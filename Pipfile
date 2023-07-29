@@ -1,0 +1,26 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "~=4.2.3"
+django-environ = "~=0.10.0"
+gunicorn = "~=21.2.0"
+psycopg2-binary = "*"
+django-cors-headers = "~=4.2.0"
+djangorestframework = "~=3.14.0"
+drf-spectacular = "~=0.26.3"
+whitenoise = "*"
+django-widget-tweaks = "*"
+argon2-cffi = "*"
+django-allauth = "~=0.54.0"
+django-vite = "*"
+
+[dev-packages]
+django-stubs = "*"
+djangorestframework-stubs = "*"
+inotify = "*"
+
+[requires]
+python_version = "3.11.4"
