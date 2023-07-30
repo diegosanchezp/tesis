@@ -1,0 +1,5 @@
+USE_DOCKER=yes
+IPYTHONDIR=/app/.ipython
+PIPENV_CACHE_DIR=/app/.pipcache
+SECRET_KEY=django-insecure-ljhb6%7olggtla2gbam+d5u=7w5#&&dyl%6f*+a96@lcw(azwk
+DJANGO_SETTINGS_MODULE=django_src.settings.development

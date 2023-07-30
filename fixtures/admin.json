@@ -1,0 +1,12 @@
+[
+    { "model": "auth.user",
+        "fields": {
+            "username": "admin",
+            "email": "admin@dev.com",
+            "password": "argon2$argon2id$v=19$m=102400,t=2,p=8$Z1Vyc0NFSDlvZGd4NDd5WGhoeVZzeA$HkUbcuuINKKY9yWZYy3lJW4LNeU+biP1pPwjtxE03dc",
+            "is_superuser": true,
+            "is_staff": true,
+            "is_active": true
+        }
+    }
+]

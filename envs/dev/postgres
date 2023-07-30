@@ -1,0 +1,8 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=django_dev
+POSTGRES_USER=django
+POSTGRES_PASSWORD=dev123456
+DATABASE_URL=postgres://django:dev123456@postgres:5432/django_dev
