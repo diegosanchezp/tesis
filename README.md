@@ -12,6 +12,7 @@ These system dependencies are required, **Linux OS** is preferred.
 | bash              | >= 5    | Setup scripts           |
 | docker            | >= 24   | Build images            |
 | docker-compose    | >= 2    | Development environment |
+| pnpm              | >= 8    | Manage Javascript deps  |
 
 ## Docker config
 Docker has to be able run as a non root user, for more info check
@@ -45,10 +46,16 @@ Load development command utilities with
 source shscripts/dev.sh
 ```
 
-Activate the server, to test if everything has worked.
+Activate the servers, to test if everything has worked.
 
 ```bash
+# Django
 runserver
+```
+
+```bash
+# Vite
+pnpm run dev
 ```
 
 Visit `https://127.0.0.1:8000` in your web browser.
