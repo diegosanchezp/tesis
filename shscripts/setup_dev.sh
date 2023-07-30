@@ -17,6 +17,10 @@ docker-compose run -u root -w /app --entrypoint bash --rm django shscripts/gener
 echo "Creating private env file"
 cp "$ROOT_DIR"/envs/private.env.template "$ROOT_DIR"/envs/.private.env
 
+echo "Installing NODEJS dependencies"
+
+pnpm install
+
 echo "=== LOAD COMMAND UTILITIES with command ===" && \
 
 echo "source \"$SCRIPT_DIR/dev.sh\""

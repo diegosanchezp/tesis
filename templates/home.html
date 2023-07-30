@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load django_vite %}
+
+{% block extrameta %}
+  <title>Django Vite Example</title>
+{% endblock %}
+
+{% block body %}
+  <h1>Django Vite Example</h1>
+  <p id="tsdom"></p>
+  <p>Also, see <code>console logs</code></p>
+{% endblock body %}
+
+{% block extrascripts %}
+    {% vite_asset 'main.tsx' %}
+{% endblock extrascripts %}

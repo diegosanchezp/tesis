@@ -48,6 +48,29 @@ DJANGO_VITE_DEV_SERVER_PROTOCOL = "https"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")  # noqa F405
 MEDIA_URL = "/media/"
 
+
+# https://github.com/benoitc/gunicorn/issues/1562#issuecomment-1530850143
+# Gunicorn worker will have cached templates, so disable them in development
+default_loaders = [
+    "django.template.loaders.filesystem.Loader",
+    "django.template.loaders.app_directories.Loader",
+]
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [str(BASE_DIR / "templates")],
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+            "loaders": default_loaders,
+        },
+    },
+]
 # LOGGING = {
 #     "version": 1,
 #     "disable_existing_loggers": False,
