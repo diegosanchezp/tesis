@@ -16,6 +16,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "exclude": ["node_modules", "dist", "lib"]
   },
   "references": [{ "path": "./tsconfig.node.json" }]
 }
