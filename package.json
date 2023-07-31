@@ -16,5 +16,8 @@
     "typescript": "^5.1.6",
     "vite": "^4.4.6",
     "vite-tsconfig-paths": "^4.2.0"
+  },
+  "dependencies": {
+    "flowbite": "^1.8.0"
   }
 }
