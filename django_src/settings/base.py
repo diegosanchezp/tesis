@@ -47,6 +47,21 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     # Alluth providers
     'allauth.socialaccount.providers.google',
+    # Wagtail
+    'wagtail.contrib.forms',
+    'wagtail.contrib.redirects',
+    'wagtail.embeds',
+    'wagtail.sites',
+    'wagtail.users',
+    'wagtail.snippets',
+    'wagtail.documents',
+    'wagtail.images',
+    'wagtail.search',
+    'wagtail.admin',
+    'wagtail',
+
+    'modelcluster',
+    'taggit',
 ]
 
 # Required by allauth
@@ -63,6 +78,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # wagtail
+    'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 ]
 
 ROOT_URLCONF = "django_src.urls"
@@ -172,3 +189,5 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
+
+WAGTAIL_SITE_NAME = 'Red Egresados UCV'
