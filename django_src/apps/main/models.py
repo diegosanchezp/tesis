@@ -2,16 +2,46 @@ from django.db import models
 
 from django.utils.translation import gettext_lazy as _
 
+from modelcluster.fields import ParentalKey
+
 from wagtail.models import (
-    Page
+    Page,
+    Orderable
 )
 
 from wagtail.admin.panels import (
     FieldPanel,
     MultiFieldPanel,
+    InlinePanel,
 )
-# Create your models here.
 
+# Create your models here.
+class HeroSection(Orderable):
+    page = ParentalKey("HomePage", on_delete=models.CASCADE, related_name='hero_sections')
+
+    title = models.CharField(
+        max_length=255,
+        verbose_name=_("Titulo del factor promocional"),
+    )
+
+    description = models.TextField(
+        verbose_name=_("Descripción del factor promocional"),
+    )
+
+    image = models.ForeignKey(
+        "wagtailimages.Image",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text=_("Imagen del factor promocional"),
+    )
+
+    panels = [
+        FieldPanel('image'),
+        FieldPanel('title'),
+        FieldPanel('description'),
+    ]
 
 class HomePage(Page):
     """
@@ -41,23 +71,6 @@ class HomePage(Page):
     # --- Hero section benefits, four in total --- #
 
     # First hero section
-    hero_one_title = models.CharField(
-        max_length=255,
-        verbose_name=_("Titulo del primer factor promocional"),
-    )
-
-    hero_one_desc = models.TextField(
-        verbose_name=_("Descripción del primer factor promocional"),
-    )
-
-    hero_one_image = models.ForeignKey(
-        "wagtailimages.Image",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="+",
-        help_text=_("Imagen del primer factor promocional"),
-    )
     content_panels = Page.content_panels + [
         MultiFieldPanel(
             heading=_("Sección de Cabecera"),
@@ -67,33 +80,10 @@ class HomePage(Page):
                 FieldPanel("header_cta"),
             ],
         ),
-        MultiFieldPanel(
-            heading=_("Primer Factor promocional"),
-            children=[
-                FieldPanel("hero_one_title"),
-                FieldPanel("hero_one_desc"),
-                FieldPanel("hero_one_image"),
-            ]
-        )
+        InlinePanel(
+            'hero_sections',
+            label=_("Factores promocionales")
+        ),
     ]
 
 
-    # Second
-    # hero_two_desc = models.TextField(
-    #     verbose_name=_("Descripción segunda sección"),
-    # )
-    #
-    # hero_two_tex = models.CharField(
-    #     max_length=255,
-    #     help_text=_("Texto de cabecera de la segunda sección"),
-    #
-    # )
-    #
-    # hero_two_image = models.ForeignKey(
-    #     "wagtailimages.Image",
-    #     null=True,
-    #     blank=True,
-    #     on_delete=models.SET_NULL,
-    #     related_name="+",
-    #     help_text=_(""),
-    # )
