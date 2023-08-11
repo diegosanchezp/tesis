@@ -7,10 +7,12 @@
 {% block body %}
   <main class="px-20">
     <header class="flex flex-col justify-center items-center">
-      {% image page.header_image max-500x500 %}
+      <div class="my-8">
+        {% image page.header_image max-500x500 %}
+      </div>
       <p>{{page.header_text}}</p>
       <div>
-        <button class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">{{page.header_cta}}</button>
+        <button class="my-8 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">{{page.header_cta}}</button>
       </div>
     </header>
     {# this for loop is probably an n+1 query #}
@@ -18,7 +20,7 @@
     {% for hero_section in page.hero_sections.all %}
       {# cycle is used for odd and even iterations #}
       {# such that when odd images goes to the left and to the right when even#}
-      <article class="flex {% cycle 'flex-row-reverse' '' %}">
+      <article class="flex my-8 {% cycle 'flex-row-reverse' '' %}">
         <div class="w-1/2 flex  justify-center items-center bg-slate-300 mr-4">
           {# <img class="block h-auto"> #}
           {% image hero_section.image max-800x300 %}
@@ -26,8 +28,8 @@
 
         {# Title and description section #}
         <div class="w-1/2 flex flex-col">
-          <h3 class="text-3xl font-bold">{{hero_section.title}}</h3>
-          <p>{{hero_section.description}}</p>
+          <h2 class="text-4xl font-extrabold">{{hero_section.title}}</h2>
+          <p class="mt-3">{{hero_section.description}}</p>
         </div>
       </article>
     {% endfor %}
