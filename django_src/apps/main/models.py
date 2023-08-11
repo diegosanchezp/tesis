@@ -17,7 +17,12 @@ from wagtail.admin.panels import (
 
 # Create your models here.
 class HeroSection(Orderable):
-    page = ParentalKey("HomePage", on_delete=models.CASCADE, related_name='hero_sections')
+    page = ParentalKey(
+        "HomePage",
+        on_delete=models.CASCADE,
+        related_name='hero_sections',
+        verbose_name="",
+    )
 
     title = models.CharField(
         max_length=255,
@@ -30,6 +35,7 @@ class HeroSection(Orderable):
 
     image = models.ForeignKey(
         "wagtailimages.Image",
+        verbose_name=_("Imagen"),
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -49,8 +55,11 @@ class HomePage(Page):
     """
     template = 'main/home_page.html'
 
+    page_description = _("Esta es la página principal de este sitio.")
+
     header_image = models.ForeignKey(
         "wagtailimages.Image",
+        verbose_name=_("Imagen cabecera"),
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -60,7 +69,8 @@ class HomePage(Page):
 
     # --- Hero section header --- #
     header_text = models.CharField(
-        max_length=255, help_text=_("Texto introductorio de la página promocional")
+        max_length=255,
+        verbose_name=_("Texto introductorio de la página promocional")
     )
 
     header_cta = models.CharField(
@@ -81,9 +91,9 @@ class HomePage(Page):
             ],
         ),
         InlinePanel(
-            'hero_sections',
-            label=_("Factores promocionales")
+            relation_name='hero_sections',
+            label=_("Factor promocional"),
+            min_num=2,
+            heading=_("Factores promocionales")
         ),
     ]
-
-
