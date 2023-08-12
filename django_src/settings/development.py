@@ -71,6 +71,11 @@ TEMPLATES = [
         },
     },
 ]
+
+
+# WAGTAILADMIN_BASE_URL required for notification emails
+WAGTAILADMIN_BASE_URL = "https://127.0.0.1:8000"
+
 # LOGGING = {
 #     "version": 1,
 #     "disable_existing_loggers": False,
