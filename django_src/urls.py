@@ -17,15 +17,16 @@ urlpatterns = [
     # Wagtail
     path('cms/', include(wagtailadmin_urls)),
     path('documents/', include(wagtaildocs_urls)),
-    path('pages/', include(wagtail_urls)),
     # End wagtail
 
-    # Landing page Vite Tailwind test
-    path("", TemplateView.as_view(template_name="home.html"), name="home-view"),
     #path('i18n/', include('django.conf.urls.i18n')),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     path('accounts/', include('allauth.urls')),
+
+    # Landing page Wagtail
+    # Placing at the end nsures that it doesn’t override more specific URL patterns.
+    path('', include(wagtail_urls)),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:

@@ -80,7 +80,7 @@ MANAGE = str(BASE_DIR / "manage.py")
 sp.run(["python", MANAGE, "migrate"])
 
 # name of fixtures, order matters
-FIXTURES = ["admin"]
+FIXTURES = ["admin", "wagtail_pages"]
 
 # Load fixtures
 sp.run(

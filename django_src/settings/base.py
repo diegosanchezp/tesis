@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     # ---- Our apps ----
     "django_src.apps.api.apps.ApiConfig",
+    "django_src.apps.main.apps.MainConfig",
     # ---- Third party ----
     # API REST
     "rest_framework",
