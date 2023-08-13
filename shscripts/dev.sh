@@ -50,7 +50,9 @@ resetdb(){
 }
 
 # Docker related
-alias runserver='docker-compose run --rm --service-ports django'
+runserver(){
+  docker-compose run --rm --service-ports django
+}
 alias logs='docker-compose logs --no-log-prefix -f django'
 
 # Python related
