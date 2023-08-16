@@ -32,13 +32,6 @@ DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
 ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "host.docker.internal"]
 
-# https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
-STATICFILES_DIRS = [
-    str(BASE_DIR / "static"),
-    # Include DJANGO_VITE_ASSETS_PATH into STATICFILES_DIRS to be copied inside
-    # when run command python manage.py collectstatic
-    DJANGO_VITE_ASSETS_PATH
-]  # noqa F405
 
 # If use HMR or not.
 DJANGO_VITE_DEV_MODE = DEBUG
@@ -51,43 +44,10 @@ MEDIA_URL = "/media/"
 
 # https://github.com/benoitc/gunicorn/issues/1562#issuecomment-1530850143
 # Gunicorn worker will have cached templates, so disable them in development
-default_loaders = [
-    "django.template.loaders.filesystem.Loader",
-    "django.template.loaders.app_directories.Loader",
-]
-
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [str(BASE_DIR / "templates")],
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-            "loaders": default_loaders,
-        },
-    },
-]
-
+TEMPLATES[0]["OPTIONS"]["loaders"] = default_loaders
 
 # WAGTAILADMIN_BASE_URL required for notification emails
 WAGTAILADMIN_BASE_URL = "https://127.0.0.1:8000"
 
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     "handlers": {
-#         "console": {
-#             "class": "logging.StreamHandler",
-#         },
-#     },
-#     "loggers": {
-#         "django": {
-#             "handlers": ["console"],
-#             "level": "DEBUG",
-#         },
-#     },
-# }
+# https://pypi.org/project/django-cors-headers/
+CORS_ALLOW_ALL_ORIGINS = True

@@ -1,0 +1,49 @@
+volumes:
+  postgres_data: {}
+  postgres_data_backups: {}
+
+services:
+  django:
+    image: django_prod_image:latest
+    container_name: django_prod
+    working_dir: /app
+    depends_on:
+      - postgres
+    command: "gunicorn --bind 0.0.0.0:8000 django_src.wsgi"
+    # Git repo of the app
+    volumes:
+      - type: bind
+        source: ../..
+        target: /app
+    # Be careful with this
+    user: "${UID}:${GID}"
+    # ports:
+    #   - "8000:8000"
+    env_file:
+      # For local testing uncomment these
+      - ../../envs/dev/django
+      - ../../envs/dev/postgres
+      - ../../envs/.private.env
+      # - ~/envs/postgres
+      # - ~/envs/django
+  postgres:
+    image: postgres:14.4
+    container_name: postgres_prod
+    volumes:
+      - postgres_data:/var/lib/postgresql/data:Z
+      - postgres_data_backups:/backups:z
+    env_file:
+      # For local testing uncomment these
+      - ../../envs/dev/postgres
+      # - ~/envs/postgres
+    # ports:
+    #   - "5432:5432"
+  nginx:
+    image: nginx:1.25.1
+    container_name: nginx_prod
+    depends_on:
+      - django
+    volumes_from:
+      - django:ro
+    ports:
+      - "443:443"

@@ -8,7 +8,12 @@ mkdir mkcert
 CAROOT=./mkcert mkcert -cert-file mkcert/cert.pem -key-file mkcert/key.pem localhost 127.0.0.1 ::1
 CAROOT=./mkcert mkcert -install
 
+# Change file permissions
 chmod go=rx mkcert/cert.pem mkcert/key.pem
+
+# For nginx
+cp mkcert/cert.pem mkcert/127.0.0.1.crt
+cp mkcert/key.pem mkcert/127.0.0.1.key
 
 echo "Add rootCA.pem certicate to your web browser"
 echo ""

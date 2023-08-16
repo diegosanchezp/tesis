@@ -85,11 +85,17 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "django_src.urls"
 
+default_loaders = [
+    "django.template.loaders.filesystem.Loader",
+    "django.template.loaders.app_directories.Loader",
+]
+
+cached_loaders = [("django.template.loaders.cached.Loader", default_loaders)]
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [str(BASE_DIR / "templates")],
-        "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
@@ -148,13 +154,39 @@ STATICFILES_FINDERS = [
 # https://docs.djangoproject.com/en/stable/howto/static-files/
 # Name of static files folder (after called python manage.py collectstatic)
 
+# Where all static files from all aps are copied to
 STATIC_ROOT = str(BASE_DIR / "staticfiles")  # noqa F405
-# https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 
+# https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 STATIC_URL = "/static/"
 
+STATIC_DIR_NAME = "static"
+
 # Where ViteJS assets are built.
-DJANGO_VITE_ASSETS_PATH = BASE_DIR / "static" / "dist"
+DJANGO_VITE_ASSETS_PATH = BASE_DIR / STATIC_DIR_NAME / "dist"
+
+# https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
+STATICFILES_DIRS = [
+    str(BASE_DIR / STATIC_DIR_NAME / "img"),
+    # Include DJANGO_VITE_ASSETS_PATH into STATICFILES_DIRS to be copied inside
+    # when run command python manage.py collectstatic
+    DJANGO_VITE_ASSETS_PATH
+]  # noqa F405
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [str(BASE_DIR / "templates")],
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
 
 REST_FRAMEWORK = {
     # YOUR SETTINGS
@@ -162,14 +194,12 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Distribuidor API",
-    "DESCRIPTION": "Comercio electrónico 2-2021, Distribuidor API",
+    "TITLE": "Red Social Egresados API",
+    "DESCRIPTION": "API de la Red Social egresados UCV",
     "VERSION": "1.0.0",
     # OTHER SETTINGS
 }
 
-# https://pypi.org/project/django-cors-headers/
-CORS_ALLOW_ALL_ORIGINS = True
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
