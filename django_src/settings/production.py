@@ -2,7 +2,7 @@ import os
 
 from .base import *  # noqa
 
-SECRET_KEY=os.getenv("SECRET_KEY")
+SECRET_KEY = env("SECRET_KEY")
 
 DEBUG = False
 

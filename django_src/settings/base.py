@@ -4,8 +4,11 @@ import environ
 
 from django.core.management.utils import get_random_secret_key
 
+# Set env var defaults for the builds
 env = environ.Env(
-    SECRET_KEY=(str,get_random_secret_key())
+    SECRET_KEY=(str,get_random_secret_key()),
+    GOOGLE_CLIENT_ID=(str, ""),
+    GOOGLE_SECRET=(str,""),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

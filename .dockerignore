@@ -3,3 +3,5 @@ node_modules
 .lvenv/
 .venv/
 .pipcache/
+staticfiles
+static/dist
