@@ -32,7 +32,14 @@
     {# ==== Cascading Style Sheets ==== #}
 
     {# - Global stylesheet #}
-    {% vite_asset 'css/main.css' %}
+    {% if settings.DEBUG %}
+      {# For hot module reload use vite_asset, which inserts a javascript file #}
+      {% vite_asset 'css/main.css' %}
+    {% else %}
+      {# In production use an actual css file, tailwind compiled #}
+      <link rel="stylesheet" href="{% vite_asset_url 'css/main.css' %}">
+    {% endif %}
+
     {% block extrastyles %}{% endblock %}
 
     {# ==== JavaScripts ==== #}
