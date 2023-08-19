@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-import os
 
 from .base import *  # noqa
 
@@ -36,10 +35,6 @@ ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "host.docker.internal"]
 # If use HMR or not.
 DJANGO_VITE_DEV_MODE = DEBUG
 DJANGO_VITE_DEV_SERVER_PROTOCOL = "https"
-# Media Files
-# https://overiq.com/django-1-10/handling-media-files-in-django/
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")  # noqa F405
-MEDIA_URL = "/media/"
 
 
 # https://github.com/benoitc/gunicorn/issues/1562#issuecomment-1530850143
@@ -50,4 +45,16 @@ TEMPLATES[0]["OPTIONS"]["loaders"] = default_loaders
 WAGTAILADMIN_BASE_URL = "https://127.0.0.1:8000"
 
 # https://pypi.org/project/django-cors-headers/
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
+
+# Serve static and media files staticfiles
+MIDDLEWARE.insert(3,"whitenoise.middleware.WhiteNoiseMiddleware")
+
+CORS_ALLOWED_ORIGINS = [
+    "https://127.0.0.1:8000",
+    "https://localhost:8000",
+    "https://django:8000",
+]
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True

@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import os
 import environ
 
 from django.core.management.utils import get_random_secret_key
@@ -75,7 +75,6 @@ MIDDLEWARE = [
     # CORS, hould be placed as high as possible
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -175,6 +174,13 @@ STATICFILES_DIRS = [
     # when run command python manage.py collectstatic
     DJANGO_VITE_ASSETS_PATH
 ]  # noqa F405
+
+# Media Files
+# https://overiq.com/django-1-10/handling-media-files-in-django/
+# Where django saves user uploaded files
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")  # noqa F405
+# URL to fetch the saved user uploaded files
+MEDIA_URL = "/media/"
 
 TEMPLATES = [
     {

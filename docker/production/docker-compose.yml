@@ -9,7 +9,7 @@ services:
     working_dir: /app
     depends_on:
       - postgres
-    command: "gunicorn --bind 0.0.0.0:8000 django_src.wsgi"
+    command: "gunicorn --bind django:8000 django_src.wsgi"
     # Git repo of the app
     volumes:
       - type: bind
