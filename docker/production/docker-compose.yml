@@ -9,19 +9,23 @@ services:
     working_dir: /app
     depends_on:
       - postgres
-    command: "gunicorn --bind django:8000 django_src.wsgi"
+    command: "gunicorn \
+              --bind django:8000 \
+              django_src.wsgi"
     # Git repo of the app
     volumes:
+      # - type: bind
+      #   source: ../../django_src/settings/
+      #   target: /app/django_src/settings/
       - type: bind
         source: ../..
         target: /app
+
     # Be careful with this
     user: "${UID}:${GID}"
-    # ports:
-    #   - "8000:8000"
     env_file:
       # For local testing uncomment these
-      - ../../envs/dev/django
+      - ../../envs/production/django
       - ../../envs/dev/postgres
       - ../../envs/.private.env
       # - ~/envs/postgres
@@ -43,7 +47,18 @@ services:
     container_name: nginx_prod
     depends_on:
       - django
-    volumes_from:
-      - django:ro
+    volumes:
+      - type: bind
+        source: ./nginx.conf
+        target: /etc/nginx/nginx.conf
+      - type: bind
+        source: ../../staticfiles
+        target: /app/staticfiles
+      - type: bind
+        source: ../../media
+        target: /app/media
+      - type: bind
+        source: ../../mkcert
+        target: /app/mkcert
     ports:
       - "443:443"
