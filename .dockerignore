@@ -1,0 +1,11 @@
+node_modules
+.git
+.lvenv/
+.venv/
+.pipcache/
+# static root folder
+staticfiles
+# js/css build folder
+static/dist
+# User uploaded files
+media

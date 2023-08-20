@@ -289,3 +289,4 @@ static/dist
 .vite/deps_temp_b20a772c
 .lvenv
 media
+envs/production

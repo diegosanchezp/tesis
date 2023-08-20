@@ -30,7 +30,8 @@ export default defineConfig({
     target: 'es2015',
     rollupOptions: {
       input: {
-        main: resolve('./static/src/js/main.tsx'),
+        js: resolve('./static/src/js/main.tsx'),
+        css: resolve('./static/src/css/main.css'),
       },
       output: {
         chunkFileNames: undefined,

@@ -73,3 +73,6 @@ source shscripts/dev.sh
 
 - CI/CD is currently made with Github Actions and it is docker based.
 - If you don't want a specific action it can be [disabled](https://docs.github.com/en/actions/managing-workflow-runs/disabling-and-enabling-a-workflow).
+
+## Testing before deployment
+Read this file [Local production testing procedure](docs/testing_prod_locally_procedure.md)

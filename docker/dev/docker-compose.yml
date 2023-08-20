@@ -23,7 +23,7 @@ services:
       - ../../envs/dev/django
       - ../../envs/dev/postgres
       - ../../envs/.private.env
-    entrypoint: ["bash", "shscripts/init_docker_dev.sh"]
+    command: ["bash", "shscripts/init_docker_dev.sh"]
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
       - "localhost:172.17.0.1"

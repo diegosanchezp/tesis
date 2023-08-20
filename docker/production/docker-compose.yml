@@ -1,0 +1,61 @@
+volumes:
+  postgres_data: {}
+  postgres_data_backups: {}
+  # Shared volumnes for django_nginx
+  django_static_files: {}
+  django_media_files: {}
+
+services:
+  django:
+    image: django_prod_image:latest
+    container_name: django_prod
+    working_dir: /app
+    depends_on:
+      - postgres
+    # bind the hostname of the service
+    command: "gunicorn \
+              --bind django:8000 \
+              django_src.wsgi"
+    volumes:
+      # These volumnes are created so nginx
+      # can access the files
+      - type: volume
+        source: django_media_files
+        target: /app/media/
+      - type: volume
+        source: django_static_files
+        target: /app/staticfiles
+    env_file:
+      # This files must be created when deploying
+      - ../../envs/production/django
+      - ../../envs/production/postgres
+  postgres:
+    image: postgres:14.4
+    container_name: postgres_prod
+    volumes:
+      - postgres_data:/var/lib/postgresql/data:Z
+      - postgres_data_backups:/backups:z
+    env_file:
+      # For local testing uncomment these
+      - ../../envs/production/postgres
+  nginx:
+    image: nginx:1.25.1
+    container_name: nginx_prod
+    depends_on:
+      - django
+    volumes_from:
+      # Nginx only needs to read data from django container, use ro flag
+      - django:ro
+    volumes:
+      # Copy nginx configuration to container
+      - type: bind
+        source: ./nginx.conf
+        target: /etc/nginx/nginx.conf
+
+      # Use this for local https testing
+      - type: bind
+        source: ../../mkcert
+        target: /app/mkcert
+    ports:
+      - "443:443"
+

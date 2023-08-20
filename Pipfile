@@ -16,7 +16,7 @@ django-widget-tweaks = "*"
 argon2-cffi = "*"
 django-allauth = "~=0.54.0"
 django-vite = "*"
-wagtail = "~=5.1"
+wagtail = "~=5.1.1"
 
 [dev-packages]
 django-stubs = "*"
