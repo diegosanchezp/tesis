@@ -231,3 +231,15 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 WAGTAIL_SITE_NAME = 'Red Egresados UCV'
+
+# --- Security settings --- #
+CORS_ALLOW_ALL_ORIGINS = False
+
+# --- HTTPS
+
+# https://docs.djangoproject.com/en/stable/ref/settings/#secure-content-type-nosniff
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Mark CSRF_COOKIE  as “secure”, browsers may ensure that the cookie is only sent with an HTTPS connection
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
