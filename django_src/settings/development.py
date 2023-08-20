@@ -51,7 +51,7 @@ DJANGO_VITE_DEV_SERVER_PROTOCOL = "https"
 TEMPLATES[0]["OPTIONS"]["loaders"] = default_loaders
 
 # WAGTAILADMIN_BASE_URL required for notification emails
-WAGTAILADMIN_BASE_URL = "https://127.0.0.1:8000"
+WAGTAILADMIN_BASE_URL = f"https://{env('HOST_NAME')}:8000"
 
 # Serve static and media files staticfiles
 MIDDLEWARE.insert(3,"whitenoise.middleware.WhiteNoiseMiddleware")

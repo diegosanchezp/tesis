@@ -49,7 +49,7 @@ SECURE_SSL_REDIRECT = True
 # X_FRAME_OPTIONS = "SAMEORIGIN"
 
 # TODO: test
-WAGTAILADMIN_BASE_URL = "https://127.0.0.1"
+WAGTAILADMIN_BASE_URL = f"https://{os.getenv('HOST_NAME')}"
 
 TEMPLATES[0]["OPTIONS"]["loaders"] = cached_loaders
 
