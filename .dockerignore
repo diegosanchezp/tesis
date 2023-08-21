@@ -9,3 +9,5 @@ staticfiles
 static/dist
 # User uploaded files
 media
+# Local https certificates
+mkcert

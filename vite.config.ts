@@ -4,7 +4,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import fs from 'fs';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+const baseconfig = {
   plugins: [
     tsconfigPaths()
   ],
@@ -16,10 +16,6 @@ export default defineConfig({
     open: false,
     watch: {
       usePolling: false,
-    },
-    https: {
-      key: fs.readFileSync('./mkcert/key.pem'),
-      cert: fs.readFileSync('./mkcert/cert.pem'),
     },
   },
   build: {
@@ -37,5 +33,29 @@ export default defineConfig({
         chunkFileNames: undefined,
       },
     },
+  }
+}
+
+// https://vitejs.dev/config/#conditional-config
+export default defineConfig(({ command, mode, ssrBuild })=>{
+
+  // dev specific config
+  console.log(command);
+  if (command === 'serve') {
+    return {
+      ...baseconfig,
+      server: {
+        ...baseconfig.server,
+        // Add https configuration
+        https: {
+          key: fs.readFileSync('./mkcert/key.pem'),
+          cert: fs.readFileSync('./mkcert/cert.pem'),
+        },
+      }
+    };
+  } else {
+    // command === 'build'
+    // build specific config
+    return baseconfig;
   }
 })
