@@ -49,5 +49,7 @@ jobs:
           context: .
           file: docker/production/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
+
+          builder: ${{ steps.buildx.outputs.name }}
           tags: latest
           labels: ${{ steps.meta.outputs.labels }}
