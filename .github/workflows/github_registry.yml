@@ -51,5 +51,5 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
 
           builder: ${{ steps.buildx.outputs.name }}
-          tags: latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           labels: ${{ steps.meta.outputs.labels }}
