@@ -10,7 +10,7 @@ on:
 # Defines two custom environment variables for the workflow. These are used for the Container registry domain, and a name for the Docker image that this workflow builds.
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: ${{ github.repository_owner }}/django_egresados
 # There is a single job in this workflow. It's configured to run on the latest available version of Ubuntu.
 jobs:
   build-and-push-image:
@@ -33,6 +33,8 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
             # Git short commit
             type=sha
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
       # Uses the `docker/login-action` action to log in to the Container registry registry using the account and password that will publish the packages. Once published, the packages are scoped to the account defined here.
       - name: Log in to the Container registry
         uses: docker/login-action@v2
@@ -49,7 +51,6 @@ jobs:
           context: .
           file: docker/production/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
-
           builder: ${{ steps.buildx.outputs.name }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
