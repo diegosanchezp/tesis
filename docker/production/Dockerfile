@@ -8,7 +8,7 @@ FROM node:18.17.1-slim as jsbuild
 WORKDIR /app
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-COPY pnpm-lock.yaml package.json vite.config.ts tailwind.config.cjs postcss.config.cjs static ./
+COPY pnpm-lock.yaml package.json vite.config.ts tailwind.config.cjs postcss.config.cjs ./
 # Docker doesnt keep the directory structure so we have to create it
 WORKDIR /app/static
 COPY static .
