@@ -7,7 +7,7 @@ volumes:
 
 services:
   django:
-    image: django_prod_image:latest
+    image: ${DOCKER_IMAGE}
     container_name: django_prod
     working_dir: /app
     depends_on:
