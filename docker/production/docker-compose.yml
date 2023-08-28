@@ -1,9 +1,13 @@
 volumes:
+  # Database
   postgres_data: {}
   postgres_data_backups: {}
   # Shared volumnes for django_nginx
   django_static_files: {}
   django_media_files: {}
+  # HTTP certs
+  certbot_certs: {}
+  certbot_libs: {}
 
 services:
   django:
@@ -49,13 +53,36 @@ services:
     volumes:
       # Copy nginx configuration to container
       - type: bind
-        source: ./nginx.conf
+        source: ../../nginx/nginx.conf
         target: /etc/nginx/nginx.conf
+
+      - type: volume
+        source: certbot_certs
+        target: /etc/letsencrypt
+        read_only: true
 
       # Use this for local https testing
       - type: bind
         source: ../../mkcert
         target: /app/mkcert
+
     ports:
       - "443:443"
 
+  certbot:
+    image: certbot/certbot
+    tty: true
+    container_name: certbot_prod
+    volumes:
+      - type: volume
+        source: certbot_certs
+        target: /etc/letsencrypt
+      - type: volume
+        source: certbot_libs
+        target: /var/lib/letsencrypt
+    # entrypoint: /bin/sh
+    ports:
+      - "80:80"
+    # Prevent this container from start when doing up -d command
+    profiles:
+      - certbot
