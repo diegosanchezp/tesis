@@ -1,6 +1,9 @@
 # HTTPS CA certificates by mkcert
 mkcert
 
+# Template generated files
+nginx/nginx.conf
+
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/

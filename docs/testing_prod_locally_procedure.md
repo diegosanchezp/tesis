@@ -24,6 +24,18 @@ Build the production image for Django
 docker build -f docker/production/Dockerfile --tag django_egresados:latest .
 ```
 
+Render all config files that use jinja2
+
+```bash
+docker run --rm \
+--env-file envs/production/django \
+--mount 'type=bind,source=./nginx,destination=/app/nginx' \
+--mount 'type=bind,source=./shscripts,destination=/app/shscripts,readonly' \
+--interactive --tty \
+django_egresados:latest \
+python shscripts/generate_templates.py
+```
+
 Start all services in detached mode
 
 ```bash
@@ -47,5 +59,6 @@ Upload testing fixtures to database
 ```bash
 docker compose run --rm django python manage.py loaddata fixtures/wagtail_pages.json
 ```
+
 
 ## Debugging the service containers
