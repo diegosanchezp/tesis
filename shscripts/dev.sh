@@ -12,6 +12,7 @@ WORKDIR="/app" # Docker container working directory
 export COMPOSE_FILE
 
 export DOCKER_BUILDKIT=1
+export AWS_PROFILE="tesis-infra"
 
 cterm(){
   docker-compose run --rm --no-deps -w /app --entrypoint "bash" django

@@ -2,9 +2,10 @@ volumes:
   # Database
   postgres_data: {}
   postgres_data_backups: {}
+
   # Shared volumnes for django_nginx
   django_static_files: {}
-  django_media_files: {}
+
   # HTTP certs
   certbot_certs: {}
   certbot_libs: {}
@@ -23,12 +24,12 @@ services:
     volumes:
       # These volumnes are created so nginx
       # can access the files
-      - type: volume
-        source: django_media_files
-        target: /app/media/
+
       - type: volume
         source: django_static_files
         target: /app/staticfiles
+
+    user: "${UID}:${GID}"
     env_file:
       # This files must be created when deploying
       - ../../envs/production/django
@@ -55,6 +56,12 @@ services:
       - type: bind
         source: ../../nginx/nginx.conf
         target: /etc/nginx/nginx.conf
+
+      - type: bind
+        source: ~/s3mount
+        target: /app/s3mount
+        read_only: true
+
 
       - type: volume
         source: certbot_certs
