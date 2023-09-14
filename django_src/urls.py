@@ -2,12 +2,14 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.contrib.auth.decorators import login_required
 from django.urls import include, path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView, RedirectView
+from django.views.static import serve
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
-
+from django_src.apps.main.views import PrivateMediaView
 # Wagtail
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
@@ -25,14 +27,30 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
 
     # Landing page Wagtail
-    # Placing at the end nsures that it doesn’t override more specific URL patterns.
+    # Placing at the end ensures that it doesn’t override more specific URL patterns.
     path('', include(wagtail_urls)),
 
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+
 if settings.DEBUG:
+
+    # Simulate NGINX authenticated request
+    serve_login = login_required(serve)
+
+    MEDIA_URL = settings.MEDIA_URL.lstrip("/")
+    urlpatterns += [
+        # First path below is similar to
+        # + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+        path(f"{MEDIA_URL}<path:path>/", serve, {'document_root': settings.MEDIA_ROOT,  'show_indexes':True},),
+        path("private_media/<path:path>/", serve_login, {'document_root': settings.PRIVATE_MEDIA_ROOT,}),
+    ]
     # Static file serving when using Gunicorn + Uvicorn for local web socket development
     urlpatterns += staticfiles_urlpatterns()
-
+else:
+    urlpatterns += [
+        # NGINX authenticated request
+        path("private_media/<path:file_path>", PrivateMediaView.as_view())
+    ]
 
 # API URLS
 urlpatterns += [

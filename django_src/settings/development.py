@@ -45,6 +45,7 @@ DATABASES["default"]["ATOMIC_REQUESTS"] = True
 DJANGO_VITE_DEV_MODE = DEBUG
 DJANGO_VITE_DEV_SERVER_PROTOCOL = "https"
 
+PRIVATE_MEDIA_ROOT = os.path.join(BASE_DIR, "private_media")
 
 # https://github.com/benoitc/gunicorn/issues/1562#issuecomment-1530850143
 # Gunicorn worker will have cached templates, so disable them in development
@@ -63,3 +64,4 @@ CORS_ALLOWED_ORIGINS = load_env_array("CORS_ALLOWED_ORIGINS")
 
 # https://docs.djangoproject.com/en/stable/ref/settings/#csrf-trusted-origins
 CSRF_TRUSTED_ORIGINS = load_env_array("CSRF_TRUSTED_ORIGINS")
+
