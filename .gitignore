@@ -292,4 +292,6 @@ static/dist
 .vite/deps_temp_b20a772c
 .lvenv
 media
-envs/production
+envs/production/host
+envs/production/django
+envs/production/postgres
