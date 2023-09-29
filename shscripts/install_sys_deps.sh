@@ -39,8 +39,19 @@ sudo apt-get install -y ./mount-s3.deb
 # Clone repo
 git clone https://github.com/diegosanchezp/tesis.git
 
+# install stow
+cd tesis/vpsconf
+stow --no-folding --verbose --target ~ zsh/
+# zsh setup
+mkdir ~/.cache/zsh/
+touch ~/.cache/zsh/history
+
+# change default shell to zsh
+sudo usermod -s /bin/zsh $USER
+# return back
+cd ..
+
 # Prepare environment variables files
-cd tesis
 
 ROOT_DIR=".."
 
@@ -84,3 +95,4 @@ sudo --preserve-env docker compose up -d
 
 # After installing the sshd config restart the daemon
 sudo systemctl restart sshd.service
+
