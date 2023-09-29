@@ -29,7 +29,6 @@ services:
         source: django_static_files
         target: /app/staticfiles
 
-    user: "${UID}:${GID}"
     env_file:
       # This files must be created when deploying
       - ../../envs/production/django
@@ -69,9 +68,9 @@ services:
         read_only: true
 
       # Use this for local https testing
-      - type: bind
-        source: ../../mkcert
-        target: /app/mkcert
+      # - type: bind
+      #   source: ../../mkcert
+      #   target: /app/mkcert
 
     ports:
       - "443:443"

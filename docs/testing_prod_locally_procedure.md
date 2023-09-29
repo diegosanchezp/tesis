@@ -12,7 +12,7 @@ Set the required environment variables for the docker host
 
 ```bash
 export COMPOSE_FILE=docker/production/docker-compose.yml
-export DOCKER_IMAGE=django_egresados:latest
+export DOCKER_IMAGE=ghcr.io/diegosanchezp/django_egresados:latest
 
 # Also these can be stored on a file: envs/production/host
 load_env envs/production/host
@@ -21,7 +21,7 @@ load_env envs/production/host
 Build the production image for Django
 
 ``` bash
-docker build -f docker/production/Dockerfile --tag django_egresados:latest .
+docker build -f docker/production/Dockerfile --tag "$DOCKER_IMAGE" .
 ```
 
 Render all config files that use jinja2
@@ -32,7 +32,7 @@ docker run --rm \
 --mount 'type=bind,source=./nginx,destination=/app/nginx' \
 --mount 'type=bind,source=./shscripts,destination=/app/shscripts,readonly' \
 --interactive --tty \
-django_egresados:latest \
+"$DOCKER_IMAGE" \
 python shscripts/generate_templates.py
 ```
 
@@ -60,7 +60,8 @@ tesis-django ~/s3mount
 Run migrations ( create database tables )
 
 ```bash
-docker compose run --rm django python manage.py migrate
+docker compose run --rm django \
+    python manage.py migrate --settings django_src.settings.production
 ```
 
 Upload testing fixtures to database
@@ -68,6 +69,5 @@ Upload testing fixtures to database
 ```bash
 docker compose run --rm django python manage.py loaddata fixtures/wagtail_pages.json
 ```
-
 
 ## Debugging the service containers

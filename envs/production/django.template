@@ -1,0 +1,20 @@
+USE_DOCKER=
+
+SECRET_KEY=""
+
+DJANGO_SETTINGS_MODULE=django_src.settings.production
+
+GOOGLE_CLIENT_ID=""
+GOOGLE_SECRET=""
+
+# NGINX proxy, and docker-compose host
+ALLOWED_HOSTS=""
+
+CORS_ALLOWED_ORIGINS=""
+
+CSRF_TRUSTED_ORIGINS=""
+
+# This is for WAGTAILADMIN_BASE_URL
+HOST_NAME=
+
+MODE=

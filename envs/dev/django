@@ -6,6 +6,7 @@ SECRET_KEY="django-insecure-ljhb6%7olggtla2gbam+d5u=7w5#&&dyl%6f*+a96@lcw(azwk"
 
 DJANGO_SETTINGS_MODULE=django_src.settings.development
 
+# NGINX proxy, and docker-compose host
 ALLOWED_HOSTS="localhost, 0.0.0.0, 127.0.0.1, host.docker.internal"
 
 CORS_ALLOWED_ORIGINS="https://127.0.0.1:8000, https://localhost:8000, https://django:8000"
