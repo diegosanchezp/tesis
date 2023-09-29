@@ -11,7 +11,7 @@ sudo apt-get update
 # docker
 # ca-certificates curl
 
-sudo apt-get install ca-certificates curl gnupg git
+sudo apt-get install ca-certificates curl gnupg git neovim zsh zsh-syntax-highlighting stow
 
 # Add Docker's official GPG key:
 sudo install -m 0755 -d /etc/apt/keyrings
