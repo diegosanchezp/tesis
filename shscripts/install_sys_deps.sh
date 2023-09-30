@@ -11,7 +11,7 @@ sudo apt-get update
 # docker
 # ca-certificates curl
 
-sudo apt-get install ca-certificates curl gnupg git
+sudo apt-get install ca-certificates curl gnupg git neovim zsh zsh-syntax-highlighting stow
 
 # Add Docker's official GPG key:
 sudo install -m 0755 -d /etc/apt/keyrings
@@ -39,8 +39,19 @@ sudo apt-get install -y ./mount-s3.deb
 # Clone repo
 git clone https://github.com/diegosanchezp/tesis.git
 
+# install stow
+cd tesis/vpsconf
+stow --no-folding --verbose --target ~ zsh/
+# zsh setup
+mkdir ~/.cache/zsh/
+touch ~/.cache/zsh/history
+
+# change default shell to zsh
+sudo usermod -s /bin/zsh $USER
+# return back
+cd ..
+
 # Prepare environment variables files
-cd tesis
 
 ROOT_DIR=".."
 
@@ -84,3 +95,4 @@ sudo --preserve-env docker compose up -d
 
 # After installing the sshd config restart the daemon
 sudo systemctl restart sshd.service
+
