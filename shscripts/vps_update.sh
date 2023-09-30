@@ -3,8 +3,7 @@
 # Load environment variables
 source ~/.zprofile
 
-# Go to the root folder of the repo
-cd ..
-sudo --preserve-env docker compose stop
-sudo --preserve-env docker pull "$DOCKER_IMAGE"
+# Update docker image for django service
+sudo --preserve-env docker compose stop && \
+sudo --preserve-env docker pull --quiet "$DOCKER_IMAGE" &> /dev/null && \
 sudo --preserve-env docker compose up -d
