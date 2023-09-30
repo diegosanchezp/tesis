@@ -5,6 +5,6 @@ source ~/.zprofile
 
 # Go to the root folder of the repo
 cd ..
-docker compose stop
-docker pull "$DOCKER_IMAGE"
-docker compose up -d
+sudo --preserve-env docker compose stop
+sudo --preserve-env docker pull "$DOCKER_IMAGE"
+sudo --preserve-env docker compose up -d
