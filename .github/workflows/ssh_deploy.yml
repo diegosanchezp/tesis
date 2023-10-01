@@ -19,5 +19,7 @@ jobs:
           SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
           SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
         run: bash shscripts/config_ssh.sh
+      - name: Update vps git repo
+        run: ssh production "cd tesis && git pull"
       - name: Update docker image on VPS
-        run: ssh production tesis/shscripts/vps_update.sh
+        run: ssh production "bash tesis/shscripts/vps_update.sh"
