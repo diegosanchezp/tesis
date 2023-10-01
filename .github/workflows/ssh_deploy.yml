@@ -1,0 +1,23 @@
+name: SSH deployment
+
+# Configures this workflow to run every time a change is pushed to the branch called `main`.
+on:
+  push:
+    branches: ['main']
+  # Run manually on default branch
+  workflow_dispatch:
+jobs:
+  sshdeploy:
+    name: SSH VPS deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Configure SSH
+        env:
+          SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+          SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+        run: bash shscripts/config_ssh.sh
+      - name: Update docker image on VPS
+        run: ssh staging tesis/shscripts/vps_update.sh
