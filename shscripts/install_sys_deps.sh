@@ -31,11 +31,6 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 # Reboot has to be performed from this point here, see
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-reboot.html
 
-# Install s3 mount point
-wget https://s3.amazonaws.com/mountpoint-s3-release/latest/x86_64/mount-s3.deb
-
-sudo apt-get install -y ./mount-s3.deb
-
 # Clone repo
 git clone https://github.com/diegosanchezp/tesis.git
 
@@ -67,14 +62,6 @@ cp "$ROOT_DIR"/envs/production/postgres.template "$ROOT_DIR"/envs/production/pos
 load_env env/production/host
 
 # Generate http certs
-
-# Mount s3 bucket
-mkdir s3mount
-
-sudo mount-s3 --region us-east-1  \
---read-only \
---allow-other \
-tesis-django ~/s3mount
 
 sudo --preserve-env docker pull "$DOCKER_IMAGE"
 
