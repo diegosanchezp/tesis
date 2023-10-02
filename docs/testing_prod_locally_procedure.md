@@ -36,11 +36,6 @@ docker run --rm \
 python shscripts/generate_templates.py
 ```
 
-Start all services in detached mode
-
-```bash
-docker-compose up --detach
-```
 
 Mount S3 bucket to a local folder `~/s3mount`
 
@@ -51,10 +46,17 @@ mkdir ~/s3mount
 ```
 
 ```bash
+export PATH=$PATH:/opt/aws/mountpoint-s3/bin && \
 mount-s3 --region us-east-1 --profile tesiss3mount \
---read-only --log-metrics --auto-unmount \
 --allow-other \
+--allow-delete \
 tesis-django ~/s3mount
+```
+
+Start all services in detached mode
+
+```bash
+docker compose up --detach
 ```
 
 Run migrations ( create database tables )
@@ -68,6 +70,20 @@ Upload testing fixtures to database
 
 ```bash
 docker compose run --rm django python manage.py loaddata fixtures/wagtail_pages.json
+```
+
+Reset the database
+
+```bash
+docker-compose run --rm --no-deps -w /app --entrypoint "python shscripts/reset_db.py" django
+```
+
+Also
+
+```bash
+docker compose run --rm --no-deps -w /app \
+  --volume /home/diego/repos/tesis/shscripts/reset_db.py:/app/shscripts/reset_db.py \
+  --entrypoint "python shscripts/reset_db.py" django
 ```
 
 ## Debugging the service containers

@@ -31,6 +31,13 @@ DATABASES = {
 
 ALLOWED_HOSTS = load_env_array("ALLOWED_HOSTS")
 
+# Media Files
+# https://overiq.com/django-1-10/handling-media-files-in-django/
+# Where django saves user uploaded files
+MEDIA_ROOT = str(BASE_DIR / "s3mount" / "media")  # noqa F405
+
+FILE_UPLOAD_PERMISSIONS=None
+
 # https://pypi.org/project/django-cors-headers/
 CORS_ALLOWED_ORIGINS = load_env_array("CORS_ALLOWED_ORIGINS")
 

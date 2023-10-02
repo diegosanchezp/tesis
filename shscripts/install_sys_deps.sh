@@ -72,8 +72,8 @@ load_env env/production/host
 mkdir s3mount
 
 sudo mount-s3 --region us-east-1  \
---read-only \
 --allow-other \
+--allow-delete \
 tesis-django ~/s3mount
 
 sudo --preserve-env docker pull "$DOCKER_IMAGE"

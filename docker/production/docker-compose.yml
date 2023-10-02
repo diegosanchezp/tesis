@@ -24,10 +24,14 @@ services:
     volumes:
       # These volumnes are created so nginx
       # can access the files
-
       - type: volume
         source: django_static_files
         target: /app/staticfiles
+
+      # For media files
+      - type: bind
+        source: ~/s3mount
+        target: /app/s3mount
 
     env_file:
       # This files must be created when deploying
