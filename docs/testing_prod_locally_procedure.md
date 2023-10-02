@@ -42,21 +42,6 @@ Start all services in detached mode
 docker-compose up --detach
 ```
 
-Mount S3 bucket to a local folder `~/s3mount`
-
-In the future this will be done with a docker service and be accesible via volumes
-
-```bash
-mkdir ~/s3mount
-```
-
-```bash
-mount-s3 --region us-east-1 --profile tesiss3mount \
---read-only --log-metrics --auto-unmount \
---allow-other \
-tesis-django ~/s3mount
-```
-
 Run migrations ( create database tables )
 
 ```bash

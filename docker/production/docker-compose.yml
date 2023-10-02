@@ -24,7 +24,6 @@ services:
     volumes:
       # These volumnes are created so nginx
       # can access the files
-
       - type: volume
         source: django_static_files
         target: /app/staticfiles
@@ -55,12 +54,6 @@ services:
       - type: bind
         source: ../../nginx/nginx.conf
         target: /etc/nginx/nginx.conf
-
-      - type: bind
-        source: ~/s3mount
-        target: /app/s3mount
-        read_only: true
-
 
       - type: volume
         source: certbot_certs

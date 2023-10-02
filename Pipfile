@@ -18,6 +18,8 @@ django-allauth = "~=0.54.0"
 django-vite = "*"
 wagtail = "~=5.1.1"
 jinja2 = "*"
+django-storages = {version = "*", extras = ["s3"]}
+wagtail-storages = "*"
 
 [dev-packages]
 django-stubs = "*"

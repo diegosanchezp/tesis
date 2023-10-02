@@ -9,6 +9,9 @@ env = environ.Env(
     SECRET_KEY=(str,get_random_secret_key()),
     GOOGLE_CLIENT_ID=(str, ""),
     GOOGLE_SECRET=(str,""),
+    AWS_S3_REGION_NAME=(str,""),
+    AWS_S3_URL_PROTOCOL=(str,"https:"),
+    AWS_STORAGE_BUCKET_NAME=(str,"false_bucket_name"),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -66,6 +69,8 @@ INSTALLED_APPS = [
 
     'modelcluster',
     'taggit',
+    # wagtail storages
+    "wagtail_storages.apps.WagtailStoragesConfig",
 ]
 
 # Required by allauth

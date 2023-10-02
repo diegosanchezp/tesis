@@ -74,3 +74,43 @@ LOGGING = {
         },
     },
 }
+
+# wagtail storages
+
+STORAGES = {
+    # Media files are stored on s3
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+    },
+    # Static files are stored in the docker image
+    # and served with nginx
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# --- Django storages ---
+
+# remove query parameter authentication from generated URLs, S3 buckets is public
+# AWS_QUERYSTRING_AUTH=False
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
+# Do not allow overriding files on S3 as per Wagtail docs recommendation:
+# https://docs.wagtail.io/en/stable/advanced_topics/deploying.html#cloud-storage
+# Not having this setting may have consequences such as losing files.
+AWS_S3_FILE_OVERWRITE = False
+
+# Default ACL for new files should be "private" - not accessible to the
+# public. Images should be made available to public via the bucket policy,
+# where the documents should use wagtail-storages.
+AWS_DEFAULT_ACL = "private"
+
+# When signing URLs is enabled, the region must be set.
+# The global S3 endpoint does not seem to support signed URLS.
+# Set this only if you will be using signed URLs.
+AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME")
+
+# This settings lets you force using http or https protocol when generating
+# the URLs to the files. Set https as default.
+# https://github.com/jschneier/django-storages/blob/10d1929de5e0318dbd63d715db4bebc9a42257b5/storages/backends/s3boto3.py#L217
+AWS_S3_URL_PROTOCOL = env("AWS_S3_URL_PROTOCOL")
