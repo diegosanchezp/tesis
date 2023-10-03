@@ -1,2 +1,3 @@
 COMPOSE_FILE=docker/production/docker-compose.yml
 DOCKER_IMAGE=
+ENVIRONMENT=production
