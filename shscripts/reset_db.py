@@ -90,6 +90,21 @@ def setup_django(BASE_DIR):
     django.setup()
 
 
+def loaddata():
+    """
+    Load django fixtures
+    """
+    # name of fixtures, order matters
+    FIXTURES = ["admin", "wagtail_pages"]
+
+    FIXTURE_PATH = f"{os.environ.get('HOME')}/fixture_backups" if ENVIRONMENT == "production" else BASE_DIR / "fixtures"
+
+    fixtures=[
+        f"{FIXTURE_PATH}/{fname}.json" for fname in FIXTURES
+    ]
+
+    call_command("loaddata", *fixtures)
+
 if __name__ == "__main__":
 
     setup_django(BASE_DIR)
@@ -97,6 +112,7 @@ if __name__ == "__main__":
     # Read environment files
     env = read_env(BASE_DIR)
 
+    # Create a connection to the database
     connection = create_connection(env)
 
     cursor = connection.cursor()
@@ -112,13 +128,4 @@ if __name__ == "__main__":
     # Apply migrations
     call_command("migrate")
 
-    # name of fixtures, order matters
-    FIXTURES = ["admin", "wagtail_pages"]
-
-    FIXTURE_PATH = f"{os.environ.get('HOME')}/fixture_backups" if ENVIRONMENT == "production" else BASE_DIR / "fixtures"
-
-    fixtures=[
-        f"{FIXTURE_PATH}/{fname}.json" for fname in FIXTURES
-    ]
-
-    call_command("loaddata", *fixtures)
+    loaddata()
