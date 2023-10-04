@@ -288,10 +288,10 @@ envs/.private.env
 
 # Vite, JS
 static/dist
-
-.vite/deps_temp_b20a772c
+.vite
 .lvenv
 media
 envs/production/host
 envs/production/django
 envs/production/postgres
+.vite/deps_temp_d41c0c5d/package.json
