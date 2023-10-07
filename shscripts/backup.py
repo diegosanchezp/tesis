@@ -49,7 +49,7 @@ def get_fixture_path(BASE_DIR):
     ENVIRONMENT = get_environment()
 
     if ENVIRONMENT == "production":
-        folder_path = Path.home() / "fixture_backups"
+        folder_path = BASE_DIR / "fixture_backups"
 
         # if the folder doesn't exists, create it
         if not folder_path.exists():
