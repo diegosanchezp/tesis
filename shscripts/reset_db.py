@@ -103,7 +103,7 @@ def loaddata(BASE_DIR):
 
     call_command("loaddata", *fixtures)
     fixture_str = ", ".join(fixtures)
-    logging.info(msg=f"fixtures {fixture_str} upload to database")
+    logging.info(msg=f"fixtures {fixture_str} uploaded to the database")
 
 if __name__ == "__main__":
 
