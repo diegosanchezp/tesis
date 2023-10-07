@@ -1,30 +1,23 @@
-import os
-import sys
-import environ
+import logging
 from pathlib import Path
+import sys
 
-import django
+from django import db
 from django.core.management import call_command
 
 import psycopg2
 from psycopg2 import errors
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+import environ
 
+# This lines have to come before the below import otherwise it will
+# throw import error
 
-BASE_DIR = Path(__file__).resolve().parent.parent  # Parent Directory of this file
-ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
+# BASE_DIR = Path(__file__).resolve().parent.parent  # Parent Directory of this file
+# sys.path.append(str(BASE_DIR))
 
-def read_env(BASE_DIR):
-    """
-    Read environment variables
-    """
-
-    env_dir = "production" if ENVIRONMENT == "production" else "dev"
-    ENV_DIR = BASE_DIR / "envs" / env_dir
-    env = environ.Env()
-    env.read_env(str(ENV_DIR / "postgres"))
-    env.read_env(str(ENV_DIR / "django"))
-    return env
+# execute this file like this to avoid the lines above
+# python -m shscripts.reset_db
+from shscripts.backup import backup, setup, get_fixture_folder
 
 def create_connection(env: environ.Env):
     """
@@ -40,19 +33,29 @@ def create_connection(env: environ.Env):
         # Connect to template, otherwise db cant be dropped
         dbname="template1",
     )
-    # https://pythontic.com/database/postgresql/create%20database
-    connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 
     return connection
 
-def drop_database(cursor):
+
+def drop_database(env: environ.Env):
     """
+    Drop the whole database
     """
+
+    # Create a connection to the database
+    connection = create_connection(env)
+
+    # A few commands (e.g. CREATE DATABASE, VACUUM, CALL on stored procedures using transaction control…) require to be run outside any transaction: in order to be able to run these commands from Psycopg, the connection must be in autocommit mode
+    connection.autocommit = True
+
+    cursor = connection.cursor()
 
     cursor.execute(f"DROP DATABASE IF EXISTS {env('POSTGRES_DB')}")
 
     # Create database and database user
     cursor.execute(f"CREATE DATABASE {env('POSTGRES_DB')};")
+
+    # === Begin transaction ===
     try:
         cursor.execute(
             f"CREATE USER {env('POSTGRES_USER')} WITH PASSWORD '${env('POSTGRES_PASSWORD')}';"  # noqa: E501
@@ -75,57 +78,53 @@ def drop_database(cursor):
     )
     cursor.execute(f"ALTER USER {env('POSTGRES_USER')} CREATEDB;")
 
-def setup_django(BASE_DIR):
-    """
-    Load settings and populate Django’s application registry.
-    This step is required django components in standalone mode.
-    https://docs.djangoproject.com/en/4.2/topics/settings/#calling-django-setup-is-required-for-standalone-django-usage
-    """
+    # === End transaction ===
+    connection.commit()
 
-    # Tell python interpreter that it can look in the root repository for modules
-    # otherwise we can't do imports like from django_src.settings
-    sys.path.append(str(BASE_DIR))
-
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_src.settings.development')
-    django.setup()
+    # Close db connection
+    cursor.close()
+    connection.close()
+    logging.info(msg="DATABASE successfully dropped")
 
 
-def loaddata():
+def loaddata(BASE_DIR):
     """
-    Load django fixtures
+    Restore a backup by Loading django fixtures
     """
-    # name of fixtures, order matters
+
+    # Name of fixtures, this also defines the order in wich to load them
     FIXTURES = ["admin", "wagtail_pages"]
 
-    FIXTURE_PATH = f"{os.environ.get('HOME')}/fixture_backups" if ENVIRONMENT == "production" else BASE_DIR / "fixtures"
+    FIXTURE_FOLDER = get_fixture_folder(BASE_DIR)
 
     fixtures=[
-        f"{FIXTURE_PATH}/{fname}.json" for fname in FIXTURES
+        f"{FIXTURE_FOLDER}/{fname}.json" for fname in FIXTURES
     ]
 
     call_command("loaddata", *fixtures)
+    fixture_str = ", ".join(fixtures)
+    logging.info(msg=f"fixtures {fixture_str} upload to database")
 
 if __name__ == "__main__":
 
-    setup_django(BASE_DIR)
+    BASE_DIR = Path(__file__).resolve().parent.parent  # Parent Directory of this file
 
-    # Read environment files
-    env = read_env(BASE_DIR)
+    env = setup(BASE_DIR)
 
-    # Create a connection to the database
-    connection = create_connection(env)
-
-    cursor = connection.cursor()
+    # backup the database
+    backup(BASE_DIR)
 
     # Drop the database
-    drop_database(cursor)
 
-    # Close db connection
-    connection.close()
+    # Close all database connections oppened by django
+    # so the database can be dropped
+    db.connections.close_all()
 
-    # === Rung Django manage.py commands ===
+    drop_database(env)
 
     # Apply migrations
-    call_command("migrate")
+    call_command("migrate", verbosity=1)
+    logging.info("Database schema restored")
 
-    loaddata()
+    # Load data to the database
+    loaddata(BASE_DIR)
