@@ -1,94 +1,130 @@
-import os
-import environ
+import logging
+from pathlib import Path
+import sys
 
-import subprocess as sp
+from django import db
+from django.core.management import call_command
 
 import psycopg2
 from psycopg2 import errors
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+import environ
 
-from pathlib import Path
+# This lines have to come before the below import otherwise it will
+# throw import error
 
-BASE_DIR = Path(__file__).resolve().parent.parent  # Parent Directory of this file
+# BASE_DIR = Path(__file__).resolve().parent.parent  # Parent Directory of this file
+# sys.path.append(str(BASE_DIR))
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_src.settings.development')
+# execute this file like this to avoid the lines above
+# python -m shscripts.reset_db
+from shscripts.backup import backup, setup, get_fixture_folder
 
-def read_env(BASE_DIR):
+def create_connection(env: environ.Env):
     """
-    Read environment variables
+    Creates a psycopg2 connection object
     """
 
-    ENV_DIR = BASE_DIR / "envs" / "dev"
-    env = environ.Env()
-    env.read_env(str(ENV_DIR / "postgres"))
-    env.read_env(str(ENV_DIR / "django"))
-    return env
-
-
-# Read environment files
-env = read_env(BASE_DIR)
-
-
-# Establish a connection to database
-connection = psycopg2.connect(
-    host=env("POSTGRES_HOST"),
-    user=env("POSTGRES_USER"),
-    password=env("POSTGRES_PASSWORD"),
-    port=env("POSTGRES_PORT"),
-    # Connect to template, otherwise db cant be dropped
-    dbname="template1",
-)
-# https://pythontic.com/database/postgresql/create%20database
-connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-cursor = connection.cursor()
-
-cursor.execute(f"DROP DATABASE IF EXISTS {env('POSTGRES_DB')}")
-
-# Create database and database user
-cursor.execute(f"CREATE DATABASE {env('POSTGRES_DB')};")
-try:
-    cursor.execute(
-        f"CREATE USER {env('POSTGRES_USER')} WITH PASSWORD '${env('POSTGRES_PASSWORD')}';"  # noqa: E501
+    # Establish a connection to database
+    connection = psycopg2.connect(
+        host=env("POSTGRES_HOST"),
+        user=env("POSTGRES_USER"),
+        password=env("POSTGRES_PASSWORD"),
+        port=env("POSTGRES_PORT"),
+        # Connect to template, otherwise db cant be dropped
+        dbname="template1",
     )
-except errors.DuplicateObject:
-    # We don't want to stop program
-    pass
 
-cursor.execute(
-    f"ALTER ROLE {env('POSTGRES_USER')} set client_encoding to 'utf8';"  # noqa: E501
-)
-cursor.execute(
-    f"ALTER ROLE {env('POSTGRES_USER')} SET default_transaction_isolation TO 'read committed';"  # noqa: E501
-)
-cursor.execute(
-    f"ALTER ROLE {env('POSTGRES_USER')} SET timezone TO 'America/Caracas';"  # noqa: E501
-)
-cursor.execute(
-    f"GRANT ALL PRIVILEGES ON DATABASE {env('POSTGRES_DB')} TO {env('POSTGRES_USER')};"  # noqa: E501
-)
-cursor.execute(f"ALTER USER {env('POSTGRES_USER')} CREATEDB;")
-
-# Close db connection
-connection.close()
-
-# === Rung Django manage.py commands ===
-
-MANAGE = str(BASE_DIR / "manage.py")
+    return connection
 
 
-# Apply migrations
-sp.run(["python", MANAGE, "migrate"])
+def drop_database(env: environ.Env):
+    """
+    Drop the whole database
+    """
 
-# name of fixtures, order matters
-FIXTURES = ["admin", "wagtail_pages"]
+    # Create a connection to the database
+    connection = create_connection(env)
 
-# Load fixtures
-sp.run(
-    [
-        "python",
-        MANAGE,
-        "loaddata",
-    ] + [
-        f"fixtures/{fname}.json" for fname in FIXTURES
+    # A few commands (e.g. CREATE DATABASE, VACUUM, CALL on stored procedures using transaction control…) require to be run outside any transaction: in order to be able to run these commands from Psycopg, the connection must be in autocommit mode
+    connection.autocommit = True
+
+    cursor = connection.cursor()
+
+    cursor.execute(f"DROP DATABASE IF EXISTS {env('POSTGRES_DB')}")
+
+    # Create database and database user
+    cursor.execute(f"CREATE DATABASE {env('POSTGRES_DB')};")
+
+    # === Begin transaction ===
+    try:
+        cursor.execute(
+            f"CREATE USER {env('POSTGRES_USER')} WITH PASSWORD '${env('POSTGRES_PASSWORD')}';"  # noqa: E501
+        )
+    except errors.DuplicateObject:
+        # We don't want to stop the program
+        pass
+
+    cursor.execute(
+        f"ALTER ROLE {env('POSTGRES_USER')} set client_encoding to 'utf8';"  # noqa: E501
+    )
+    cursor.execute(
+        f"ALTER ROLE {env('POSTGRES_USER')} SET default_transaction_isolation TO 'read committed';"  # noqa: E501
+    )
+    cursor.execute(
+        f"ALTER ROLE {env('POSTGRES_USER')} SET timezone TO 'America/Caracas';"  # noqa: E501
+    )
+    cursor.execute(
+        f"GRANT ALL PRIVILEGES ON DATABASE {env('POSTGRES_DB')} TO {env('POSTGRES_USER')};"  # noqa: E501
+    )
+    cursor.execute(f"ALTER USER {env('POSTGRES_USER')} CREATEDB;")
+
+    # === End transaction ===
+    connection.commit()
+
+    # Close db connection
+    cursor.close()
+    connection.close()
+    logging.info(msg="DATABASE successfully dropped")
+
+
+def loaddata(BASE_DIR):
+    """
+    Restore a backup by Loading django fixtures
+    """
+
+    # Name of fixtures, this also defines the order in wich to load them
+    FIXTURES = ["admin", "wagtail_pages"]
+
+    FIXTURE_FOLDER = get_fixture_folder(BASE_DIR)
+
+    fixtures=[
+        f"{FIXTURE_FOLDER}/{fname}.json" for fname in FIXTURES
     ]
-)
+
+    call_command("loaddata", *fixtures)
+    fixture_str = ", ".join(fixtures)
+    logging.info(msg=f"fixtures {fixture_str} uploaded to the database")
+
+if __name__ == "__main__":
+
+    BASE_DIR = Path(__file__).resolve().parent.parent  # Parent Directory of this file
+
+    env = setup(BASE_DIR)
+
+    # backup the database
+    backup(BASE_DIR)
+
+    # Drop the database
+
+    # Close all database connections oppened by django
+    # so the database can be dropped
+    db.connections.close_all()
+
+    drop_database(env)
+
+    # Apply migrations
+    call_command("migrate", verbosity=1)
+    logging.info("Database schema restored")
+
+    # Load data to the database
+    loaddata(BASE_DIR)
