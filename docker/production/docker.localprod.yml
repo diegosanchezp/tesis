@@ -1,0 +1,10 @@
+# this files overrides extends docker-compose.yml
+# see docs/testing_prod_locally_procedure.md
+services:
+  nginx:
+    volumes:
+      #Use this for local https testing
+      - type: bind
+        source: ../../mkcert
+        target: /app/mkcert
+        read_only: true

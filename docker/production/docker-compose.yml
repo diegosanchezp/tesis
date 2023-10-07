@@ -60,11 +60,6 @@ services:
         target: /etc/letsencrypt
         read_only: true
 
-      # Use this for local https testing
-      # - type: bind
-      #   source: ../../mkcert
-      #   target: /app/mkcert
-
     ports:
       - "443:443"
 
