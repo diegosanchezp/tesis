@@ -61,18 +61,18 @@ mkdir ~/fixture_backups
 ```
 
 ```bash
-docker run --rm \
-  --name backup_prod \
-  --workdir /app \
-  --mount "type=bind,source=$HOME/fixture_backups,target=/app/fixture_backups" \
-  --mount "type=bind,source=./shscripts/,target=/app/shscripts/" \
-  --user "$(id -u)" \
+docker compose run --rm \
   --env "ENVIRONMENT=production" \
-  --env-file envs/production/django \
-  --env-file envs/production/postgres \
-  --network production_default \
-  "$DOCKER_IMAGE" \
-  python -m shscripts.backup
+  --user "$(id -u)" \
+  --volume "$HOME/fixture_backups:/app/fixture_backups" \
+  --volume "./shscripts/:/app/shscripts/" \
+  django python -m shscripts.backup
+```
+## Resetting the database
+```bash
+docker compose run --rm \
+  --volume "$HOME/fixture_backups:/app/fixture_backups" \
+  django python -m shscripts.reset_db
 ```
 
 ## Debugging the service containers
