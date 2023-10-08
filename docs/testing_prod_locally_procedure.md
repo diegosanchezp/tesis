@@ -36,6 +36,14 @@ docker run --rm \
 python shscripts/generate_templates.py
 ```
 
+Update the staticfiles on django_static_files volume
+
+```bash
+docker compose run --rm django python manage.py collectstatic \
+  --settings django_src.settings.production \
+  --noinput
+```
+
 Start all services in detached mode
 
 ```bash
