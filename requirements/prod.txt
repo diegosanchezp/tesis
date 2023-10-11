@@ -5,21 +5,21 @@ argon2-cffi-bindings==21.2.0; python_version >= '3.6'
 asgiref==3.7.2; python_version >= '3.7'
 attrs==23.1.0; python_version >= '3.7'
 beautifulsoup4==4.11.2; python_full_version >= '3.6.0'
-boto3==1.28.57
-botocore==1.31.57; python_version >= '3.7'
+boto3==1.28.62
+botocore==1.31.62; python_version >= '3.7'
 certifi==2023.7.22; python_version >= '3.6'
 cffi==1.16.0; python_version >= '3.8'
 charset-normalizer==3.3.0; python_full_version >= '3.7.0'
 cryptography==41.0.4
 defusedxml==0.7.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
-django==4.2.5
+django==4.2.6
 django-allauth==0.54.0
 django-cors-headers==4.2.0
 django-environ==0.10.0
 django-filter==23.3; python_version >= '3.7'
-django-modelcluster==6.0; python_version >= '3.7'
+django-modelcluster==6.1; python_version >= '3.8'
 django-permissionedforms==0.1; python_version >= '3.7'
-django-storages[s3]==1.14.1
+django-storages[s3]==1.14.2
 django-taggit==4.0.0; python_version >= '3.6'
 django-treebeard==4.7; python_version >= '3.8'
 django-vite==2.1.3
@@ -44,7 +44,7 @@ openpyxl==3.1.2; python_version >= '3.6'
 packaging==23.2; python_version >= '3.7'
 pillow==10.0.1; python_version >= '3.8'
 pillow-heif==0.13.0
-psycopg2-binary==2.9.8
+psycopg2-binary==2.9.9
 pycparser==2.21
 pyjwt[crypto]==2.8.0; python_version >= '3.7'
 python-dateutil==2.8.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
@@ -54,14 +54,17 @@ pyyaml==6.0.1; python_version >= '3.6'
 referencing==0.30.2; python_version >= '3.8'
 requests==2.31.0; python_version >= '3.7'
 requests-oauthlib==1.3.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-rpds-py==0.10.3; python_version >= '3.8'
+rpds-py==0.10.4; python_version >= '3.8'
 s3transfer==0.7.0; python_version >= '3.7'
 six==1.16.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+slippers==0.6.2
 soupsieve==2.5; python_version >= '3.8'
 sqlparse==0.4.4; python_version >= '3.5'
 telepath==0.3.1; python_version >= '3.8'
+typeguard==2.13.3; python_full_version >= '3.5.3'
+typing-extensions==4.8.0; python_version >= '3.8'
 uritemplate==4.1.1; python_version >= '3.6'
-urllib3==1.26.17; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'
+urllib3==2.0.6; python_version >= '3.7'
 wagtail==5.1.2
 wagtail-storages==1.0.0
 webencodings==0.5.1

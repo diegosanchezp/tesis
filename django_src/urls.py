@@ -14,6 +14,7 @@ from django_src.apps.main.views import PrivateMediaView
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
+from django_src.apps.main.views import ComponentsView
 
 urlpatterns = [
     # Wagtail
@@ -25,6 +26,7 @@ urlpatterns = [
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     path('accounts/', include('allauth.urls')),
+    path("components/", ComponentsView.as_view()),
 
     # Landing page Wagtail
     # Placing at the end ensures that it doesn’t override more specific URL patterns.

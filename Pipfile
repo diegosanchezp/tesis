@@ -20,6 +20,7 @@ wagtail = "~=5.1.1"
 jinja2 = "*"
 django-storages = {version = "*", extras = ["s3"]}
 wagtail-storages = "*"
+slippers = "*"
 
 [dev-packages]
 django-stubs = "*"

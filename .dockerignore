@@ -11,3 +11,5 @@ static/dist
 media
 # Local https certificates
 mkcert
+# Host dependencies files
+.vite
