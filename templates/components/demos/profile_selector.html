@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% load slippers %}
+
+{% block body %}
+    <div class="flex gap-x-1.5">
+        {% profile_selector profile_name="Estudiante" %}
+        {% profile_selector profile_name="Mentor" %}
+    </div>
+{% endblock body %}
