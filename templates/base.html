@@ -31,6 +31,12 @@
     </title>
     {# ==== Cascading Style Sheets ==== #}
 
+
+    {% block icons %}
+        {# Bootstrap icons #}
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    {% endblock %}
+
     {# - Global stylesheet #}
     {% if settings.DEBUG %}
       {# For hot module reload use vite_asset, which inserts a javascript file #}
