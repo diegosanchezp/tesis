@@ -1,7 +1,7 @@
 import posixpath
 import os
 
-from django.views.generic.base import View
+from django.views.generic.base import TemplateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 
@@ -28,4 +28,12 @@ class PrivateMediaView(LoginRequiredMixin, View):
         return response
 
 
+class ComponentsDemoView(TemplateView):
+    """
+    Components demo view
+    """
 
+    def get(self, request, *args, **kwargs):
+        # Parametrized template name
+        self.template_name = f"components/demos/{kwargs.get('template_name')}.html"
+        return super().get(request,*args,**kwargs)

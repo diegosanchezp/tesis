@@ -71,6 +71,8 @@ INSTALLED_APPS = [
     'taggit',
     # wagtail storages
     "wagtail_storages.apps.WagtailStoragesConfig",
+    # UI component framework for Django
+    "slippers",
 ]
 
 # Required by allauth
@@ -110,6 +112,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
+            "builtins": ["slippers.templatetags.slippers"],
         },
     },
 ]

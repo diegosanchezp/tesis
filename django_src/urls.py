@@ -14,6 +14,7 @@ from django_src.apps.main.views import PrivateMediaView
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
+from django_src.apps.main.views import ComponentsDemoView
 
 urlpatterns = [
     # Wagtail
@@ -78,6 +79,7 @@ if settings.DEBUG:
             kwargs={"exception": Exception("Page not Found")},
         ),
         path("500/", default_views.server_error),
+        path("components/<str:template_name>", ComponentsDemoView.as_view()),
     ]
     if "debug_toolbar" in settings.INSTALLED_APPS:
         import debug_toolbar

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load slippers %}
+
+{% block body %}
+    <div class="flex justify-center">
+        {% stepper left_line="false" number=1 text="Seleccionar perfil" state="completed" %}
+        {% stepper number=2 text="Selecciona tu carrera" url="abcd" %}
+        {% stepper number=3 text="Añade tu experiencia profesional" url="abcd" %}
+        {% stepper right_line="false" number=4 text="Completa el perfil" url="abcd" %}
+    </div>
+{% endblock body %}
