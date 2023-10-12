@@ -17,20 +17,11 @@ from wagtail.documents import urls as wagtaildocs_urls
 from django_src.apps.main.views import ComponentsDemoView
 
 urlpatterns = [
-    # Wagtail
-    path('cms/', include(wagtailadmin_urls)),
-    path('documents/', include(wagtaildocs_urls)),
-    # End wagtail
 
     #path('i18n/', include('django.conf.urls.i18n')),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     path('accounts/', include('allauth.urls')),
-
-    # Landing page Wagtail
-    # Placing at the end ensures that it doesn’t override more specific URL patterns.
-    path('', include(wagtail_urls)),
-
 ]
 
 if settings.DEBUG:
@@ -79,9 +70,21 @@ if settings.DEBUG:
             kwargs={"exception": Exception("Page not Found")},
         ),
         path("500/", default_views.server_error),
-        path("components/<str:template_name>", ComponentsDemoView.as_view()),
+        path("components/<str:template_name>/", ComponentsDemoView.as_view()),
     ]
     if "debug_toolbar" in settings.INSTALLED_APPS:
         import debug_toolbar
 
         urlpatterns = [path("__debug__/", include(debug_toolbar.urls))] + urlpatterns
+
+urlpatterns += [
+
+    # Wagtail
+    path('cms/', include(wagtailadmin_urls)),
+    path('documents/', include(wagtaildocs_urls)),
+    # End wagtail
+
+    # Landing page Wagtail
+    # Placing at the end ensures that it doesn’t override more specific URL patterns.
+    path('', include(wagtail_urls)),
+]
