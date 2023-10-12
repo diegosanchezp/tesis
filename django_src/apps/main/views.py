@@ -28,5 +28,12 @@ class PrivateMediaView(LoginRequiredMixin, View):
         return response
 
 
-class ComponentsView(TemplateView):
-    template_name = "components/demo.html"
+class ComponentsDemoView(TemplateView):
+    """
+    Components demo view
+    """
+
+    def get(self, request, *args, **kwargs):
+        # Parametrized template name
+        self.template_name = f"components/demos/{kwargs.get('template_name')}.html"
+        return super().get(request,*args,**kwargs)

@@ -14,7 +14,7 @@ from django_src.apps.main.views import PrivateMediaView
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
-from django_src.apps.main.views import ComponentsView
+from django_src.apps.main.views import ComponentsDemoView
 
 urlpatterns = [
     # Wagtail
@@ -26,7 +26,6 @@ urlpatterns = [
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     path('accounts/', include('allauth.urls')),
-    path("components/", ComponentsView.as_view()),
 
     # Landing page Wagtail
     # Placing at the end ensures that it doesn’t override more specific URL patterns.
@@ -80,6 +79,7 @@ if settings.DEBUG:
             kwargs={"exception": Exception("Page not Found")},
         ),
         path("500/", default_views.server_error),
+        path("components/<str:template_name>", ComponentsDemoView.as_view()),
     ]
     if "debug_toolbar" in settings.INSTALLED_APPS:
         import debug_toolbar
