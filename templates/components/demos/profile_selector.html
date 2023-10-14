@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load slippers django_vite %}
+
+{% block body %}
+    <div class="flex gap-x-1.5">
+        {% profile_selector id="estudiante" profile_name="Estudiante" %}
+        {% profile_selector id="mentor" profile_name="Mentor" %}
+    </div>
+{% endblock body %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/components/profile_selector.ts' %}
+{% endblock extrascripts %}
+

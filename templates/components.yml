@@ -1,2 +1,3 @@
 components:
   stepper: "components/stepper.html"
+  profile_selector: "components/profile_selector.html"

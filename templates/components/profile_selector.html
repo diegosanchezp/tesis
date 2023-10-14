@@ -1,0 +1,11 @@
+<div x-data="profile_selector('{{id}}')">
+    <div @click="set_current" class="flex flex-col rounded-sm border border-solid border-black px-8 py-3 relative">
+        <i x-show="selected" class="bi bi-check-circle text-base absolute right-1 top-0.5"></i>
+        <div class="flex items-center">
+            <i class="bi bi-person text-xl"></i>
+            <p class="ml-2">{{profile_name}}</p>
+        </div>
+    </div>
+    <input class="hidden" type="radio" id="{{id}}" x-bind:checked="selected" name="profile_name"/>
+</div>
+
