@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load slippers django_vite %}
+
+{% block body %}
+
+<p> Style override </p>
+{% #button style="color: black;" title="hey!" %} Hello {% /button %}
+
+<p> Icons </p>
+
+{% #button icon_left="bi bi-arrow-left"%} Hello {% /button %}
+{% #button icon_right="bi bi-arrow-right"%} Hello {% /button %}
+{% endblock body %}

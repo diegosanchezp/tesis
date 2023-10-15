@@ -21,7 +21,8 @@ urlpatterns = [
     #path('i18n/', include('django.conf.urls.i18n')),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
-    path('accounts/', include('allauth.urls')),
+    #path('accounts/', include('allauth.urls')),
+    path('register/', include('django_src.apps.register.urls', namespace="register")),
 ]
 
 if settings.DEBUG:

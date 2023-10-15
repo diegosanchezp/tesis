@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     # ---- Our apps ----
     "django_src.apps.api.apps.ApiConfig",
     "django_src.apps.main.apps.MainConfig",
+    "django_src.apps.register.apps.RegisterConfig",
     # ---- Third party ----
     # API REST
     "rest_framework",

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load django_vite slippers %}
+
+{% block title %}
+    Registrarse
+{% endblock %}
+
+{% block body %}
+<main class="px-20">
+    {# Numbered Steps #}
+    <div class="flex justify-center mt-10">
+        {% stepper left_line="false" right_line="false" number=1 text="Seleccionar perfil" %}
+    </div>
+
+    <form x-data class="flex flex-col justify-center">
+        {# Profile Selectors #}
+        <div class="flex gap-x-5 mt-14 justify-center">
+            {% profile_selector id="estudiante" profile_name="Estudiante" selected="true" %}
+            {% profile_selector id="mentor" profile_name="Mentor" %}
+            {% profile_selector id="empresa" profile_name="Empresa" %}
+        </div>
+
+        <div class="self-center mt-20">
+            {% #button icon_right="bi bi-arrow-right" x-show="$store.profile.profile" %}
+            <p>
+                Registrarme como <span x-text="$store.profile.profile"></span>
+            </p>
+            {% /button %}
+        </div>
+    </form>
+
+</main>
+{% endblock body %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/components/profile_selector.ts' %}
+{% endblock extrascripts %}

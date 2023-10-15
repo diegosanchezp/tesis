@@ -1,4 +1,4 @@
-<div x-data="profile_selector('{{id}}')">
+<div x-data="profile_selector('{{id}}', {{selected}})">
     <div @click="set_current" class="flex flex-col rounded-sm border border-solid border-black px-8 py-3 relative">
         <i x-show="selected" class="bi bi-check-circle text-base absolute right-1 top-0.5"></i>
         <div class="flex items-center">
