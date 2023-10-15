@@ -23,12 +23,15 @@ const baseconfig = {
     assetsDir: '',
     manifest: true,
     emptyOutDir: true,
-    target: 'es2015',
+    // es2017 is required by alpine
+    // https://github.com/alpinejs/alpine/discussions/2487
+    target: 'es2017',
     rollupOptions: {
-      input: {
-        js: resolve('./static/src/js/main.tsx'),
-        css: resolve('./static/src/css/main.css'),
-      },
+      input: [
+        resolve('./static/src/js/main.tsx'),
+        resolve('./static/src/js/components/profile_selector.ts'),
+        resolve('./static/src/css/main.css'),
+      ],
       output: {
         chunkFileNames: undefined,
       },

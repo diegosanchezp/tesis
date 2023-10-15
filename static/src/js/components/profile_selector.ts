@@ -9,9 +9,11 @@ Alpine.store('profile', {
 })
 
 // Component definition
-const profile_selector = (_profile: string) => ({
+const profile_selector = (_profile: string, selected=false) => ({
     profile: _profile,
-
+    init(){
+        if (selected) Alpine.store("profile").change(this.profile)
+    },
     /* Computed property to know if the the current component is selected */
     get selected() {
         return Alpine.store("profile").profile == this.profile
@@ -28,3 +30,5 @@ const profile_selector = (_profile: string) => ({
 Alpine.data('profile_selector', profile_selector)
 
 Alpine.start()
+
+export { profile_selector }
