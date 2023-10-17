@@ -19,6 +19,28 @@
             {% profile_selector id="mentor" profile_name="Mentor" %}
             {% profile_selector id="empresa" profile_name="Empresa" %}
         </div>
+        <div class="self-center mt-20" x-show="$store.profile.profile == 'empresa'">
+            <p class="mb-5 text-center text-xl font-semibold">
+                Con una subscripción de $4/mes puedes
+            </p>
+            {% with li_class="flex gap-x-5" i_class="bi bi-check-circle text-base" %}
+                <ul>
+                    <li class="{{ li_class }}">
+                        <i class="{{ i_class }}"></i>
+                        <p>Contactar  a miles de estudiantes graduados.</p>
+                    </li>
+                    <li class="{{ li_class }}">
+                        <i class="{{ i_class }}"></i>
+                        <p>Publicar ofertas de trabajo.</p>
+                    </li>
+                    <li class="{{ li_class }}">
+                        <i class="{{ i_class }}"></i>
+                        <p>Contactar con mentores.</p>
+                    </li>
+                </ul>
+            {% endwith %}
+
+        </div>
 
         <div class="self-center mt-20">
             {% #button icon_right="bi bi-arrow-right" x-show="$store.profile.profile" %}
