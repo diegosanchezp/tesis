@@ -43,13 +43,16 @@
         </div>
 
         <div class="self-center mt-20">
-            {% #button icon_right="bi bi-arrow-right" x-show="$store.profile.profile" %}
-            <p>
-                Registrarme como <span x-text="$store.profile.profile"></span>
-            </p>
-            {% /button %}
+            <a x-bind:href="$store.profile.url">
+                {% #button type="button" icon_right="bi bi-arrow-right" x-show="$store.profile.profile" %}
+                <p>
+                    Registrarme como <span x-text="$store.profile.profile"></span>
+                </p>
+                {% /button %}
+            </a>
         </div>
     </form>
+    {{ form_urls | json_script:'form_urls' }}
 
 </main>
 {% endblock body %}
