@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load slippers django_vite %}
+
+{% block title %}
+   Seleccionar carrera
+{% endblock %}
+
+{% block body %}
+
+<div class="flex justify-center my-10">
+    {% stepper left_line="false" number=1 text="Seleccionar perfil" url=step_urls.select_perfil %}
+    {% stepper  right_line="false" number=2 text="Selecciona tu carrera" %}
+</div>
+
+<p class="my-10 text-center">Selecciona la carrera que estudias o que estudiaste.</p>
+
+<div class="flex flex-col justify-center">
+
+    <div class="w-1/3 self-center">
+    {% carrera_selector %}
+    </div>
+
+    <div class="flex justify-items-center self-center mt-6">
+        <a href="{% url "register:select_carrera" %}">
+            {% #button icon_right="bi bi-arrow-right" %}
+                Siguiente
+            {% /button %}
+        </a>
+    </div>
+</div>
+
+{% endblock body %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/register_student.ts' %}
+{% endblock extrascripts %}

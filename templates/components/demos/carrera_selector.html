@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load slippers django_vite %}
+
+{% block body %}
+
+<div class="flex justify-center">
+    {% carrera_selector %}
+</div>
+{% endblock body %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/register_student.ts' %}
+{% endblock extrascripts %}
