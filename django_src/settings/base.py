@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django_src.apps.api.apps.ApiConfig",
     "django_src.apps.main.apps.MainConfig",
     "django_src.apps.register.apps.RegisterConfig",
+    "django_src.apps.auth.apps.AuthConfig",
     # ---- Third party ----
     # API REST
     "rest_framework",
@@ -136,6 +137,8 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",  # noqa: E501
     },
 ]
+
+AUTH_USER_MODEL="customauth.User"
 
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`
