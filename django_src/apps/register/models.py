@@ -67,6 +67,9 @@ class InterestTheme(models.Model):
         verbose_name=_("Nombre"),
     )
 
+    def __str__(self) -> str:
+        return f"{self.name}"
+
 class Mentor(models.Model):
     """
     The Mentor model
@@ -159,6 +162,11 @@ class Carreer(models.Model):
         related_name="carreers",
     )
 
+    interest_themes=models.ManyToManyField(
+        to="InterestTheme",
+        verbose_name=_("Temas de interés"),
+    )
+
     def __str__(self) -> str:
         return f"{self.name}"
 
@@ -169,9 +177,9 @@ class CarrerSpecialization(models.Model):
     name = models.TextField(_("Nombre"), unique=True)
     career=models.ForeignKey(
         to="Carreer",
-        verbose_name=_("faculty"),
+        verbose_name=_("Carrer"),
         null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
     )
 
     def __str__(self) -> str:

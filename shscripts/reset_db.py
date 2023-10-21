@@ -1,10 +1,10 @@
 import logging
 from pathlib import Path
-import sys
+import argparse
 
 from django import db
 from django.core.management import call_command
-
+from django_src.apps.register.upload_data import upload_data as register_upload_data
 import psycopg2
 from psycopg2 import errors
 import environ
@@ -105,14 +105,36 @@ def loaddata(BASE_DIR):
     fixture_str = ", ".join(fixtures)
     logging.info(msg=f"fixtures {fixture_str} uploaded to the database")
 
+
+def upload_data():
+    """
+    Put here all of the functions that use ORM models
+    for uploading data
+    """
+    register_upload_data()
+
 if __name__ == "__main__":
 
     BASE_DIR = Path(__file__).resolve().parent.parent  # Parent Directory of this file
 
     env = setup(BASE_DIR)
 
-    # backup the database
-    backup(BASE_DIR)
+    # Beging parser setup
+    parser = argparse.ArgumentParser(
+        description="Reset database script"
+    )
+
+    parser.add_argument(
+        "--dont_backup",
+        help="Disable the database backup (use with caution)",
+        action="store_false",
+    )
+
+    args = parser.parse_args()
+
+    if not args.dont_backup:
+        # backup the database
+        backup(BASE_DIR)
 
     # Drop the database
 
@@ -128,3 +150,4 @@ if __name__ == "__main__":
 
     # Load data to the database
     loaddata(BASE_DIR)
+    upload_data()

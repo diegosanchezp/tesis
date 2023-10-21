@@ -3,7 +3,10 @@ from django_src.apps.register.models import (
     Student, StudentInterest,
     Mentor, MentorExperience,
     Faculty, Carreer, CarrerSpecialization,
+    InterestTheme,
 )
+from .upload_data import create_carreers
+
 from datetime import date
 from django.contrib.auth import get_user_model
 
@@ -40,7 +43,7 @@ class ModelTests(TestCase):
 
     def test_student_model(self):
 
-        ati = CarrerSpecialization.objects.create(
+        ati = self.computacion.carrerspecialization_set.create(
             name="Aplicaciones Tecnología Internet",
         )
 
@@ -49,15 +52,19 @@ class ModelTests(TestCase):
         self.assertEqual(ati.students.count(), 1)
         self.assertEqual(ati.students.first().user.first_name, self.student.user.first_name)
 
-        self.student.interests.create(
+        mates = self.student.interests.create(
             name="Matemáticas",
         )
 
-        self.student.interests.create(
+        programacion = self.student.interests.create(
             name="Programación",
         )
+
+        self.computacion.interest_themes.add(mates)
+        self.computacion.interest_themes.add(programacion)
+        self.assertEqual(self.computacion.interest_themes.count(),2)
+
         self.assertEqual(self.student.interests.count(),2)
-        breakpoint()
 
 
     def test_mentor_model(self):
@@ -90,4 +97,21 @@ class ModelTests(TestCase):
         self.assertEqual(mentor.experiences.count(), 2)
 
         breakpoint()
+
+    def test_bulk(self):
+
+        interests = InterestTheme.objects.bulk_create(
+            [
+                InterestTheme(name="Matemáticas"),
+                InterestTheme(name="Programación"),
+            ]
+        )
+
+        self.computacion.interest_themes.add(*interests)
+        self.assertTrue(self.computacion.interest_themes.count(), 2)
+
+        breakpoint()
+
+    def test_upload_datascript(self):
+        create_carreers()
 
