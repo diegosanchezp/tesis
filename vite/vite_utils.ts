@@ -1,6 +1,7 @@
 import { readdirSync } from 'node:fs';
 import { resolve } from "path";
 
+/** Get the input files of a particular folder */
 function getInputFiles(dir_path: string): string[]{
 
   const files = readdirSync(dir_path, {withFileTypes: true})
