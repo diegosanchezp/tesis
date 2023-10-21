@@ -28,7 +28,10 @@ const baseconfig: UserConfig = {
     // https://github.com/alpinejs/alpine/discussions/2487
     target: 'es2017',
     rollupOptions: {
-      input: getInputFiles(resolve("./static/src/js")),
+      input: [
+        ...getInputFiles(resolve("./static/src/js")),
+        ...getInputFiles(resolve("./static/src/css"))
+      ],
       output: {
         chunkFileNames: undefined,
       },
