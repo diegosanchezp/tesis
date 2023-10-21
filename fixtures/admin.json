@@ -1,5 +1,5 @@
 [
-    { "model": "auth.user",
+    { "model": "customauth.user",
         "fields": {
             "username": "admin",
             "email": "admin@dev.com",

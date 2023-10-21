@@ -49,7 +49,7 @@ resetdb(){
     docker-compose stop django && \
     # Use -m flag to add shscript to sys.path
     # otherwise import error will arise
-    dockerpy python -m shscripts.reset_db
+    dockerpy python -m shscripts.reset_db "$@"
 }
 
 # Docker related
