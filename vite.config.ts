@@ -1,10 +1,11 @@
-import { defineConfig } from 'vite'
+import { defineConfig, UserConfig } from 'vite'
 import {resolve} from "path";
 import tsconfigPaths from 'vite-tsconfig-paths';
 import fs from 'fs';
+import {getInputFiles} from './vite/vite_utils'
 
 // https://vitejs.dev/config/
-const baseconfig = {
+const baseconfig: UserConfig = {
   plugins: [
     tsconfigPaths()
   ],
@@ -27,11 +28,7 @@ const baseconfig = {
     // https://github.com/alpinejs/alpine/discussions/2487
     target: 'es2017',
     rollupOptions: {
-      input: [
-        resolve('./static/src/js/main.tsx'),
-        resolve('./static/src/js/components/profile_selector.ts'),
-        resolve('./static/src/css/main.css'),
-      ],
+      input: getInputFiles(resolve("./static/src/js")),
       output: {
         chunkFileNames: undefined,
       },
