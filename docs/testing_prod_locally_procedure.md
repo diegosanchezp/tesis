@@ -13,9 +13,16 @@ Set the required environment variables for the docker host
 ```bash
 export COMPOSE_FILE=docker/production/docker-compose.yml:docker/production/docker.localprod.yml
 export DOCKER_IMAGE=ghcr.io/diegosanchezp/django_egresados:latest
+export DOCKER_BUILDKIT=1
 
 # Also these can be stored on a file: envs/production/host
 load_env envs/production/host
+```
+
+Install build kit, on archlinux:
+
+```bash
+sudo pacman -S docker-buildx
 ```
 
 Build the production image for Django
