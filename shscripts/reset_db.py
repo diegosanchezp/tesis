@@ -127,7 +127,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dont_backup",
         help="Disable the database backup (use with caution)",
-        action="store_false",
+        action="store_true",
     )
 
     args = parser.parse_args()
