@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@alpinejs/persist':
+    specifier: ^3.13.2
+    version: 3.13.2
   alpinejs:
     specifier: ^3.13.1
     version: 3.13.1
@@ -14,6 +17,9 @@ dependencies:
 
 devDependencies:
   '@types/alpinejs':
+    specifier: ^3.13.2
+    version: 3.13.2
+  '@types/alpinejs__persist':
     specifier: ^3.13.2
     version: 3.13.2
   '@types/node':
@@ -47,6 +53,10 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
     dev: true
+
+  /@alpinejs/persist@3.13.2:
+    resolution: {integrity: sha512-GWTqFBugNiGq/9E0XCkGnWBUcETrPG8Op2I+aBmiBfjkFCP6P/NLCHEbrEcaqWkok2Wp//0TLz3R2YBsFP0B1Q==}
+    dev: false
 
   /@cspotcode/source-map-support@0.8.1:
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -337,6 +347,12 @@ packages:
 
   /@types/alpinejs@3.13.2:
     resolution: {integrity: sha512-kRGGjngGMCw8H4BIDbaDLwuGNIsrzdvt54kKqLe6O8ZLTNW5swEMr6j2ByH/vUo46ajqf2Qbxh6fcxPDrfEU+Q==}
+    dev: true
+
+  /@types/alpinejs__persist@3.13.2:
+    resolution: {integrity: sha512-8NVsXBuGDp8yK/7e9/hVQiC/2NLmbQ3GHeMaITYSkw1KgkRe3yktbOgL5KEZiMHIyPi1RzIfPy1mnjLyrqjzlA==}
+    dependencies:
+      '@types/alpinejs': 3.13.2
     dev: true
 
   /@types/node@20.4.4:
