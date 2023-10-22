@@ -12,7 +12,9 @@
     {% stepper  right_line="false" number=2 text="Selecciona tu carrera" %}
 </div>
 
-<p class="my-10 text-center">Selecciona la carrera que estudias o que estudiaste.</p>
+<p x-data class="my-10 text-center">
+    Selecciona la carrera que <span x-show="$store.profile.profile == 'estudiante'">estudias.</span> <span x-show="$store.profile.profile == 'mentor'">estudiaste.</span>
+</p>
 
 <div class="flex flex-col justify-center">
 

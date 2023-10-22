@@ -1,30 +1,17 @@
 import Alpine from "alpinejs"
 
-// Global store for instance comunication
-Alpine.store('profile', {
-    profile: "",
-    url: "",
-    change(prfl: string){
-        this.profile = prfl
-    },
-    set_url(url: string){
-        this.url = url
-    }
-})
+import { myAlpineComponent, startAlpine} from "js/utils/alpine"
+import {profileStore} from "js/alpine_stores"
 
 // Component definition
-const profile_selector = (_profile: string, selected=false) => ({
+const profile_selector_def = (_profile: string, selected=false) => ({
     profile: _profile,
     urls: {},
     init(){
         this.urls = JSON.parse(document.getElementById('form_urls').textContent);
-        if (selected) {
-            Alpine.store("profile").change(this.profile)
-            Alpine.store("profile").set_url(this.urls[this.profile])
-        }
-        console.log(this.urls);
     },
-    /* Computed property to know if the the current component is selected */
+
+    /** Computed property to know if the the current component is selected */
     get selected() {
         return Alpine.store("profile").profile == this.profile
     },
@@ -35,13 +22,33 @@ const profile_selector = (_profile: string, selected=false) => ({
         Alpine.store("profile").set_url(this.urls[this.profile])
         console.log(Alpine.store("profile").profile)
     }
-
 })
 
+// Prepare the component to be registered in alpine
+const profileSelector: myAlpineComponent = {
+    name: "profile_selector",
+    component: profile_selector_def,
+}
 
-// Register component
-Alpine.data('profile_selector', profile_selector)
+startAlpine({
+    components: [
+        profileSelector
+    ],
+    stores: [
+        profileStore
+    ]
+})
 
-Alpine.start()
+addEventListener("DOMContentLoaded", () => {
 
-export { profile_selector }
+        const urls = JSON.parse(document.getElementById('form_urls').textContent);
+
+        // Define a default profile, if there is none &
+        // this current is the chosen one
+        if(!Alpine.store("profile").profile){
+            Alpine.store("profile").change("estudiante")
+        }
+
+        // Set url depending on the selected profile
+        Alpine.store("profile").set_url(urls[Alpine.store("profile").profile])
+});

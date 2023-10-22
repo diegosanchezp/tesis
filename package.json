@@ -10,6 +10,7 @@
   },
   "devDependencies": {
     "@types/alpinejs": "^3.13.2",
+    "@types/alpinejs__persist": "^3.13.2",
     "@types/node": "^20.4.4",
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.27",
@@ -20,6 +21,7 @@
     "vite-tsconfig-paths": "^4.2.0"
   },
   "dependencies": {
+    "@alpinejs/persist": "^3.13.2",
     "alpinejs": "^3.13.1",
     "flowbite": "^1.8.0"
   }

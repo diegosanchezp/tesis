@@ -12,7 +12,8 @@ function getInputFiles(dir_path: string): string[]{
 
   // Ignore these files, we don't want to bundle them
   const ignore = [
-    'step_view_logic.ts'
+    'step_view_logic.ts',
+    'alpine_stores.ts',
   ];
 
   for (const file of files){
