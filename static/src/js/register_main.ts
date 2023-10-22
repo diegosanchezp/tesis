@@ -1,19 +1,10 @@
 import Alpine from "alpinejs"
 
-// Global store for instance comunication
-Alpine.store('profile', {
-    profile: "",
-    url: "",
-    change(prfl: string){
-        this.profile = prfl
-    },
-    set_url(url: string){
-        this.url = url
-    }
-})
+import { myAlpineComponent, startAlpine} from "js/utils/alpine"
+import {profileStore} from "js/alpine_stores"
 
 // Component definition
-const profile_selector = (_profile: string, selected=false) => ({
+const profile_selector_def = (_profile: string, selected=false) => ({
     profile: _profile,
     urls: {},
     init(){
@@ -35,13 +26,18 @@ const profile_selector = (_profile: string, selected=false) => ({
         Alpine.store("profile").set_url(this.urls[this.profile])
         console.log(Alpine.store("profile").profile)
     }
-
 })
 
+const profileSelector: myAlpineComponent = {
+    name: "profile_selector",
+    component: profile_selector_def,
+}
 
-// Register component
-Alpine.data('profile_selector', profile_selector)
-
-Alpine.start()
-
-export { profile_selector }
+startAlpine({
+    components: [
+        profileSelector
+    ],
+    stores: [
+        profileStore
+    ]
+})
