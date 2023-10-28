@@ -27,7 +27,6 @@ export function startAlpine(params: startAlpineParams){
     Alpine.plugin(persist)
 
     for (const store of params.stores){
-        debugger
         if (store.persist){
             Alpine.store(
                 store.name,

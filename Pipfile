@@ -21,6 +21,7 @@ jinja2 = "*"
 django-storages = {version = "*", extras = ["s3"]}
 wagtail-storages = "*"
 slippers = "*"
+django-htmx = "*"
 
 [dev-packages]
 django-stubs = "*"

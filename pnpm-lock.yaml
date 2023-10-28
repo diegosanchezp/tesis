@@ -14,6 +14,9 @@ dependencies:
   flowbite:
     specifier: ^1.8.0
     version: 1.8.0
+  htmx.org:
+    specifier: ^1.9.6
+    version: 1.9.6
 
 devDependencies:
   '@types/alpinejs':
@@ -649,6 +652,10 @@ packages:
     dependencies:
       function-bind: 1.1.1
     dev: true
+
+  /htmx.org@1.9.6:
+    resolution: {integrity: sha512-4Zebo9nzg8u2ZHuIJmvB/nQS6kIMLIoEfhTg/oRwyCIJhL5MLA/jPU1EPEBtGOmG4ZG0k05Vpd3sab2+zfvteQ==}
+    dev: false
 
   /inflight@1.0.6:
     resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
