@@ -22,6 +22,7 @@ django-storages = {version = "*", extras = ["s3"]}
 wagtail-storages = "*"
 slippers = "*"
 django-htmx = "*"
+django-render-block = "*"
 
 [dev-packages]
 django-stubs = "*"
