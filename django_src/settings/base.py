@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     # CSS
     # Forms
     "widget_tweaks",
+    # HTMX
+    "django_htmx",
     # CORS
     "corsheaders",
     # Alluth
@@ -92,6 +94,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # wagtail
     'wagtail.contrib.redirects.middleware.RedirectMiddleware',
+    # django-htmx
+    "django_htmx.middleware.HtmxMiddleware",
 ]
 
 ROOT_URLCONF = "django_src.urls"

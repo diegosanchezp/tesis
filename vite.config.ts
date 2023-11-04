@@ -1,13 +1,19 @@
-import { defineConfig, UserConfig } from 'vite'
 import {resolve} from "path";
-import tsconfigPaths from 'vite-tsconfig-paths';
 import fs from 'fs';
+import tsconfigPaths from 'vite-tsconfig-paths';
+
+import inject from '@rollup/plugin-inject';
+import { defineConfig, UserConfig } from 'vite'
+
 import {getInputFiles} from './vite/vite_utils'
 
 // https://vitejs.dev/config/
 const baseconfig: UserConfig = {
   plugins: [
-    tsconfigPaths()
+    inject({
+       htmx: 'htmx.org'
+    }),
+    tsconfigPaths(),
   ],
   root: resolve('./static/src'),
   base: '/static/',

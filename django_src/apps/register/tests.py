@@ -1,4 +1,5 @@
-from django.test import TestCase
+from datetime import date
+
 from django_src.apps.register.models import (
     Student, StudentInterest,
     Mentor, MentorExperience,
@@ -6,9 +7,10 @@ from django_src.apps.register.models import (
     InterestTheme,
 )
 from .upload_data import create_carreers
-
-from datetime import date
+from .views import SelectCarreraView
+from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 
 # ./manage.py test django_src.apps.register.tests.ModelTests.test_student_model
 class ModelTests(TestCase):
@@ -115,3 +117,53 @@ class ModelTests(TestCase):
     def test_upload_datascript(self):
         create_carreers()
 
+class FormTests(TestCase):
+
+    def test_career_form(self):
+        pass
+
+# ./manage.py test django_src.apps.register.tests.ViewTests.test_select_search
+class ViewTests(TestCase):
+
+    def test_select_search(self):
+
+        ciencias = Faculty.objects.create(
+            name="Ciencias",
+        )
+
+        # Create two carreers
+        computacion = ciencias.carreers.create(name="Computación")
+        quimica = ciencias.carreers.create(name="Química")
+
+        url = reverse("register:select_carrera")
+
+        # Build the request
+        request = RequestFactory().get(
+            path=url,
+            data={"search": "compu"},
+        )
+
+        # Mock htmx attribute
+        request.htmx = True
+
+        # Build view
+        view = SelectCarreraView()
+        view.setup(request)
+
+        # Check that it has facultys
+        context = view.get_context_data()
+        facultys = context["facultys"]
+        self.assertIn("facultys", context, msg="facultys is not in context dict")
+
+        # Check that the search has been correct
+        self.assertTrue(facultys.count() == 1)
+        self.assertTrue(facultys.first() == ciencias)
+        self.assertTrue(facultys[0].carreers.count() == 1, msg="Only one carreer should've been shown")
+        self.assertTrue(facultys[0].carreers.first() == computacion, msg=f"The carrer is not {computacion.name}")
+
+        # Process the request, so we can have a response
+        response = view.dispatch(request)
+
+        # Check that django-render-block has worked correctly by inspecting 
+        # the html on the response body
+        self.assertIn("<form", response.content.decode())

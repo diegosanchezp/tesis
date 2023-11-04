@@ -1,4 +1,5 @@
 {% load django_vite %}
+{% load django_htmx %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -61,5 +62,18 @@
 
   <body>
     {% block body %}{% endblock %}
+
+
+    {% if settings.DEBUG %}
+        {# https://django-htmx.readthedocs.io/en/latest/extension_script.html #}
+        {% django_htmx_script %}
+    {% endif %}
+
+    {# CSFR Token for making POST, PUT, DELETE request with htmx #}
+    <script>
+      document.body.addEventListener('htmx:configRequest', (event) => {
+        event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+      });
+    </script>
   </body>
 </html>

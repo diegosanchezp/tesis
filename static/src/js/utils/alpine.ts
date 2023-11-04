@@ -1,6 +1,12 @@
 import Alpine from "alpinejs"
+// plugins
 import persist from '@alpinejs/persist'
-
+// htmx, do not change the order of these imports
+// https://github.com/bigskysoftware/htmx/issues/1690#issue-1844615295
+import 'js/htmx';
+// .js has to be added otherwise import error is raised
+import 'htmx.org/dist/ext/alpine-morph.js'
+ 
 export type myAlpineComponent = {
     name: string, component: () => any
 }
@@ -20,14 +26,13 @@ export type startAlpineParams = {
 }
 
 export function startAlpine(params: startAlpineParams){
-    // Init stores
-
+    window.Alpine = Alpine
     // It is important that this line is here otherwise $persist property
     // wont be defined in the Alpine global object
     Alpine.plugin(persist)
 
+    // Init stores
     for (const store of params.stores){
-        debugger
         if (store.persist){
             Alpine.store(
                 store.name,

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load django_vite slippers %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/register_main.ts' %}
+{% endblock extrascripts %}
+
+{% block title %}
+    Alpine Morph HTMX Swap
+{% endblock %}
+
+{% block body %}
+    <div hx-target="this" hx-ext="alpine-morph" hx-swap="morph">
+        <div x-data="{ count: 0, replaced: false,
+        message: 'Change me, then press the button!' }">
+            <input type="text" x-model="message">
+            <div x-text="count"></div>
+            <button x-bind:style="replaced && {'backgroundColor': '#fecaca'}"
+                    x-on:click="replaced = true; count++"
+                    hx-get="/swap">
+                Morph
+            </button>
+        </div>
+    </div>
+{% endblock body %}
