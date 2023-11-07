@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load slippers django_vite %}
+
+{% block title %}
+   Seleccionar especialización
+{% endblock %}
+
+{% block body %}
+
+{# Steps #}
+<div class="flex justify-center my-10">
+    {% stepper left_line="false" number=1 text="Seleccionar perfil" url=step_urls.select_perfil %}
+    {% stepper number=2 text="Selecciona tu carrera" url=step_urls.select_carrera %}
+    {% stepper right_line="false" number=3 text="Selecciona tu especialización" %}
+</div>
+
+
+{# Selector de especializaciones #}
+<section x-data="select_spec('{{urlCarrer}}')">
+    <h2 class="text-xl text-center" x-cloak x-show="!errorCarreer">
+        <span>¿ Cual es tu especialización para la carrera </span>
+        <span class="font-semibold" x-text="carreer"></span><span>?</span>
+    </h2>
+    {# x-cloak is used to avoid "blib" effect #}
+    <div x-cloak x-show="errorCarreer">
+        <p class="text-red-500 text-center">
+            <span>Algo extraño ha pasado, en el paso 2 seleccionaste la carrera de</span>
+            <span x-text="carreer"></span>
+            <span>. Pero quieres ver las especializaciones de </span>
+            <span x-text="urlCarreer"></span>
+        </p>
+
+    </div>
+    <div class="flex flex-col items-center justify-center my-4" x-show="!errorCarreer">
+
+        <div class="flex w-[400px] flex-col justify-center items-center border border-black border-solid rounded-md">
+            {# Searcher #}
+            <input
+                type="search"
+                name="search"
+                id="default-search"
+                placeholder="Busca por nombre..."
+                class="w-1/2 my-4 rounded-md"
+                x-model="search_key"
+            />
+                <ul class="mx-12 mb-4 max-h-[80vh] overflow-y-scroll">
+                    <template x-for="specialization in filteredSpecialization" :key="specialization.name">
+                        <li class="flex items-start my-2" >
+                            <input
+                                type="radio"
+                                name="specialization"
+                                x-model="specialization_selected"
+                                x-bind:id="specialization.name"
+                                x-bind:value="specialization.name"
+                                x-bind:checked="specialization_selected == specialization.name"
+                                />
+
+                            <label
+                                class="ml-2"
+                                x-bind:for="specialization.name"
+                                x-text="specialization.name"
+                                :class="specialization.name === no_tengo ? 'font-bold': ''"
+                                >
+                            </label>
+                        </li>
+                    </template>
+                    {% comment %}
+                      
+                    <li>
+                        <input
+                            type="radio"
+                            id="no_tengo"
+                            name="specialization"
+                            value="no_tengo"
+                            x-bind:checked="specialization_selected == 'no_tengo'"
+                            x-model="specialization_selected"
+                        />
+                        <label for="no_tengo" class="font-bold">
+                            No tengo especialización
+                        </label>
+                    </li>
+                    {% endcomment %}
+                </ul>
+        </div>
+        <a x-bind:href="next_url" x-cloak x-show="(Boolean(specialization_selected))" class="my-4 mx-6">
+            {% #button icon_right="bi bi-arrow-right"  %}
+            Siguiente
+            {% /button %}
+        </a>
+
+    </div>
+</section>
+{# this is the dataset as a json so it can be used by javascript #}
+{{ specializations_json|json_script:"specializations" }}
+{% endblock body %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/select_specialization.ts' %}
+{% endblock extrascripts %}

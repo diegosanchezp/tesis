@@ -7,7 +7,7 @@ from django_src.apps.register.models import (
     InterestTheme,
 )
 from .upload_data import create_carreers
-from .views import SelectCarreraView
+from .views import SelectCarreraView, SelectCarrerSpecialization
 from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -122,18 +122,20 @@ class FormTests(TestCase):
     def test_career_form(self):
         pass
 
-# ./manage.py test django_src.apps.register.tests.ViewTests.test_select_search
 class ViewTests(TestCase):
 
-    def test_select_search(self):
+    def setUp(self):
 
-        ciencias = Faculty.objects.create(
+        self.ciencias = Faculty.objects.create(
             name="Ciencias",
         )
 
         # Create two carreers
-        computacion = ciencias.carreers.create(name="Computación")
-        quimica = ciencias.carreers.create(name="Química")
+        self.computacion = self.ciencias.carreers.create(name="Computación")
+        self.quimica = self.ciencias.carreers.create(name="Química")
+    # ./manage.py test django_src.apps.register.tests.ViewTests.test_select_search
+    def test_select_search(self):
+
 
         url = reverse("register:select_carrera")
 
@@ -157,9 +159,9 @@ class ViewTests(TestCase):
 
         # Check that the search has been correct
         self.assertTrue(facultys.count() == 1)
-        self.assertTrue(facultys.first() == ciencias)
+        self.assertTrue(facultys.first() == self.ciencias)
         self.assertTrue(facultys[0].carreers.count() == 1, msg="Only one carreer should've been shown")
-        self.assertTrue(facultys[0].carreers.first() == computacion, msg=f"The carrer is not {computacion.name}")
+        self.assertTrue(facultys[0].carreers.first() == self.computacion, msg=f"The carrer is not {self.computacion.name}")
 
         # Process the request, so we can have a response
         response = view.dispatch(request)
@@ -167,3 +169,27 @@ class ViewTests(TestCase):
         # Check that django-render-block has worked correctly by inspecting 
         # the html on the response body
         self.assertIn("<form", response.content.decode())
+
+    # ./manage.py test django_src.apps.register.tests.ViewTests.test_select_specialization
+    def test_select_specialization(self):
+
+        self.ati = self.computacion.carrerspecialization_set.create(
+            name="Aplicaciones Tecnología Internet",
+        )
+
+        url = reverse("register:select_specialization", kwargs={"name":self.computacion.name})
+
+        # Build the request
+        request = RequestFactory().get(
+            path=url,
+        )
+
+        # Build view
+        view = SelectCarrerSpecialization()
+        view.setup(request, name=self.computacion.name)
+        response = view.dispatch(request)
+        context = view.get_context_data()
+        self.assertEquals(
+            context["specializations_json"],
+            [{"name": self.ati.name}]
+        )

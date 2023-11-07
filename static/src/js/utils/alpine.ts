@@ -17,6 +17,7 @@ export type myAlpineStore = {
     persist: boolean
     as: string
     persist_value: string
+    persist_prop: string
 }
 
 
@@ -38,7 +39,7 @@ export function startAlpine(params: startAlpineParams){
                 store.name,
                 store.store(
                     {
-                        [store.persist_value]: Alpine.$persist(store.persist_value).as(store.as)
+                        [store.persist_prop]: Alpine.$persist(store.persist_value).as(store.as)
                     }
                 )
             )
