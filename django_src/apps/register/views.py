@@ -16,7 +16,7 @@ class MainView(TemplateView):
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
 
-        select_carrera_url = reverse("register:select_carrera")
+        select_carrera_url = reverse_lazy("register:select_carrera")
         context["form_urls"] = {
             "estudiante": select_carrera_url,
             "mentor": select_carrera_url,

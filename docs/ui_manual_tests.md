@@ -18,5 +18,15 @@ url: /register/
 - [ ] Shows a loading spinner When performing a search.
 - [ ] If a carreer was previously selected.
     - [ ] Shows save button
-    - [ ] Shows message "`carreer` was previously selected".
+    - [ ] Shows message `carreer` was selected".
+    - [ ] Marks as checked the corresponding radio input
 - [ ] Shows save button when a carreer is selected.
+
+# Specialization
+- [ ] Fetches the specializations of a carreer
+- [ ] Can search between specializations
+- [ ] Saves selected specialization to localstorage
+- [ ] Restores selected specialization
+- [ ] Makes proper url to next views.
+Errors
+Display red text if selected carreer doesn't matches the carreer that was provided in the URL path

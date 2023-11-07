@@ -16,7 +16,7 @@
     Selecciona la carrera que <span x-show="profile == 'estudiante'">estudias.</span> <span x-show="profile == 'mentor'">estudiaste.</span>
 </p>
 
-<div 
+<div
     class="flex flex-col justify-center"
     x-data="select_carrera">
 
@@ -50,7 +50,7 @@
                 <img src="https://htmx.org/img/bars.svg" style="width: 20px"/>
                 <p>Buscando...</p>
             </span>
-            <p class="text-center" x-show="Boolean(carreer) && !selected" x-text="`Seleccionaste previamente ${carreer}`"></p>
+            <p class="text-center" x-show="Boolean(carreer)" x-text="`Seleccionaste ${carreer}`"></p>
 
             {# List of carreers and professions #}
             {% block carrer_form %}
@@ -71,7 +71,7 @@
                                     <ul class="mt-1 pb-4">
                                         {% for carreer in faculty.carreers.all  %}
                                             <li class="flex gap-x-2 items-center">
-                                                <input type="radio" name="carreer" x-on:click="handle_selected('{{carreer.name}}')" />
+                                                <input type="radio" name="carreer" x-bind:checked="carreer == '{{carreer.name}}'" x-model="carreer" value="{{carreer.name}}"/>
                                                 <label>{{ carreer.name }}</label>
                                             </li>
                                         {% endfor %}
