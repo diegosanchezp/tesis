@@ -1,9 +1,10 @@
 from django.db.models.aggregates import Count
 from django.db.models.expressions import When
 from django.views.generic.base import TemplateView
+from django.views.generic.detail import DetailView
 from django.http import HttpResponse
-from django.db.models import Prefetch, Q
-from django.urls import reverse
+from django.db.models import Prefetch
+from django.urls import reverse_lazy
 from .models import Faculty, Carreer
 from render_block import render_block_to_string
 
@@ -22,6 +23,12 @@ class MainView(TemplateView):
             "empresa": "todo",
         }
         return context
+
+# common steps between the mentor and student
+step_urls = {
+    "select_perfil": reverse_lazy("register:index"), #1
+    "select_carrera": reverse_lazy("register:select_carrera"), #2
+}
 
 class SelectCarreraView(TemplateView):
     template_name = "register/select_carrera.html"
@@ -70,7 +77,32 @@ class SelectCarreraView(TemplateView):
 
         # faculty_num is used to determine the number of columns of the grid of facultys
         context["faculty_num"] = facultys.count()
-        context["step_urls"] = {
-            "select_perfil": reverse("register:index")
-        }
+        context["step_urls"] = step_urls
         return context
+
+class SelectCarrerSpecialization(DetailView):
+    template_name = "register/carrer_specialization.html"
+    model = Carreer
+    context_object_name = "carreer"
+    slug_field = "name"
+    slug_url_kwarg = "name"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["step_urls"] = step_urls
+        carreer: Carreer = context[self.context_object_name]
+        context["specializations_json"] = list(
+            carreer.carrerspecialization_set.all().values("name")
+        )
+        context["urlCarrer"] = self.kwargs[self.slug_url_kwarg]
+        return context
+
+    def get_queryset(self):
+        carrer_set = super().get_queryset()
+        # prefetch all specialization to avoid performance problems
+        carrer_set.prefetch_related("carrerspecialization_set")
+        return carrer_set
+
+
+

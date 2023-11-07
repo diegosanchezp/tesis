@@ -19,28 +19,31 @@ class TestQuerys(unittest.TestCase):
         self.BASE_DIR = Path(__file__).resolve().parent.parent  # Parent Directory of this file
         setup_django(self.BASE_DIR)
 
+        app_label = "register"
+        self.Faculty = apps.get_model(app_label, "Faculty")
+        self.Carreer = apps.get_model(app_label, "Carreer")
+
+        self.facultys = self.Faculty.objects.prefetch_related("carreers")
+        self.ciencias = self.facultys.get(name="Ciencias")
+        self.computacion = self.ciencias.carreers.get(name="Computación")
+
+    # python -m unittest tests.model_query.TestQuerys.test_carreer_querys
     def test_carreer_querys(self):
 
-        app_label = "register"
-        Faculty = apps.get_model(app_label, "Faculty")
-        Carreer = apps.get_model(app_label, "Carreer")
-        facultys = Faculty.objects.prefetch_related("carreers")
-        self.assertTrue(facultys.count() > 1)
-        ciencias = facultys.get(name="Ciencias")
-        self.assertTrue(ciencias.carreers.count() > 1)
-        computacion = ciencias.carreers.get(name="Computación")
-        print(computacion)
+        self.assertTrue(self.facultys.count() > 1)
+        self.assertTrue(self.ciencias.carreers.count() > 1)
+        print(self.computacion)
 
         # Get facultys that contains a carrer that is name com
         search_key="Compu"
-        carreers = Faculty.objects.filter(carreers__name__icontains="Compu")
+        carreers = self.Faculty.objects.filter(carreers__name__icontains="Compu")
         self.assertEqual(carreers.count(), 1)
 
         # First get the carrers that matches the search key
-        carreers = Carreer.objects.filter(name__icontains=search_key)
+        carreers = self.Carreer.objects.filter(name__icontains=search_key)
 
         # Then get the facultys of the carrers that matches
-        facultys = Faculty.objects.filter(
+        facultys = self.Faculty.objects.filter(
             pk__in=carreers.values("faculty_id")
         ).prefetch_related(
             Prefetch(
@@ -52,6 +55,14 @@ class TestQuerys(unittest.TestCase):
         )
         self.assertTrue(facultys.count(), 1)
         self.assertTrue(facultys[0].carreers.count(), 1)
-        self.assertTrue(facultys[0].carreers.first() == computacion)
+        self.assertTrue(facultys[0].carreers.first() == self.computacion)
         breakpoint()
+
+    # python -m unittest tests.model_query.TestQuerys.test_model_todict
+    def test_model_todict(self):
+        print(
+            list(
+                self.computacion.carrerspecialization_set.all().values("name")
+            )
+        )
 
