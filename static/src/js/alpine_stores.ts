@@ -17,6 +17,8 @@ export const profileStore: myAlpineStore = {
     name: "profile",
     store: profileStoreObj,
     persist: true,
-    persist_value: "profile", // property name
+    // Alpine.$persist(store.persist_value).as(store.as)
+    persist_prop: "profile",
+    persist_value: "",
     as: "profile",
 }
