@@ -17,7 +17,7 @@
 
 {# Selector de especializaciones #}
 <section x-data="select_spec('{{urlCarrer}}')">
-    <h2 class="text-xl text-center" x-cloak x-show="!errorCarreer">
+    <h2 class="text-xl text-center" x-cloak x-show="!errorCarreer && !errorProfile">
         <span>¿ Cual es tu especialización para la carrera </span>
         <span class="font-semibold" x-text="carreer"></span><span>?</span>
     </h2>
@@ -29,9 +29,15 @@
             <span>. Pero quieres ver las especializaciones de </span>
             <span x-text="urlCarreer"></span>
         </p>
-
     </div>
-    <div class="flex flex-col items-center justify-center my-4" x-show="!errorCarreer">
+
+    <div x-cloak x-show="errorProfile">
+        <div class="text-red-500 text-center">
+            <p>Oops, no puedes elegir una especialización teniendo elegido el perfil de mentor.</p>
+            <p>Vuelve al paso 1 para seleccionar el perfil de estudiante</p>
+        </div>
+    </div>
+    <div class="flex flex-col items-center justify-center my-4" x-show="!errorCarreer && !errorProfile">
 
         <div class="flex w-[400px] flex-col justify-center items-center border border-black border-solid rounded-md">
             {# Searcher #}

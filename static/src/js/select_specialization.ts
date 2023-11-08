@@ -8,8 +8,10 @@ const select_spec = (urlCarrer: string) => ({
     specializations: [],
     search_key: "",
     specialization_selected: Alpine.$persist("").as("specialization"),
+    profile: Alpine.$persist("").as("profile"),
     no_tengo: "No tengo especialización",
     errorCarreer: false,
+    errorProfile: false,
     urlCarreer: urlCarrer, // The carrer from the url path
     carreer: Alpine.$persist('').as('carreer'),
     // The carrer that is in the url path
@@ -21,7 +23,7 @@ const select_spec = (urlCarrer: string) => ({
             {name:this.no_tengo}
         )
         this.errorCarreer = this.carreer != urlCarrer
-
+        this.errorProfile = this.profile == "mentor"
     },
     get next_url(){
         if (this.specialization_selected === this.no_tengo){
