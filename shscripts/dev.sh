@@ -18,6 +18,10 @@ cterm(){
   docker-compose run --rm --no-deps -w /app --entrypoint "bash" django
 }
 
+load_env(){
+  set -a
+  source ${1:-.env}
+}
 
 # Wrapper command
 dockerpy(){
