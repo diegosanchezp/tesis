@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load django_vite slippers %}
+
+{% block title %}
+Temas de interés
+{% endblock title %}
+
+{% block body %}
+<main x-data="select_theme('{{urlCarrer}}')" class="px-20 flex flex-col justify-center items-center">
+
+    {# Numbered Steps #}
+
+    <div class="flex justify-center my-10">
+        {% stepper left_line="false" number=1 text="Seleccionar perfil" url=step_urls.select_perfil %}
+        {% stepper number=2 text="Selecciona tu carrera" url=step_urls.select_carrera %}
+        {% stepper number=3 text="Selecciona tu especialización" url=step_urls.specialization %}
+        {% stepper right_line="false" number=4 text="Temas de interés" %}
+    </div>
+    <h3 class=" text-xl">Elige uno o más temas de interés</h3>
+
+    <form class=" w-[550px] flex gap-y-2 my-6 flex-col justify-center align-center">
+
+        <ul class="flex gap-2 flex-wrap max-h-[80vh] overflow-y-scroll" x-on:fetchedpage="on_new_page">
+            {% block theme_list %}
+                {% for theme in object_list %}
+                    <li class="rounded-2xl bg-slate-600 py-2 px-4 text-white">
+                        <input type="checkbox" name="theme" id="{{ theme.name }}" x-model="themes" value="{{ theme.name }}"/>
+                        <label for="{{ theme.name }}">{{ theme.name }}</label>
+                    </li>
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li
+                        id="replaceMe"
+                        hx-get="?{{themes_query_param}}{% if themes_query_param_len > 0 %}&{% endif %}page={{ page_obj.next_page_number }}"
+                        hx-target="#replaceMe" hx-swap="outerHTML">
+                        {% #button icon_right="bi bi-plus" type="button" title="Mostrar más" %}
+                        {% /button %}
+                    </li>
+                {% endif %}
+            {% endblock theme_list %}
+        </ul>
+    </form>
+
+    <a x-bind:href="next_url" class="my-4">
+        {% #button icon_right="bi bi-arrow-right" %}
+            Siguiente
+        {% /button %}
+    </a>
+    {# Django objects that are converted to json #}
+    {{ url_themes|json_script:"url_themes" }}
+    {{ page_serialized|json_script:"page_serialized" }}
+</main>
+{% endblock body %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/select_theme.ts' %}
+{% endblock extrascripts %}

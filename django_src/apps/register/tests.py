@@ -1,5 +1,7 @@
 from datetime import date
 
+from django.urls.base import reverse_lazy
+
 from django_src.apps.register.models import (
     Student, StudentInterest,
     Mentor, MentorExperience,
@@ -7,7 +9,7 @@ from django_src.apps.register.models import (
     InterestTheme,
 )
 from .upload_data import create_carreers
-from .views import SelectCarreraView, SelectCarrerSpecialization
+from .views import SelectCarreraView, SelectCarrerSpecialization, SelecThemeView
 from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -166,7 +168,7 @@ class ViewTests(TestCase):
         # Process the request, so we can have a response
         response = view.dispatch(request)
 
-        # Check that django-render-block has worked correctly by inspecting 
+        # Check that django-render-block has worked correctly by inspecting
         # the html on the response body
         self.assertIn("<form", response.content.decode())
 
@@ -193,3 +195,194 @@ class ViewTests(TestCase):
             context["specializations_json"],
             [{"name": self.ati.name}]
         )
+class InterestThemeViewTest(TestCase):
+    def setUp(self):
+
+        self.ciencias = Faculty.objects.create(
+            name="Ciencias",
+        )
+
+        # Create two carreers
+        self.computacion = self.ciencias.carreers.create(name="Computación")
+
+        self.computacion.interest_themes.create(name="Matemáticas",)
+        self.computacion.interest_themes.create(name="Programación",)
+
+        self.computacion.interest_themes.create(name="HTML"),
+        self.computacion.interest_themes.create(name="Javascript"),
+        self.computacion.interest_themes.create(name="CSS"),
+        self.computacion.interest_themes.create(name="C++"),
+        self.computacion.interest_themes.create(name="UI/UX"),
+        self.computacion.interest_themes.create(name="Trabajo en equipo"),
+        self.computacion.interest_themes.create(name="Gestion de Recursos"),
+        self.computacion.interest_themes.create(name="BPM"),
+        # Build view
+        self.view = SelecThemeView()
+
+        self.url = reverse("register:select_themes", kwargs={"name":self.computacion.name})
+
+    # ./manage.py test django_src.apps.register.tests.InterestThemeViewTest.test_normal_get
+    def test_normal_get(self):
+        """
+        A normal get request
+
+        When an user had just completed the previous step and hasn't choosen any themes
+
+        AKA the default state of the select themes page
+        """
+
+        # Build the request
+        request = RequestFactory().get(
+            path=self.url,
+        )
+
+        request.htmx = False
+
+        self.view.setup(request, name=self.computacion.name)
+
+        response = self.view.dispatch(request)
+        context = self.view.get_context_data()
+
+        url_spec = reverse_lazy("register:select_specialization", kwargs={"name":self.computacion.name})
+
+        self.assertEquals(
+            context["step_urls"]["specialization"],
+            url_spec,
+        )
+
+        self.assertEquals(
+            context["carreer"],
+            self.computacion,
+        )
+
+        self.assertEquals(
+            context["object_list"].count(),
+            self.view.paginate_by,
+        )
+
+    # ./manage.py test django_src.apps.register.tests.InterestThemeViewTest.get_page_with_htmx
+    def get_page_with_htmx(self):
+        """
+        HTMX calls the view with query parameter "page"
+        To get a new set of themes.
+
+        No themes had been previously selected
+        """
+
+        # Build the request
+        request = RequestFactory().get(
+            path=self.url,
+            # Set page to two because the alredy returns the first page
+            data={"page": 2}
+        )
+
+        # Mock htmx middleware
+        request.htmx = True
+
+        # Set number of items in a page
+        self.view.paginate_by = 4
+        self.view.setup(request, name=self.computacion.name)
+
+        response = self.view.dispatch(request)
+        context = self.view.get_context_data()
+        object_list = context["object_list"]
+
+        # Check that it has returned the right ammount of themes
+        self.assertEqual(len(object_list), self.view.paginate_by)
+
+        # Check that second page has the correct items
+        for theme in self.computacion.interest_themes.order_by("name")[4:8].values("name"):
+            self.assertIn(
+                theme["name"],
+                [object_themes["name"] for object_themes in object_list.values("name")],
+            )
+
+        # Print the rendered content don't know how to test it
+        print(response.content.decode())
+
+    # ./manage.py test django_src.apps.register.tests.InterestThemeViewTest.get_with_themes
+    def get_with_themes(self):
+        """
+        The previous steps makes a request and themes have been previously selected
+
+        Please see the headless tests.model_query.TestQuerys.test_themes_pagination
+        """
+        selected_themes_list = ["Trabajo en equipo", "Matemáticas"]
+
+        #----------------
+        # Themes had been previously selected and whe
+        # are visiting the page again
+        #----------------
+
+        # Build the request
+        request = RequestFactory().get(
+            path=self.url,
+            data={
+                "theme": selected_themes_list,
+                # not having the page param is the same as
+                # "page": 1,
+            }
+        )
+
+        request.htmx = False
+
+        # Set number of items in a page
+        self.view.paginate_by = 4
+        self.view.setup(request, name=self.computacion.name)
+
+        response = self.view.dispatch(request)
+
+        # Selected themes are set in the view
+        self.assertEqual(
+            self.view.selected_themes_list,
+            selected_themes_list
+        )
+
+        context = self.view.get_context_data()
+
+        # Object list is the queryset that a page returns
+        first_page_object_list = context["object_list"]
+
+        # First items should be two select and have the same order
+        self.assertEqual(
+            [theme["name"] for theme in first_page_object_list[:2].values("name")],
+            selected_themes_list
+        )
+
+        # Page should have 4 items
+        self.assertEqual(
+            # .count() doesn't works, gives 1 less, use len() instead
+            len(first_page_object_list),
+            self.view.paginate_by
+        )
+
+        #----------------
+        # Get a page with htmx
+        #----------------
+
+        # Request a second page with selected themes
+        page = 2
+        request = RequestFactory().get(
+            path=self.url,
+            data={
+                "theme": selected_themes_list,
+                "page": page,
+            }
+        )
+        # Mock htmx
+        request.htmx = True
+
+        self.view.setup(request, name=self.computacion.name)
+        response = self.view.dispatch(request)
+        context = self.view.get_context_data()
+
+        self.assertEqual(context["page_obj"].number, page)
+
+        second_page_object_list = context["object_list"]
+
+        # If we request a second page, then the items of the second page shouldn't be in the first one
+        for theme in second_page_object_list.values("name"):
+            self.assertNotIn(
+                theme["name"],
+                [theme["name"] for theme in first_page_object_list.values("name")],
+            )
