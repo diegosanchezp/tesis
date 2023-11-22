@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% load slippers django_vite %}
+
+{% block title %}
+    Completa el perfil
+{% endblock %}
+
+{% block body %}
+
+<main class="flex flex-col justify-center items-center" x-data="complete_profile('{{urlCarrer}}')">
+    <div class="flex justify-center mt-10 mb-14">
+        {% stepper number=1 text="Seleccionar perfil" left_line="false"  url=step_urls.select_perfil %}
+        {% stepper number=2 text="Selecciona tu carrera" url=step_urls.select_carrera %}
+        {% stepper number=3 text="Selecciona tu especialización" url=step_urls.specialization %}
+
+        {# Student doesn't have a specialization, so he must of have selected themes #}
+        {% if no_spec %}
+            {% stepper number=4 text="Temas de interés" url=step_urls.specialization %}
+            {% stepper number=5 text="Completa el perfil" right_line="false"   %}
+        {% else %}
+            {% stepper number=4 text="Completa el perfil" right_line="false"   %}
+        {% endif %}
+
+
+    </div>
+
+    {% block form %}
+        <form
+            id="form"
+            class="grid grid-cols-2 gap-x-2 gap-y-4"
+            enctype="multipart/form-data"
+            method="post"
+            hx-post=""
+            hx-swap="outerHTML"
+            hx-target="#form"
+            >
+            {# Render all of the form fields of the user_form excluding those that are hidden #}
+            {% for field in user_form %}
+                {% if not field.is_hidden %}
+                    <div
+                        class="
+                            flex flex-col
+                            {% if field == user_form.profile_pic %}
+                                col-span-full justify-self-center
+                                text-center my-4
+                            {% endif %}
+                            {% if field == user_form.password1 %}
+                                col-start-1
+                            {% endif %}
+                        "
+                    >
+                        <label for="{{ field.id_for_label }}">{{field.label}}</label>
+
+                        {% if field == user_form.profile_pic %}
+                            <div class="my-4">
+                                <i class="bi bi-person-circle text-[50px]"></i>
+                            </div>
+                        {% endif %}
+                        {# Render the input element #}
+                        {{ field }}
+
+                        {# Render the error list of the filed #}
+                        {% if field.errors %}
+                            <ul class="text-red-600">
+                                {% for error in field.errors %}
+                                    <li>{{ error|escape }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            {# Student form fields #}
+            {% for field in student_form.visible_fields %}
+                <div class="
+                    flex flex-col
+                    {% if field == student_form.voucher %}
+                        col-span-full justify-self-center text-center my-4
+                    {% endif %}
+                ">
+                    <label for="{{ field.id_for_label }}">{{student_form.voucher.label}}</label>
+                    {{ field }}
+                    <ul class="text-red-600">
+                        {% for error in field.errors %}
+                            <li>{{ error|escape }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+
+            {# Render non_field_errors #}
+            {% if student_form.non_field_errors %}
+                <ul class="text-red-600">
+                    {% for error in student_form.non_field_errors %}
+                        <li>{{ error|escape }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {# Render errors of hidden fields of the student form #}
+            {% for field in student_form.hidden_fields %}
+                {% if student_form.is_bound %}
+                    {{ field }}
+                {% else %}
+                    {# Use htmx to fill in the input values #}
+                    {% if field == student_form.interests %}
+                        {# Render all of the interest themes, must be django form complient #}
+                        <template x-for="interest in interests">
+                            <input type="hidden" name="{{ field.name }}" x-bind:value="interest">
+                        </template>
+                    {% else %}
+                        <input type="hidden" name="{{ field.name }}" x-bind:value="{{ field.name }}">
+                    {% endif %}
+                {% endif %}
+                {% if field.errors %}
+                    <ul class="col-span-full text-red-600">
+                        {% for error in field.errors %}
+                            <li>{{ error|escape }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+            {% endfor %}
+
+            <div class="col-span-full justify-self-center">
+
+                {% #button type="submit" name="action" value="create_student" %}
+                    Completar el registro
+                {% /button %}
+
+            </div>
+        </form>
+    {% endblock form %}
+</main>
+{% endblock %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/complete_profile.ts' %}
+{% endblock extrascripts %}

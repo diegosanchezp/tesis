@@ -65,3 +65,5 @@ CORS_ALLOWED_ORIGINS = load_env_array("CORS_ALLOWED_ORIGINS")
 # https://docs.djangoproject.com/en/stable/ref/settings/#csrf-trusted-origins
 CSRF_TRUSTED_ORIGINS = load_env_array("CSRF_TRUSTED_ORIGINS")
 
+# Should probably move this to a testing.py settings file
+MEDIA_ROOT_TEST = os.path.join(BASE_DIR, "tests", "media")

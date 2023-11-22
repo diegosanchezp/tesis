@@ -67,6 +67,21 @@ class TestQuerys(unittest.TestCase):
                 self.computacion.carrerspecialization_set.all().values("name")
             )
         )
+    # python -m unittest tests.model_query.TestQuerys.test_themes_incareer
+    def test_themes_incareer(self):
+        """
+        Test that an interest theme is a carreer
+        """
+        # Grab an interest theme that actually belongs to
+        interest_theme = self.computacion.interest_themes.first()
+        self.assertTrue(
+            self.computacion.interest_themes.filter(pk=interest_theme.pk).exists()
+        )
+
+        # Let's do one randomn interes theme that doesn't belong to the carreer
+        self.assertFalse(self.computacion.interest_themes.filter(pk=1000).exists())
+
+
     # python -m unittest tests.model_query.TestQuerys.test_themes_pagination
     def test_themes_pagination(self):
         """

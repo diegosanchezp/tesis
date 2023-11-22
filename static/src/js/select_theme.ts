@@ -1,6 +1,8 @@
 import Alpine from "alpinejs"
 import { myAlpineComponent, startAlpine } from "js/utils/alpine"
 
+import {registerUrls} from "js/config/urls";
+
 // Component definition
 const select_theme = (urlCarrer: string) => ({
 
@@ -43,7 +45,7 @@ const select_theme = (urlCarrer: string) => ({
     },
 
     get next_url(){
-        return "Todo"
+        return registerUrls.complete_profile(this.carreer, true)
     },
 })
 

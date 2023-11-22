@@ -43,9 +43,9 @@ Temas de interés
     </form>
 
     <a x-bind:href="next_url" class="my-4">
-        {% #button icon_right="bi bi-arrow-right" %}
-            Siguiente
-        {% /button %}
+    {% #button icon_right="bi bi-arrow-right" x-bind:disabled="themes.length === 0" %}
+        Siguiente
+    {% /button %}
     </a>
     {# Django objects that are converted to json #}
     {{ url_themes|json_script:"url_themes" }}

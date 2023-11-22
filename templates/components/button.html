@@ -1,11 +1,11 @@
 {% load slippers %}
 
 {# define the default css class #}
-{% var class=class|default:"text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5" %}
+{% var class=class|default:"text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 disabled:bg-slate-300" %}
 
 {# attrs define the html attributes that this component can support, if one is missing just add more #}
 
-<button {% attrs autofocus disabled form formaction formenctype formmethod formnovalidate formtarget popovertarget popovertargetaction name type value class id title style tabindex role lang intert x-data x-show @click x-ref hx-boost hx-get hx-post hx-on hx-push-url hx-select hx-select-oob hx-swap hx-swap-oob hx-target hx-trigger hx-vals %}>
+<button {% attrs autofocus disabled form formaction formenctype formmethod formnovalidate formtarget popovertarget popovertargetaction name type value class id title style tabindex role lang intert x-data x-bind:disabled x-show @click x-ref hx-boost hx-get hx-post hx-on hx-push-url hx-select hx-select-oob hx-swap hx-swap-oob hx-target hx-trigger hx-vals %}>
     {# Currently this button component only supports bootstrap icons #}
     <div class="flex gap-2">
         {% if icon_left %}

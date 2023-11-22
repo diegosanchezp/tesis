@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% load slippers django_vite %}
+
+{% block title %}
+Éxito
+{% endblock %}
+
+
+{% block body %}
+<main class="flex flex-col justify-center items-center h-screen">
+    <h1 class="text-2xl">¡Haz sido registrado exitosamente!</h1>
+
+    <i class="bi bi-check-circle text-[80px] text-green-700"></i>
+    <div class="flex flex-col gap-y-2">
+        <p>Tu comprobante de estudios se ha enviado a un administrador.</p>
+        <p class=" font-semibold">Recibiras un correo electrónico cuando tu registro sea aprobado.</p>
+    </div>
+</main>
+{% endblock %}
