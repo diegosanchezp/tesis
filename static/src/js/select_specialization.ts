@@ -3,6 +3,8 @@ import Alpine from "alpinejs"
 import { myAlpineComponent, startAlpine } from "js/utils/alpine"
 import { profileStore } from "js/alpine_stores"
 
+import {registerUrls} from "js/config/urls";
+
 // Component definition
 const select_spec = (urlCarrer: string) => ({
     specializations: [],
@@ -51,10 +53,20 @@ const select_spec = (urlCarrer: string) => ({
         )
         this.errorCarreer = this.carreer != urlCarrer
         this.errorProfile = this.profile == "mentor"
+
+        this.$watch("specialization_selected", (newValue, oldValue)=>{
+            // Reset the themes array since we now have a specialization selected
+            console.log(`oldValue: ${oldValue}`);
+            console.log(`newValue: ${newValue}`);
+            if(oldValue === this.no_tengo){
+                this.themes = []
+            }
+        })
     },
 
     /** crafts the url for the next step: choose themes */
     get next_url(){
+        // If the user doesn't have a specialization, redirect to the interest themes page
         if (this.specialization_selected === this.no_tengo){
 
             const themes_url = `/register/select_themes/${this.urlCarreer}`
@@ -66,7 +78,9 @@ const select_spec = (urlCarrer: string) => ({
 
             return themes_url
         }
-        return "/register/complete_profile"
+
+        // User does have a specialization, go to the final step
+        return registerUrls.complete_profile(this.carreer)
     },
 
     /** getter for filtering specializations names */
@@ -91,6 +105,7 @@ const selectSpec: myAlpineComponent = {
     name: "select_spec",
     component: select_spec,
 }
+
 // Register component
 startAlpine({
     components: [

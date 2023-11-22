@@ -38,6 +38,13 @@ class Student(models.Model):
 
     )
 
+    voucher = models.FileField(
+        upload_to="student_vouchers",
+        verbose_name=_("Comprobante de estudios"),
+        null=True,
+        blank=True,
+    )
+
     def __str__(self) -> str:
         return f"{self.user.first_name} {self.user.last_name}"
 
@@ -87,6 +94,13 @@ class Mentor(models.Model):
         on_delete=models.CASCADE,
         related_name="mentors",
 
+    )
+
+    voucher = models.FileField(
+        upload_to="mentor_vouchers",
+        verbose_name=_("Comprobante"),
+        null=True,
+        blank=True,
     )
 
     # the students to whom the mentor has mentored

@@ -1,6 +1,13 @@
 from datetime import date
+from typing import cast
+from pathlib import Path
+from django.http.response import HttpResponse
+from django.conf import settings
+
+from django.template.response import TemplateResponse
 
 from django.urls.base import reverse_lazy
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from django_src.apps.register.models import (
     Student, StudentInterest,
@@ -8,12 +15,19 @@ from django_src.apps.register.models import (
     Faculty, Carreer, CarrerSpecialization,
     InterestTheme,
 )
+from django_src.apps.register.forms import (
+    StudentForm,
+    UserCreationForm,
+)
 from .upload_data import create_carreers
-from .views import SelectCarreraView, SelectCarrerSpecialization, SelecThemeView
+from .views import SelectCarreraView, SelectCarrerSpecialization, SelecThemeView, step_urls
+import django_src.apps.register.complete_profile_view as profile_view
 from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
-from django.urls import reverse
 
+from django.http.response import HttpResponseNotAllowed
+from django.urls import reverse
+from django_htmx.http import HttpResponseClientRedirect
 # ./manage.py test django_src.apps.register.tests.ModelTests.test_student_model
 class ModelTests(TestCase):
 
@@ -119,12 +133,10 @@ class ModelTests(TestCase):
     def test_upload_datascript(self):
         create_carreers()
 
-class FormTests(TestCase):
-
-    def test_career_form(self):
-        pass
-
 class ViewTests(TestCase):
+    """
+    Tests for select SelectCarreraView and SelectCarrerSpecialization 
+    """
 
     def setUp(self):
 
@@ -195,6 +207,7 @@ class ViewTests(TestCase):
             context["specializations_json"],
             [{"name": self.ati.name}]
         )
+
 class InterestThemeViewTest(TestCase):
     def setUp(self):
 
@@ -386,3 +399,324 @@ class InterestThemeViewTest(TestCase):
                 theme["name"],
                 [theme["name"] for theme in first_page_object_list.values("name")],
             )
+
+class CompleteStudentProfileViewTest(TestCase):
+    def setUp(self):
+        self.url = reverse("register:complete_profile")
+
+        self.faculty = Faculty.objects.create(
+            name="Ciencias",
+        )
+
+        self.computacion = self.faculty.carreers.create(name="Computación")
+        self.matematicas = self.faculty.carreers.create(name="Matemáticas")
+
+        self.computacion_interests = InterestTheme.objects.bulk_create(
+            [
+                InterestTheme(name="Matemáticas"),
+                InterestTheme(name="Programación"),
+            ]
+        )
+
+        self.mates_interest_set = InterestTheme.objects.bulk_create(
+            [
+                InterestTheme(name="Cálculo"),
+                InterestTheme(name="Límites"),
+            ]
+        )
+
+        self.ati = self.computacion.carrerspecialization_set.create(
+            name="Aplicaciones Tecnología Internet",
+        )
+
+        self.elementos = self.matematicas.carrerspecialization_set.create(
+            name="Elementos",
+        )
+
+        self.computacion.interest_themes.add(*self.computacion_interests)
+        self.matematicas.interest_themes.add(*self.mates_interest_set)
+        self.base_data = {
+            "email": "diego@mail.com",
+            "first_name": "Diego",
+            "last_name": "Sánchez",
+            "profile": "estudiante",
+            # https://docs.djangoproject.com/en/stable/ref/forms/api/#binding-uploaded-files-to-a-form
+            "voucher": SimpleUploadedFile(name="voucher.pdf", content=b"file_content", content_type="application/pdf"),
+            "profile_pic": SimpleUploadedFile(
+                name="profile_pic.jpg",
+                content=open(str(Path(settings.MEDIA_ROOT_TEST) / "jpeg_example.jpg"), "rb").read(),
+                content_type="image/jpeg",
+            ),
+            "action": "create_student",
+        }
+
+    # ./manage.py test --keepdb django_src.apps.register.tests.CompleteStudentProfileViewTest.test_student_form
+    def test_student_form(self):
+        """
+        Just a quick test to find out if to_field_name works
+        """
+        form = StudentForm(
+            initial={
+                "carreer": self.computacion.name,
+                "specialization": self.ati.name,
+            }
+        )
+        # values of the fields should be those specified in the initial dict
+        self.assertEqual(form["carreer"].value(), self.computacion.name)
+        self.assertEqual(form["specialization"].value(), self.ati.name)
+
+        pass
+    # ./manage.py test --keepdb django_src.apps.register.tests.CompleteStudentProfileViewTest.test_get
+    def test_get(self):
+        """
+        Test the first visit to the page
+        """
+        request = RequestFactory().get(
+            path=self.url,
+            data={
+                "carreer": self.computacion,
+            },
+        )
+
+        # Cast is used for type hints
+        # https://stackoverflow.com/questions/71845596/python-typing-narrowing-type-from-function-that-returns-a-union
+        response  = cast(TemplateResponse,profile_view.complete_profile_view(request))
+
+        # Test that it has the basic urls for the stepper component
+        assert response.context_data, "Context data is undefined for the response" # this assert avoids lsp errors
+
+        for key in step_urls.keys():
+            self.assertIsNotNone(response.context_data["step_urls"][key])
+
+
+    # ./manage.py test --keepdb django_src.apps.register.tests.CompleteStudentProfileViewTest.test_create_student
+    def test_create_student(self):
+        """
+        Test the creation of a student with valid data and all fields filled
+        """
+
+        # Valid case for user and student form
+        request = RequestFactory().post(
+            path=self.url,
+            data={
+                **self.base_data,
+                "password1": "dev_123456",
+                "password2": "dev_123456",
+                "carreer": self.computacion.name,
+                "interests": self.computacion.interest_themes.values_list("name",flat=True)
+            }
+        )
+
+        # mock htmx
+        request.htmx = True
+
+        # --- Test the context --- #
+        context = profile_view.get_context(request, action=self.base_data["action"])
+        assert context, "context is None"
+
+        user_form_valid = cast(UserCreationForm, context["user_form"])
+        student_form_valid = cast(StudentForm,context["student_form"])
+
+        self.assertTrue(user_form_valid.is_valid(), msg=dict(user_form_valid.errors))
+        self.assertTrue(student_form_valid.is_valid(), msg=dict(student_form_valid.errors))
+
+        response = cast(HttpResponseClientRedirect,profile_view.complete_profile_view(request))
+
+        self.assertEqual(response.status_code, 200)
+
+        # This will probably change to be a redirect request
+        self.assertEqual(response.url, "/register/success")
+
+        # Test that the voucher was saved
+        student = Student.objects.get(user__email=user_form_valid.cleaned_data['email'])
+
+        self.assertEqual(student.user.username, student.user.email)
+
+        voucher_path = Path(student.voucher.path)
+        self.assertTrue(voucher_path.exists())
+
+        # Cleanup action remove the voucher
+        student.voucher.delete()
+
+        # Make sure the voucher was delete
+        assert voucher_path.exists() == False, "Voucher was not deleted"
+
+        # Test that the profile pic was saved
+        profile_pic_path = Path(student.user.profile_pic.path)
+        self.assertTrue(profile_pic_path.exists())
+
+        # Cleanup action remove the profile picture file
+        student.user.profile_pic.delete()
+
+        # Make sure the profile picture was delete
+        assert profile_pic_path.exists() == False, "Voucher was not deleted"
+
+
+    # ./manage.py test --keepdb django_src.apps.register.tests.CompleteStudentProfileViewTest.test_password_do_not_match
+    def test_password_do_not_match(self):
+        """
+        The user form is invalid
+        """
+
+        # Passwords do not match
+        request = RequestFactory().post(
+            path=self.url,
+            data={
+                **self.base_data,
+                "password1": "@ds*1234567",
+                "password2": "@ds*12345678",
+                "specialization": self.ati.name,
+                "carreer": self.computacion.name,
+            }
+        )
+
+        # mock htmx
+        request.htmx = True
+
+        context = profile_view.get_context(request, action=self.base_data["action"])
+
+        # Make sure that the contex is not null
+        assert context, "The context is None"
+
+        # Get forms
+        user_form = cast(UserCreationForm, context["user_form"])
+        student_form = cast(StudentForm,context["student_form"])
+
+        # Check forms validity
+        self.assertTrue(student_form.is_valid(), msg=student_form.errors)
+        self.assertFalse(user_form.is_valid(), msg=user_form.errors)
+
+        # Check that the password error is in the password2 field
+        self.assertIn("password2", user_form.errors)
+
+        response = cast(HttpResponse,profile_view.complete_profile_view(request))
+
+        from html.parser import HTMLParser
+
+        res_html = response.content.decode("utf-8")
+
+    # ./manage.py test --keepdb django_src.apps.register.tests.CompleteStudentProfileViewTest.test_specialization_is_invalid
+    def test_specialization_is_invalid(self):
+        """
+        Test an invalid case: the specialization is not in the carreer
+        """
+
+        request = RequestFactory().post(
+            path=self.url,
+            data={
+                **self.base_data,
+                # Passwords do match
+                "password1": "dev_123456",
+                "password2": "dev_123456",
+                # Elementos specialization does not belongs to computer science carreer
+                "specialization": self.elementos.name,
+                "carreer": self.computacion.name,
+            }
+        )
+
+        context = profile_view.get_context(request, action=self.base_data["action"])
+
+        user_form = cast(UserCreationForm, context["user_form"])
+        student_form = cast(StudentForm,context["student_form"])
+
+        # Check forms validity
+        self.assertTrue(user_form.is_valid(), msg=user_form.errors)
+        self.assertFalse(student_form.is_valid(), msg=student_form.errors)
+
+        self.assertIn("specialization", student_form.errors)
+
+    # ./manage.py test --keepdb django_src.apps.register.tests.CompleteStudentProfileViewTest.test_specialization_interest_validation
+    def test_specialization_interest_validation(self):
+        """
+        Test that student can't have specialization an interest themes at the same time
+        """
+
+        # Valid case for user and student form
+        request = RequestFactory().post(
+            path=self.url,
+            data={
+                **self.base_data,
+                "password1": "dev_123456",
+                "password2": "dev_123456",
+                "specialization": self.ati.name,
+                "carreer": self.computacion.name,
+                "interests": self.matematicas.interest_themes.values_list("name",flat=True)
+            }
+        )
+
+        # mock htmx
+        request.htmx = True
+
+        # --- Test the context --- #
+        context = profile_view.get_context(request, action=self.base_data["action"])
+        assert context, "context is None"
+
+        user_form = cast(UserCreationForm, context["user_form"])
+        student_form = cast(StudentForm,context["student_form"])
+
+        # Check forms validity
+        self.assertTrue(user_form.is_valid(), msg=user_form.errors)
+        self.assertFalse(student_form.is_valid(), msg=student_form.errors)
+
+        self.assertIn("interests", student_form.errors)
+
+    # ./manage.py test --keepdb django_src.apps.register.tests.CompleteStudentProfileViewTest.test_no_specialization_and_no_interest
+    def test_no_specialization_and_no_interest(self):
+
+        # Valid case for user and student form
+        request = RequestFactory().post(
+            path=self.url,
+            data={
+                **self.base_data,
+                "password1": "dev_123456",
+                "password2": "dev_123456",
+                "carreer": self.computacion.name,
+            }
+        )
+
+        # mock htmx
+        request.htmx = True
+
+        # --- Test the context --- #
+        context = profile_view.get_context(request, action=self.base_data["action"])
+        assert context, "context is None"
+
+        user_form = cast(UserCreationForm, context["user_form"])
+        student_form = cast(StudentForm,context["student_form"])
+
+        # Check forms validity
+        self.assertTrue(user_form.is_valid(), msg=user_form.errors)
+        self.assertFalse(student_form.is_valid(), msg=student_form.errors)
+
+        # Non field errors should appear
+        self.assertIn("__all__", student_form.errors)
+
+    # ./manage.py test --keepdb django_src.apps.register.tests.CompleteStudentProfileViewTest.test_interest_theme_invalid
+    def test_interest_theme_invalid(self):
+        """
+        Test that interest_themes are invalid, because it belongs to another carreer
+        """
+
+        request = RequestFactory().post(
+            path=self.url,
+            data={
+                **self.base_data,
+                # Passwords do match
+                "password1": "dev_123456",
+                "password2": "dev_123456",
+                "carreer": self.computacion.name,
+                "interests": self.matematicas.interest_themes.values_list("name",flat=True)
+            }
+        )
+
+        context = profile_view.get_context(request, action=self.base_data["action"])
+
+        user_form = cast(UserCreationForm, context["user_form"])
+        student_form = cast(StudentForm,context["student_form"])
+
+
+        # Check forms validity
+        self.assertTrue(user_form.is_valid(), msg=user_form.errors)
+        self.assertFalse(student_form.is_valid(), msg=student_form.errors)
+
+        self.assertIn("interests", student_form.errors)
