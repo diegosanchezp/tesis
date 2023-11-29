@@ -14,6 +14,7 @@ from django.urls import reverse_lazy
 
 from .models import Faculty, Carreer
 
+from render_block import render_block_to_string
 # Create your views here.
 class MainView(TemplateView):
     template_name = "register/main.html"
