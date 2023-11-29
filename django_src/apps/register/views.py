@@ -8,14 +8,11 @@ from django.views.generic import ListView, CreateView
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.template.response import TemplateResponse
-from django.contrib.auth.forms import UserCreationForm
 
 from django.http import HttpResponse, QueryDict
 from django.urls import reverse_lazy
 
 from .models import Faculty, Carreer
-from .forms import StudentForm, UserCreationForm
-from render_block import render_block_to_string
 
 # Create your views here.
 class MainView(TemplateView):
@@ -218,3 +215,4 @@ class SelecThemeView(SingleObjectMixin, ListView):
 
 def register_sucess_view(request):
     return TemplateResponse(request, 'register/success.html', {})
+

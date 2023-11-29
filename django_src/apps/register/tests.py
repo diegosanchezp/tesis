@@ -1,26 +1,34 @@
-from datetime import date
+from datetime import date, timedelta
+import json
 from typing import cast
 from pathlib import Path
+
 from django.http.response import HttpResponse
 from django.conf import settings
 
 from django.template.response import TemplateResponse
+from django import forms
 
 from django.urls.base import reverse_lazy
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+import django.db
+
 from django_src.apps.register.models import (
-    Student, StudentInterest,
+    Student,
     Mentor, MentorExperience,
-    Faculty, Carreer, CarrerSpecialization,
+    Faculty, Carreer,
     InterestTheme,
 )
 from django_src.apps.register.forms import (
     StudentForm,
     UserCreationForm,
+    get_MentorExperienceFormSet,
 )
 from .upload_data import create_carreers
 from .views import SelectCarreraView, SelectCarrerSpecialization, SelecThemeView, step_urls
+from .add_mentor_exp_view import add_mentor_exp_view, get_POST_context_data, get_GET_context_data, actions as exp_actions
+from .forms import MentorExperienceForm
 import django_src.apps.register.complete_profile_view as profile_view
 from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
@@ -28,7 +36,8 @@ from django.contrib.auth import get_user_model
 from django.http.response import HttpResponseNotAllowed
 from django.urls import reverse
 from django_htmx.http import HttpResponseClientRedirect
-# ./manage.py test django_src.apps.register.tests.ModelTests.test_student_model
+
+# ./manage.py  test --keepdb django_src.apps.register.tests.ModelTests
 class ModelTests(TestCase):
 
     def setUp(self):
@@ -114,7 +123,39 @@ class ModelTests(TestCase):
         )
         self.assertEqual(mentor.experiences.count(), 2)
 
-        breakpoint()
+
+    # ./manage.py test --keepdb django_src.apps.register.tests.ModelTests.test_exp_uniqueness
+    def test_exp_uniqueness(self):
+
+        mentor = Mentor.objects.create(
+            user=self.mentor_user,
+            carreer=self.computacion,
+        )
+
+        exp1 = MentorExperience(
+            mentor=mentor,
+            name="Full stack developer",
+            company="Google",
+            init_year=date(2010,1,1),
+            end_year=date(2011,1,1),
+            current=False,
+            description="Full Stack Dev @ Google",
+        )
+
+        exp1.save()
+
+        exp2 = MentorExperience(
+            mentor=mentor,
+            name="Full stack developer",
+            company="Google",
+            init_year=date(2010,1,1),
+            end_year=date(2011,1,1),
+            current=False,
+            description="Full Stack Dev @ Google",
+        )
+
+        with self.assertRaises(django.db.IntegrityError):
+            exp2.save()
 
     def test_bulk(self):
 
@@ -128,14 +169,13 @@ class ModelTests(TestCase):
         self.computacion.interest_themes.add(*interests)
         self.assertTrue(self.computacion.interest_themes.count(), 2)
 
-        breakpoint()
 
     def test_upload_datascript(self):
         create_carreers()
 
 class ViewTests(TestCase):
     """
-    Tests for select SelectCarreraView and SelectCarrerSpecialization 
+    Tests for select SelectCarreraView and SelectCarrerSpecialization
     """
 
     def setUp(self):
@@ -720,3 +760,464 @@ class CompleteStudentProfileViewTest(TestCase):
         self.assertFalse(student_form.is_valid(), msg=student_form.errors)
 
         self.assertIn("interests", student_form.errors)
+
+class TestCaseWithData(TestCase):
+    """
+    Injects models to the test case
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+        cls.faculty = Faculty.objects.create(
+            name="Ciencias",
+        )
+
+        cls.computacion: Carreer = cls.faculty.carreers.create(name="Computación")
+        cls.matematicas = cls.faculty.carreers.create(name="Matemáticas")
+
+        cls.computacion_interests = InterestTheme.objects.bulk_create(
+            [
+                InterestTheme(name="Matemáticas"),
+                InterestTheme(name="Programación"),
+            ]
+        )
+
+        cls.mates_interest_set = InterestTheme.objects.bulk_create(
+            [
+                InterestTheme(name="Cálculo"),
+                InterestTheme(name="Límites"),
+            ]
+        )
+
+        cls.ati = cls.computacion.carrerspecialization_set.create(
+            name="Aplicaciones Tecnología Internet",
+        )
+
+        cls.elementos = cls.matematicas.carrerspecialization_set.create(
+            name="Elementos",
+        )
+
+        cls.computacion.interest_themes.add(*cls.computacion_interests)
+        cls.matematicas.interest_themes.add(*cls.mates_interest_set)
+
+class TestCreateMentorExpView(TestCaseWithData):
+
+    def setUp(self):
+        super().setUp()
+        self.today = date.today()
+        self.management_form_data = {
+            # Incrementing the TOTAL_FORMS adds a new empty form to the formset
+            "form-TOTAL_FORMS": 1,
+            "form-INITIAL_FORMS": 0,
+            "form-MIN_NUM_FORMS": 0,
+            "form-MAX_NUM_FORMS": 1000,
+        }
+        self.form_data={
+            "form-0-name": "Full stack developer",
+            "form-0-company": "Google",
+            "form-0-init_year": date(2010,1,1),
+            "form-0-end_year": date(2011,1,1),
+            "form-0-description": "Full Stack Dev @ Google",
+        }
+
+        self.url = reverse("register:add_exp")
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+    # ./manage.py test --keepdb django_src.apps.register.tests.TestCreateMentorExpView.test_fields
+    def test_fields(self):
+        field = forms.ModelChoiceField(queryset=Carreer.objects.all(), to_field_name="name")
+
+        # This career do exits
+        try:
+            field.clean(self.computacion.name)
+        except:
+            self.fail("Raised exception for an existent carreer")
+
+        with self.assertRaises(forms.ValidationError):
+            field.clean("djwakdw")
+
+    # ./manage.py test --keepdb django_src.apps.register.tests.TestCreateMentorExpView.test_formset
+    def test_formset(self):
+
+
+        MentorExperienceFormSet = get_MentorExperienceFormSet(extra=2, max_num=2)
+
+        form_prefix = MentorExperienceFormSet().prefix
+        assert form_prefix, "form prefix is none"
+
+        initial = [
+            {
+                "name": "Full stack developer",
+                "company": "Google",
+                "init_year": date(2010,1,1),
+                "end_year": date(2015,1,1),
+                "id_current": False,
+                "description": "Full Stack Dev @ Google",
+            },
+            {
+                "name": "Javascript Soy Dev",
+                "company": "Apple",
+                "init_year": date(2010,1,1),
+                "end_year": date(2015,1,1),
+                "id_current": False,
+                "description": "Drinking soy lattes @ starbucks and coding my Nodejs app",
+            },
+        ]
+        initial2 = [{'company': 'Google',
+                     'current': True,
+                     'description': 'jkjljljlk',
+                     'end_year': None,
+                     'init_year': '2023-10-30',
+                     'name': 'Full stack dev'},
+                    {'company': 'Apple',
+                     'current': True,
+                     'description': 'jkjllkjl',
+                     'end_year': None,
+                     'init_year': '2023-10-29',
+                     'name': 'Javascript soy dev'}]
+
+
+        empty_formset = MentorExperienceFormSet()
+
+        formset = MentorExperienceFormSet(
+            data={
+                "form-TOTAL_FORMS": 2,
+                "form-INITIAL_FORMS": 0,
+                "form-MIN_NUM_FORMS": 0,
+                "form-MAX_NUM_FORMS": 1000,
+                "form-0-name": "Full stack developer",
+                "form-0-company": "Google",
+                "form-0-init_year": date(2010,1,1),
+                "form-0-end_year": date(2011,1,1),
+                "form-0-description": "Full Stack Dev @ Google",
+                "form-1-name": "Javascript Soy Dev",
+                "form-1-company": "",
+                "form-1-init_year": date(2015,4,1),
+                "form-1-current": True,
+                "form-1-description": "Full Stack Dev @ Google",
+            }
+        )
+
+        # Formset two works for adding an extra form, but validates to invalid
+        formset2 = MentorExperienceFormSet(initial=initial2)
+        self.assertEqual(formset.total_form_count(), len(initial2))
+
+        # print(formset2)
+
+        invalid_init_year = {
+            "form-TOTAL_FORMS": 2,
+            "form-INITIAL_FORMS": 0,
+            "form-MIN_NUM_FORMS": 0,
+            "form-MAX_NUM_FORMS": 1000,
+            **self.form_data,
+        }
+        invalid_init_year["form-0-init_year"] = self.today + timedelta(days=2)
+
+        invalid_init_year_formset = MentorExperienceFormSet(data=invalid_init_year)
+        self.assertFalse(invalid_init_year_formset.is_valid())
+        self.assertIn("init_year", invalid_init_year_formset.errors[0])
+
+        # Test duplicated experiences names
+        # This is how the timline in short form looks like
+
+        # 2015-2016: Full Stack Dev @ Google
+        # 2016-2017: Frontend Stack Dev @ Google
+        # 2017-*: Full Stack @ Google, current
+
+        one_year_delta = timedelta(days=365)
+
+        timeline_data = {
+            f"{form_prefix}-TOTAL_FORMS": 3,
+            f"{form_prefix}-INITIAL_FORMS": 0,
+            f"{form_prefix}-MIN_NUM_FORMS": 0,
+            f"{form_prefix}-MAX_NUM_FORMS": 1000,
+
+            f"{form_prefix}-0-name": "Full stack developer",
+            f"{form_prefix}-0-company": "Google",
+            f"{form_prefix}-0-init_year": date(2010,1,1),
+            f"{form_prefix}-0-end_year": date(2011,1,1),
+            f"{form_prefix}-0-description": "Full Stack Dev @ Google",
+
+        }
+
+        timeline_data["form-1-name"] = "Frontend"
+        timeline_data["form-1-company"] = self.form_data["form-0-company"]
+        timeline_data["form-1-init_year"] = self.form_data["form-0-init_year"] + one_year_delta
+        timeline_data["form-1-end_year"] = self.form_data["form-0-end_year"] + one_year_delta
+        timeline_data["form-1-current"] = False
+        timeline_data["form-1-description"] = "Frontend Dev @ Google"
+
+        timeline_data["form-2-name"] = "Full stack developer"
+        timeline_data["form-2-company"] = self.form_data["form-0-company"]
+        timeline_data["form-2-init_year"] = timeline_data["form-1-end_year"]
+        timeline_data["form-2-current"] = True
+        timeline_data["form-2-description"] = "Full Stack Dev @ Google"
+
+        timeline_form = MentorExperienceFormSet(
+            data=timeline_data,
+        )
+
+        self.assertTrue(timeline_form.is_valid(), msg=timeline_form.errors)
+
+
+        # Test more than three current experiences
+
+        invalid_timeline = timeline_data.copy()
+        invalid_timeline["form-TOTAL_FORMS"] = 4
+
+        # Make sure I have 4 current experiences
+        invalid_timeline["form-0-current"] = True
+        invalid_timeline["form-1-current"] = True
+        invalid_timeline["form-2-current"] = True
+
+        invalid_timeline["form-3-name"] = "Designer"
+        invalid_timeline["form-3-company"] = self.form_data["form-0-company"]
+        invalid_timeline["form-3-init_year"] = timeline_data["form-1-end_year"]
+        invalid_timeline["form-3-current"] = True
+        invalid_timeline["form-3-description"] = "Designer @ Google"
+
+        invalid_timeline_form = MentorExperienceFormSet(data=invalid_timeline)
+        self.assertTrue(invalid_timeline_form.total_form_count(), invalid_timeline["form-TOTAL_FORMS"])
+        self.assertFalse(invalid_timeline_form.is_valid())
+        self.assertEqual(len(invalid_timeline_form.non_form_errors()), 1)
+
+        with self.subTest(msg="Invalidates empty fields"):
+
+
+            data = {
+                f"{form_prefix}-TOTAL_FORMS": 1,
+                f"{form_prefix}-INITIAL_FORMS": 0,
+                f"{form_prefix}-MIN_NUM_FORMS": 0,
+                f"{form_prefix}-MAX_NUM_FORMS": 1000,
+
+                f"{form_prefix}-0-name": "a",
+                f"{form_prefix}-0-company": "",
+                f"{form_prefix}-0-init_year": "",
+                f"{form_prefix}-0-end_year": "",
+                f"{form_prefix}-0-description": "",
+            }
+
+            mentor_form = MentorExperienceForm(data=data, prefix=f"{form_prefix}-0")
+            breakpoint()
+            fields = ["name", "company", "description"]
+            for field_name in fields:
+                # Check min_length
+                self.assertIsNotNone(mentor_form.fields[field_name].min_length, msg=f"Field {field_name} has no min_length")
+                # Check required
+                self.assertTrue(mentor_form.fields[field_name].required)
+
+            print(mentor_form.errors)
+
+            self.assertFalse(mentor_form.is_valid(), msg="")
+
+            # Now do the same tests but with a formset
+            mentor_formset = MentorExperienceFormSet(data=data)
+            for field_name in fields:
+                # Check min_length
+                self.assertIsNotNone(mentor_formset.forms[0].fields[field_name].min_length, msg=f"Field {field_name} has no min_length")
+                # Check required
+                self.assertTrue(mentor_formset.forms[0].fields[field_name].required)
+
+            self.assertFalse(mentor_formset.is_valid(), msg="formset is valid, should be invalid")
+
+    # ./manage.py test --keepdb django_src.apps.register.tests.TestCreateMentorExpView.test_view_valid
+    def test_view_valid(self):
+        """
+        User is ready to advance to the next view of the multi step form
+        """
+
+        request = RequestFactory().post(
+            path=self.url,
+            data={
+                **self.management_form_data,
+                **self.form_data,
+                "action": exp_actions["validate"],
+            }
+        )
+
+        pass
+
+        # mock htmx
+        request.htmx = True
+
+        context = get_POST_context_data(request)
+        response = cast(HttpResponse, add_mentor_exp_view(request))
+
+        self.assertEqual(context["action"],exp_actions["validate"])
+
+        formset = context["formset"]
+
+        # formset should be valid
+        self.assertTrue(formset.is_valid(), msg=formset.errors)
+
+        htmx_evt_data =  json.loads(response.headers["HX-Trigger"])
+        # Initial data should of have been sent to the frontend via an event
+        self.assertEqual(htmx_evt_data["formset_validated"]["action"], context["action"], msg=htmx_evt_data.keys())
+        self.assertEqual(htmx_evt_data["formset_validated"]["next_url"], reverse_lazy("register:complete_profile"), msg=htmx_evt_data.keys())
+        self.assertEqual(htmx_evt_data["formset_validated"]["form_valid"], formset.is_valid(), msg=htmx_evt_data.keys())
+
+
+    # ./manage.py test --keepdb django_src.apps.register.tests.TestCreateMentorExpView.test_add_form
+    def test_add_form(self):
+        """
+        Everything in the formset is valid
+        """
+
+        request = RequestFactory().post(
+            path=self.url,
+            data={
+                **self.management_form_data,
+                **self.form_data,
+                "action": exp_actions["validate_add_form"],
+            }
+        )
+        # mock htmx
+        request.htmx = True
+
+        post_context = get_POST_context_data(request)
+        post_formset = post_context["formset"]
+
+        # formset should be valid
+        self.assertTrue(post_formset.is_valid(), msg=post_formset.errors)
+
+        # TOTAL_FORMS count should have been incremented by one
+        self.assertEqual(post_formset.total_form_count(), self.management_form_data["form-TOTAL_FORMS"] + 1)
+
+        response = cast(HttpResponse, add_mentor_exp_view(request))
+
+        htmx_evt_data =  json.loads(response.headers["HX-Trigger"])
+
+        # Initial data should of have been sent to the frontend via an event
+        self.assertIn("cleaned_data", htmx_evt_data["formset_validated"], msg=htmx_evt_data.keys())
+
+        # cleaned data has the same number of forms of the formset
+        self.assertEqual(len(htmx_evt_data["formset_validated"]["cleaned_data"]), self.management_form_data["form-TOTAL_FORMS"])
+
+        # An item of cleaned_data should not have an id field
+        self.assertNotIn("id", htmx_evt_data["formset_validated"]["cleaned_data"][0], msg=htmx_evt_data["formset_validated"]["cleaned_data"])
+
+        # django-render-block should have rendered the new formset
+        self.assertIn("<form", response.content.decode("utf-8"))
+
+    # ./manage.py test --keepdb django_src.apps.register.tests.TestCreateMentorExpView.test_get_localstorage
+    def test_get_localstorage(self):
+        """
+        Set initial formset data with localstorage data
+        """
+
+        initial = [
+            {
+                'company': 'Google',
+                'current': True,
+                'description': 'jkjljljlk',
+                'end_year': None,
+                'init_year': '2023-10-30',
+                'name': 'Full stack dev'
+            },
+            {
+                'company': 'Apple',
+                'current': True,
+                'description': 'jkjllkjl',
+                'end_year': None,
+                'init_year': '2023-10-29',
+                'name': 'Javascript soy dev'
+            },
+            {
+                'company': 'STFU',
+                'current': True,
+                'description': 'aaaaaa',
+                'end_year': None,
+                'init_year': '2023-10-29',
+                'name': 'Javascript soy boy'
+            }
+        ]
+
+
+
+        request = RequestFactory().get(
+            path=self.url,
+            data={
+                "action": "get_form_localstorage",
+                "mentor_exp": json.dumps(initial),
+            }
+        )
+        raw_exp = request.GET.get("mentor_exp")
+
+        parsed_initial = json.loads(raw_exp)
+
+        # Parsed has the same
+        self.assertEqual(len(parsed_initial), len(initial))
+
+        # Parsed items are equal to the originals
+        for idx, exp in enumerate(parsed_initial):
+            self.assertEqual(exp, initial[idx])
+
+        request.htmx = True
+
+        context = get_GET_context_data(request)
+        formset = context["formset"]
+        # The numbers of forms in the formset be the same as the initial
+        self.assertEqual(len(formset.forms), len(initial))
+
+    # ./manage.py test --keepdb django_src.apps.register.tests.TestCreateMentorExpView.test_can_delete
+    def test_can_delete(self):
+
+        request = RequestFactory().post(
+            path=self.url,
+            data={
+                **self.management_form_data,
+                **self.form_data,
+                "action": "add_form",
+                "form-0-DELETE": True,
+            }
+        )
+
+        # mock htmx
+        request.htmx = True
+
+        post_context = get_POST_context_data(request)
+        post_formset = post_context["formset"]
+
+        # formset should be valid
+        self.assertTrue(post_formset.is_valid(), msg=post_formset.errors)
+        print(post_formset.as_div())
+
+    # ./manage.py test --keepdb django_src.apps.register.tests.TestCreateMentorExpView.test_view_invalid
+    def test_view_invalid(self):
+        """
+        Invalid formset case:
+        fields are missing
+        """
+
+        request = RequestFactory().post(
+            path=self.url,
+            data={
+                **self.management_form_data,
+                "form-0-name": "",
+                "form-0-company": "Google",
+                "form-0-init_year": "",
+                "form-0-end_year": "",
+                "id_form-0-current": False,
+                "form-0-description": "",
+            }
+        )
+
+        # mock htmx
+        request.htmx = True
+
+        post_context = get_POST_context_data(request)
+        post_formset = post_context["formset"]
+
+        # formset should be invalid
+        self.assertFalse(post_formset.is_valid())
+        print(post_formset.errors)
+
+        response = cast(HttpResponse, add_mentor_exp_view(request))
+
+        # django-render-block should have rendered the current formset
+        self.assertIn("<form", response.content.decode("utf-8"))
