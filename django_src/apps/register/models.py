@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-
+from django.core.validators import MinLengthValidator
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
@@ -126,10 +126,12 @@ class MentorExperience(models.Model):
     name=models.TextField(
         verbose_name=_("Nombre del cargo"),
         help_text=_("Ej: Frontend developer"),
+        validators=[MinLengthValidator(4)],
     )
 
     company=models.TextField(
         verbose_name=_("Compañía"),
+        validators=[MinLengthValidator(1)],
     )
 
     init_year=models.DateField(
@@ -148,7 +150,12 @@ class MentorExperience(models.Model):
 
     description = models.TextField(
         verbose_name=_("Descripción del cargo"),
+        validators=[MinLengthValidator(4)],
     )
+    class Meta:
+        verbose_name=_("Experiencia profesional")
+        verbose_name_plural=_("Experiencias profesionales")
+        unique_together = ["mentor", "name", "company", "init_year", "end_year"]
 
     def __str__(self) -> str:
         return f"{self.name}, {self.company}"

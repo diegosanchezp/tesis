@@ -1,8 +1,11 @@
+from datetime import date
 from django import forms
+
 from django.contrib.auth.forms import BaseUserCreationForm
 from django.contrib.auth import get_user_model
+from django.core.validators import MinLengthValidator
 from django_src.apps.register.models import (
-    Student, Carreer, InterestTheme, CarrerSpecialization
+    Student, MentorExperience
 )
 from django.core.exceptions import ValidationError
 
@@ -135,3 +138,90 @@ class UserCreationForm(BaseUserCreationForm):
         labels = {
             "profile_pic": "Añadir foto de perfil",
         }
+
+
+class MentorExperienceForm(forms.ModelForm):
+    today: date
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.today = date.today()
+
+        self.fields["name"].min_length = 4
+        self.fields["company"].min_length = 1
+        self.fields["description"].min_length = 4
+
+    class Meta:
+        model = MentorExperience
+        widgets = {
+            "name": forms.TextInput(attrs={"required": True, "minlength": 4}),
+            "company": forms.TextInput(attrs={"required": True, "minlength": 1}),
+            "description": forms.Textarea(attrs={"rows": 3, "required": True, "minlength": 4}),
+            "init_year": forms.DateInput(attrs={"type": "date", "required": True}),
+            "end_year": forms.DateInput(attrs={"type": "date"}),
+        }
+        help_texts = {
+            "name": _("Ej: Frontend developer"),
+        }
+
+        exclude=["mentor", "id", "pk"]
+
+    def clean(self):
+
+        cleaned_data = super().clean()
+        if not cleaned_data:
+            return cleaned_data
+
+        current = cleaned_data.get("current")
+        end_year = cleaned_data.get("end_year")
+        init_year = cleaned_data.get("init_year")
+
+        if not current and not end_year:
+                self.add_error(field="current", error=_("Marca si este cargo es el actual, o añade el año de finalización"))
+
+        if init_year:
+            if init_year > self.today:
+                self.add_error(field="init_year", error=_("El año de inicio no puede ser mayor al año actual"))
+
+        # End year can be
+        return cleaned_data
+
+class MentorExperienceBaseFormSet(forms.BaseModelFormSet):
+    def clean(self):
+        """
+        Check that no two experiences have the same name.
+        """
+        super().clean()
+
+        if any(self.errors):
+            # Don't bother validating the formset unless each form is valid on its own
+            return
+
+        # experiences = set()
+        actual_exp_count = 0
+
+        for form in self.forms:
+            if self.can_delete and self._should_delete_form(form):
+                continue
+            # experience = form.cleaned_data["name"]
+
+            current = form.cleaned_data.get("current")
+            if current:
+                actual_exp_count += 1
+            if actual_exp_count > 3:
+                raise ValidationError(_("No se puede tener más de tres cargos actuales"))
+
+            # if experience in experiences:
+            #     raise ValidationError(_("No se puede tener dos experiencias con el mismo nombre"))
+            # experiences.add(experience)
+
+def get_MentorExperienceFormSet(extra: int = 1, max_num: int | None = None):
+
+    MentorExperienceFormSet = forms.modelformset_factory(
+        MentorExperience,
+        formset=MentorExperienceBaseFormSet,
+        form=MentorExperienceForm,
+        extra=extra,
+        max_num=max_num,
+    )
+    return MentorExperienceFormSet

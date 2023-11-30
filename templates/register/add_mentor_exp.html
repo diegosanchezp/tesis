@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load django_vite slippers %}
+
+{% block title %}
+Añade tu experiencia profesional
+{% endblock title %}
+
+{% block body %}
+<main
+    class="px-20 flex flex-col justify-center items-center"
+    x-data="form_component('{{ formset.prefix }}')"
+    >
+
+    <div class="flex justify-center mt-10 mb-14">
+        {% stepper number=1 text="Seleccionar perfil" left_line="false"  url=step_urls.select_perfil %}
+        {% stepper number=2 text="Selecciona tu carrera" url=step_urls.select_carrera %}
+        {% stepper number=3 text="Añade tu experiencia profesional" url=step_urls.specialization right_line="false" %}
+    </div>
+
+    <section class="w-full grid grid-cols-[1fr_60%_1fr]">
+    <div></div>
+
+    {% block formset %}
+        <form
+            id="formset"
+            method="post"
+            hx-post=""
+            hx-target="#formset"
+            hx-swap="outerHTML"
+            class="border border-black rounded"
+            >
+            {{ formset.management_form }}
+            {% for form in formset %}
+
+                {# The count field should appear in the first row #}
+                {% if formset.total_form_count > 1 %}
+                    {% if forloop.counter > 1 %}
+                        <div class="col-span-full h-[1px] w-full bg-black"></div>
+                    {% endif %}
+                {% endif %}
+                <div id="{{form.prefix}}" class="grid grid-cols-3 gap-x-2 gap-y-3 p-6">
+
+                    <div class="flex justify-between col-span-full">
+                        <p>#{{ forloop.counter }}</p>
+                        {% if forloop.counter > 1 %}
+                        <button type="button" @click="remove_subform('{{form.prefix}}', '{{forloop.counter}}')" >Borrar este cargo</button>
+                        {% endif %}
+                        {% comment %}
+                            {% if form.is_valid %}
+                                <div class="flex items-baseline gap-x-2">
+                                    {{ form.DELETE }}
+                                    <label for="{{ form.DELETE.id_for_label }}">¿ Borrar este cargo ?</label>
+                                </div>
+                            {% endif %}
+                        {% endcomment %}
+                    </div>
+                    {% for field in form.visible_fields %}
+                        <div class="
+                            {% spaceless %}
+                                {% if "current" in field.name %}
+                                    flex
+                                    justify-start
+                                    gap-x-2
+                                    col-span-3
+                                {% endif %}
+
+                                {% if "current" not in field.name %}
+                                    flex flex-col
+                                {% endif %}
+
+                                {% if "name" in field.name or "company" in field.name %}
+                                    col-span-2
+                                {% endif %}
+
+                                {% if "init_year" in field.name %}
+                                    col-start-1
+                                {% endif %}
+
+                                {% if "init_year" in field.name or "end_year" in field.name %}
+                                    col-span-1
+                                {% endif %}
+
+                                {% if "description" in field.name %}
+                                    {# Description is of type text-area row size is controlled by  #}
+                                    {# the form class located at django_src/apps/register/forms.py.MentorExperienceForm #}
+                                    col-span-3
+                                {% endif %}
+                            {% endspaceless %}
+                        ">
+
+                            {% if "current" not in field.name and "Delete" not in field.label %}
+                                <label for="{{ field.id_for_label }}">{{field.label}}</label>
+                                {# Render the input element #}
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <p class="mt-2">{{ field.help_text }}</p>
+                                {% endif %}
+                            {% endif %}
+
+                            {% if "current" in field.name %}
+                                {{ field }}
+                                <label for="{{ field.id_for_label }}">{{field.label}}</label>
+                            {% endif %}
+
+                            {# Render the error list of the filed #}
+                            <ul class="text-red-600">
+                                {% for error in field.errors %}
+                                    <li>{{ error|escape }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <div class="col-span-full justify-self-center flex justify-center my-2">
+                {% #button icon_left="bi bi-plus" type="submit" name="action" value="validate_add_form" %}
+                    Añadir otro
+                {% /button %}
+            </div>
+        </form>
+    {% endblock formset %}
+
+    <div class="flex justify-end self-end w-full">
+        <div class="flex justify-items-center self-center bg-black border-l border-solid border-l-black rounded-tl-lg">
+            <div class=" my-4 mx-6 ">
+
+                {% #button type="submit" formmethod="post" name="action" value="validate" icon_right="bi bi-arrow-right" form="formset" @click="validate_form" %}
+                    Siguiente
+                {% /button %}
+            </div>
+        </div>
+    </div>
+    </section>
+
+</main>
+{% endblock body %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/add_mentor_exp.ts' %}
+{% endblock extrascripts %}
+
