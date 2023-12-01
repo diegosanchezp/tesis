@@ -843,6 +843,8 @@ class TestCreateMentorExpView(TestCaseWithData):
             "form-MAX_NUM_FORMS": 1000,
         }
         self.form_data={
+            "profile": "mentor",
+            "carreer": self.computacion.name,
             "form-0-name": "Full stack developer",
             "form-0-company": "Google",
             "form-0-init_year": date(2010,1,1),
