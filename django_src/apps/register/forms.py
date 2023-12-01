@@ -5,20 +5,43 @@ from django.contrib.auth.forms import BaseUserCreationForm
 from django.contrib.auth import get_user_model
 from django.core.validators import MinLengthValidator
 from django_src.apps.register.models import (
-    Student, MentorExperience
+    Carreer, Mentor, Student, MentorExperience
 )
 from django.core.exceptions import ValidationError
 
 from django.utils.translation import gettext_lazy as _
+
+class QueryForm(forms.Form):
+    """
+    Validates the query paramters of the view
+    """
+
+    ESTUDIANTE = "estudiante"
+    MENTOR = "mentor"
+    EMPRESA = "empresa"
+
+    profile = forms.ChoiceField(
+        choices=[
+            (ESTUDIANTE, _("Estudiante")),
+            (MENTOR, _("Mentor")),
+            (EMPRESA,_("Empresa")),
+        ],
+        widget=forms.HiddenInput(),
+        required=True,
+    )
+
+    carreer = forms.ModelChoiceField(
+        required=True,
+        queryset=Carreer.objects.all(),
+        to_field_name="name",
+    )
 
 class StudentForm(forms.ModelForm):
 
     # Add an extra field for validating the selected profile
     profile = forms.ChoiceField(
         choices=[
-            ("estudiante", _("Estudiante")),
-            ("mentor", _("Mentor")),
-            ("empresa",_("Empresa")),
+            (QueryForm.ESTUDIANTE, _("Estudiante")),
         ],
         widget=forms.HiddenInput(),
     )
@@ -225,3 +248,11 @@ def get_MentorExperienceFormSet(extra: int = 1, max_num: int | None = None):
         max_num=max_num,
     )
     return MentorExperienceFormSet
+
+class MentorForm(forms.ModelForm):
+    class Meta:
+        model = Mentor
+        fields = (
+            "carreer",
+            "voucher",
+        )

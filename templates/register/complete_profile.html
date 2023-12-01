@@ -12,7 +12,9 @@
     <div class="flex justify-center mt-10 mb-14">
         {% stepper number=1 text="Seleccionar perfil" left_line="false"  url=step_urls.select_perfil %}
         {% stepper number=2 text="Selecciona tu carrera" url=step_urls.select_carrera %}
-        {% stepper number=3 text="Selecciona tu especialización" url=step_urls.specialization %}
+        {% if profile == query_form.ESTUDIANTE %}
+            {% stepper number=3 text="Selecciona tu especialización" url=step_urls.specialization %}
+        {% endif %}
 
         {# Student doesn't have a specialization, so he must of have selected themes #}
         {% if no_spec %}
@@ -24,6 +26,17 @@
 
 
     </div>
+    {% if query_form.errors %}
+    <div>
+        <h2 class="text-lg">Uh oh, Algo malo ha pasado</h2>
+
+        <ul class="text-red-600">
+            {% for error in query_form.errors %}
+                <li>{{ error|escape }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 
     {% block form %}
         <form
@@ -72,15 +85,20 @@
                 {% endif %}
             {% endfor %}
 
+            {# Todo if form is mentor_form then render the form below #}
+
+            {# Todo if form is student_form then render the form below #}
+
+
             {# Student form fields #}
-            {% for field in student_form.visible_fields %}
+            {% for field in entity_form.visible_fields %}
                 <div class="
                     flex flex-col
-                    {% if field == student_form.voucher %}
+                    {% if field == entity_form.voucher %}
                         col-span-full justify-self-center text-center my-4
                     {% endif %}
                 ">
-                    <label for="{{ field.id_for_label }}">{{student_form.voucher.label}}</label>
+                    <label for="{{ field.id_for_label }}">{{entity_form.voucher.label}}</label>
                     {{ field }}
                     <ul class="text-red-600">
                         {% for error in field.errors %}
@@ -91,21 +109,21 @@
             {% endfor %}
 
             {# Render non_field_errors #}
-            {% if student_form.non_field_errors %}
+            {% if entity_form.non_field_errors %}
                 <ul class="text-red-600">
-                    {% for error in student_form.non_field_errors %}
+                    {% for error in entity_form.non_field_errors %}
                         <li>{{ error|escape }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}
 
             {# Render errors of hidden fields of the student form #}
-            {% for field in student_form.hidden_fields %}
-                {% if student_form.is_bound %}
+            {% for field in entity_form.hidden_fields %}
+                {% if entity_form.is_bound %}
                     {{ field }}
                 {% else %}
                     {# Use htmx to fill in the input values #}
-                    {% if field == student_form.interests %}
+                    {% if field == entity_form.interests %}
                         {# Render all of the interest themes, must be django form complient #}
                         <template x-for="interest in interests">
                             <input type="hidden" name="{{ field.name }}" x-bind:value="interest">
@@ -124,6 +142,7 @@
 
             {% endfor %}
 
+            {% if not query_form.errors %}
             <div class="col-span-full justify-self-center">
 
                 {% #button type="submit" name="action" value="create_student" %}
@@ -131,6 +150,7 @@
                 {% /button %}
 
             </div>
+            {% endif %}
         </form>
     {% endblock form %}
 </main>

@@ -28,7 +28,7 @@ from django_src.apps.register.forms import (
 from .upload_data import create_carreers
 from .views import SelectCarreraView, SelectCarrerSpecialization, SelecThemeView, step_urls
 from .add_mentor_exp_view import add_mentor_exp_view, get_POST_context_data, get_GET_context_data, actions as exp_actions
-from .forms import MentorExperienceForm
+from .forms import MentorExperienceForm, QueryForm
 import django_src.apps.register.complete_profile_view as profile_view
 from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
@@ -506,8 +506,8 @@ class CompleteStudentProfileViewTest(TestCase):
         self.assertEqual(form["specialization"].value(), self.ati.name)
 
         pass
-    # ./manage.py test --keepdb django_src.apps.register.tests.CompleteStudentProfileViewTest.test_get
-    def test_get(self):
+    # ./manage.py test --keepdb django_src.apps.register.tests.CompleteStudentProfileViewTest.test_valid_get
+    def test_valid_get(self):
         """
         Test the first visit to the page
         """
@@ -515,6 +515,7 @@ class CompleteStudentProfileViewTest(TestCase):
             path=self.url,
             data={
                 "carreer": self.computacion,
+                "profile": "estudiante",
             },
         )
 
@@ -528,6 +529,33 @@ class CompleteStudentProfileViewTest(TestCase):
         for key in step_urls.keys():
             self.assertIsNotNone(response.context_data["step_urls"][key])
 
+    # ./manage.py test --keepdb django_src.apps.register.tests.CompleteStudentProfileViewTest.test_invalid_get
+    def test_invalid_get(self):
+        """
+        """
+
+        request = RequestFactory().get(
+            path=self.url,
+            data={
+                # Set an invalid carreer
+                "carreer": "WADSADSa",
+                "profile": "",
+            },
+        )
+
+        response = cast(TemplateResponse,profile_view.complete_profile_view(request))
+
+        ctx = profile_view.get_context(request, action=self.base_data["action"])
+
+        self.assertIn("query_form", ctx)
+
+        query_form = cast(QueryForm, ctx["query_form"])
+
+        self.assertFalse(query_form.is_valid())
+        print(query_form.errors.as_data())
+        print(query_form.errors)
+        self.assertIn("carreer", query_form.errors)
+        # self.assertIn("<form", response.content.decode("utf-8"))
 
     # ./manage.py test --keepdb django_src.apps.register.tests.CompleteStudentProfileViewTest.test_create_student
     def test_create_student(self):
@@ -555,7 +583,7 @@ class CompleteStudentProfileViewTest(TestCase):
         assert context, "context is None"
 
         user_form_valid = cast(UserCreationForm, context["user_form"])
-        student_form_valid = cast(StudentForm,context["student_form"])
+        student_form_valid = cast(StudentForm,context["entity_form"])
 
         self.assertTrue(user_form_valid.is_valid(), msg=dict(user_form_valid.errors))
         self.assertTrue(student_form_valid.is_valid(), msg=dict(student_form_valid.errors))
@@ -565,7 +593,7 @@ class CompleteStudentProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # This will probably change to be a redirect request
-        self.assertEqual(response.url, "/register/success")
+        self.assertEqual(response.url, "/register/success/")
 
         # Test that the voucher was saved
         student = Student.objects.get(user__email=user_form_valid.cleaned_data['email'])
@@ -620,7 +648,7 @@ class CompleteStudentProfileViewTest(TestCase):
 
         # Get forms
         user_form = cast(UserCreationForm, context["user_form"])
-        student_form = cast(StudentForm,context["student_form"])
+        student_form = cast(StudentForm,context["entity_form"])
 
         # Check forms validity
         self.assertTrue(student_form.is_valid(), msg=student_form.errors)
@@ -657,7 +685,7 @@ class CompleteStudentProfileViewTest(TestCase):
         context = profile_view.get_context(request, action=self.base_data["action"])
 
         user_form = cast(UserCreationForm, context["user_form"])
-        student_form = cast(StudentForm,context["student_form"])
+        student_form = cast(StudentForm,context["entity_form"])
 
         # Check forms validity
         self.assertTrue(user_form.is_valid(), msg=user_form.errors)
@@ -692,7 +720,7 @@ class CompleteStudentProfileViewTest(TestCase):
         assert context, "context is None"
 
         user_form = cast(UserCreationForm, context["user_form"])
-        student_form = cast(StudentForm,context["student_form"])
+        student_form = cast(StudentForm,context["entity_form"])
 
         # Check forms validity
         self.assertTrue(user_form.is_valid(), msg=user_form.errors)
@@ -722,7 +750,7 @@ class CompleteStudentProfileViewTest(TestCase):
         assert context, "context is None"
 
         user_form = cast(UserCreationForm, context["user_form"])
-        student_form = cast(StudentForm,context["student_form"])
+        student_form = cast(StudentForm,context["entity_form"])
 
         # Check forms validity
         self.assertTrue(user_form.is_valid(), msg=user_form.errors)
@@ -752,7 +780,7 @@ class CompleteStudentProfileViewTest(TestCase):
         context = profile_view.get_context(request, action=self.base_data["action"])
 
         user_form = cast(UserCreationForm, context["user_form"])
-        student_form = cast(StudentForm,context["student_form"])
+        student_form = cast(StudentForm,context["entity_form"])
 
 
         # Check forms validity
