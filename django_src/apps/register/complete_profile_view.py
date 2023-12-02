@@ -11,21 +11,33 @@ from django_htmx.http import HttpResponseClientRedirect
 from .forms import StudentForm, UserCreationForm, MentorForm, QueryForm, get_MentorExperienceFormSet
 from .views import step_urls
 
-def get_steps_urls(carreer: str):
+def get_steps_urls(carreer: str, profile: str):
     url_kwargs = {
         "name": carreer,
     }
-    return {
-        **step_urls,
-        "specialization": reverse_lazy(
-            "register:select_specialization",
-            kwargs=url_kwargs,
-        ),
-        "select_themes": reverse_lazy(
-            "register:select_themes",
-            kwargs=url_kwargs,
-        )
-    }
+
+    if profile == QueryForm.MENTOR:
+
+        return {
+            **step_urls,
+            "add_exp": reverse_lazy("register:add_exp")
+        }
+
+    elif profile == QueryForm.ESTUDIANTE:
+
+        return {
+            **step_urls,
+            "specialization": reverse_lazy(
+                "register:select_specialization",
+                kwargs=url_kwargs,
+            ),
+            "select_themes": reverse_lazy(
+                "register:select_themes",
+                kwargs=url_kwargs,
+            )
+        }
+    else:
+        return step_urls
 
 def get_Mentor_context(request, action: Literal["initial", "create_mentor"], base_context: dict):
 
@@ -43,7 +55,8 @@ def get_Mentor_context(request, action: Literal["initial", "create_mentor"], bas
     if action == "initial":
         context = {
             **base_context,
-            "entity_form": MentorForm()
+            "entity_form": MentorForm(),
+            "formset_prefix": MentorExperienceFormSet().prefix,
         }
         return context
 
@@ -103,7 +116,7 @@ def get_context(
             "carrer": carreer,
             "profile": profile,
             "step_urls": get_steps_urls(
-                carreer
+                carreer, profile
             ),
         }
     )
@@ -151,9 +164,9 @@ def create_mentor(user, mentor_form: MentorForm, experience_form) -> Mentor:
     mentor.save()
 
     # Save and relate the experiences to the mentor
-    experience_form.save(commit=False)
+    experiences = experience_form.save(commit=False)
 
-    for experience in experience_form:
+    for experience in experiences:
         experience.mentor = mentor
         experience.save()
 
@@ -182,9 +195,6 @@ def complete_profile_view(request):
             request, action=request.POST.get("action"),
         )
 
-        # if context is None:
-        #     return HttpResponseNotAllowed("Invalid action")
-
         # Cast is used for type hints
         # https://stackoverflow.com/questions/71845596/python-typing-narrowing-type-from-function-that-returns-a-union
         user_form = cast(UserCreationForm,context["user_form"])
@@ -203,6 +213,7 @@ def complete_profile_view(request):
             if isinstance(entity_form, MentorForm):
                 exp_formset = context["exp_formset"]
                 if exp_formset.is_valid():
+                    breakpoint()
                     user = create_user(user_form)
                     entity = create_mentor(user, entity_form, exp_formset)
 

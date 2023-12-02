@@ -34,6 +34,7 @@ class QueryForm(forms.Form):
         required=True,
         queryset=Carreer.objects.all(),
         to_field_name="name",
+        widget=forms.HiddenInput(),
     )
 
 class StudentForm(forms.ModelForm):
@@ -250,9 +251,29 @@ def get_MentorExperienceFormSet(extra: int = 1, max_num: int | None = None):
     return MentorExperienceFormSet
 
 class MentorForm(forms.ModelForm):
+
+    profile = forms.ChoiceField(
+        choices=[
+            (QueryForm.MENTOR, _("Mentor")),
+        ],
+        widget=forms.HiddenInput(),
+        required=True,
+    )
+
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+        self.fields["voucher"].required = True
+        self.fields["carreer"].to_field_name = "name"
+
     class Meta:
         model = Mentor
         fields = (
             "carreer",
             "voucher",
         )
+
+        # https://docs.djangoproject.com/en/stable/topics/forms/modelforms#overriding-the-default-fields
+        widgets = {
+            "carreer": forms.HiddenInput()
+        }

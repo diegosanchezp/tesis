@@ -28,7 +28,7 @@ from django_src.apps.register.forms import (
 from .upload_data import create_carreers
 from .views import SelectCarreraView, SelectCarrerSpecialization, SelecThemeView, step_urls
 from .add_mentor_exp_view import add_mentor_exp_view, get_POST_context_data, get_GET_context_data, actions as exp_actions
-from .forms import MentorExperienceForm, QueryForm
+from .forms import MentorExperienceForm, QueryForm, MentorForm
 import django_src.apps.register.complete_profile_view as profile_view
 from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
@@ -769,7 +769,7 @@ class CompleteStudentProfileViewTest(TestCase):
             path=self.url,
             data={
                 **self.base_data,
-                # Passwords do match
+                # passwords do match
                 "password1": "dev_123456",
                 "password2": "dev_123456",
                 "carreer": self.computacion.name,
@@ -935,6 +935,7 @@ class TestCreateMentorExpView(TestCaseWithData):
 
         # Formset two works for adding an extra form, but validates to invalid
         formset2 = MentorExperienceFormSet(initial=initial2)
+        breakpoint()
         self.assertEqual(formset.total_form_count(), len(initial2))
 
         # print(formset2)
@@ -1251,3 +1252,115 @@ class TestCreateMentorExpView(TestCaseWithData):
 
         # django-render-block should have rendered the current formset
         self.assertIn("<form", response.content.decode("utf-8"))
+
+class TestCompleteMentorProfileView(TestCaseWithData):
+
+    def setUp(self):
+        super().setUp()
+        self.today = date.today()
+        self.management_form_data = {
+            "form-TOTAL_FORMS": 2,
+            "form-INITIAL_FORMS": 0,
+            "form-MIN_NUM_FORMS": 0,
+            "form-MAX_NUM_FORMS": 1000,
+        }
+
+        self.url = reverse("register:complete_profile")
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+    # python manage.py test --keepdb django_src.apps.register.tests.TestCompleteMentorProfileView.test_view_valid
+    def test_view_valid(self):
+
+        data = {
+            # Query data
+            "profile": "mentor",
+            "carreer": self.computacion.name,
+            "action": "create_mentor",
+
+            # User data
+            "email": "diego@gmail.com",
+            "first_name": "Diego",
+            "last_name": "Sánchez",
+            "profile_pic": SimpleUploadedFile(
+                name="profile_pic.jpg",
+                content=open(str(Path(settings.MEDIA_ROOT_TEST) / "jpeg_example.jpg"), "rb").read(),
+                content_type="image/jpeg",
+            ),
+            "password1": "dev_123456",
+            "password2": "dev_123456",
+
+            # https://docs.djangoproject.com/en/stable/ref/forms/api/#binding-uploaded-files-to-a-form
+
+            "voucher": SimpleUploadedFile(name="mentor_voucher.pdf", content=b"file_content", content_type="application/pdf"),
+
+            **self.management_form_data,
+
+            # Mentor experience data
+            "form-0-name": "Full stack developer",
+            "form-0-company": "Google",
+            "form-0-init_year": date(2010,1,1),
+            "form-0-end_year": date(2011,1,1),
+            "form-0-description": "Full Stack Dev @ Google",
+            "form-1-name": "Early Javascript Soy Dev",
+            "form-1-company": "Apple",
+            "form-1-init_year": date(2012,2,1),
+            "form-1-current": True,
+            "form-1-description": "Full Stack Dev @ Apple",
+        }
+        request = RequestFactory().post(
+            path=self.url,
+            data=data,
+        )
+
+        # mock htmx
+        request.htmx = True
+
+
+        context = profile_view.get_context(request, "create_mentor")
+
+        # Get forms from context
+        entity_form = context["entity_form"]
+        exp_formset = context["exp_formset"]
+        user_form = context["user_form"]
+
+        self.assertTrue(isinstance(entity_form, MentorForm))
+
+        # Validate forms
+        self.assertTrue(user_form.is_valid(), msg=user_form.errors)
+        self.assertTrue(entity_form.is_valid(), msg=entity_form.errors)
+        self.assertTrue(exp_formset.is_valid(), msg=exp_formset.errors)
+
+        # Submit the request here otherwise it will create the entities and forms above can be tested
+        response = cast(HttpResponse, profile_view.complete_profile_view(request))
+
+        self.assertEqual(response.url, reverse_lazy("register:success"))
+
+        # Test that the voucher was saved
+        mentor = Mentor.objects.get(user__email=user_form.cleaned_data['email'])
+
+        self.assertEqual(mentor.experiences.count(), data["form-TOTAL_FORMS"])
+
+        self.assertEqual(mentor.user.username, mentor.user.email)
+
+        voucher_path = Path(mentor.voucher.path)
+        self.assertTrue(voucher_path.exists())
+
+        # Cleanup action remove the voucher
+        mentor.voucher.delete()
+
+        # Make sure the voucher was delete
+        assert voucher_path.exists() == False, "Voucher was not deleted"
+
+        # Test that the profile pic was saved
+        profile_pic_path = Path(mentor.user.profile_pic.path)
+        self.assertTrue(profile_pic_path.exists())
+
+        # Cleanup action remove the profile picture file
+        mentor.user.profile_pic.delete()
+
+        # Make sure the profile picture was delete
+        assert profile_pic_path.exists() == False, "Voucher was not deleted"
+
