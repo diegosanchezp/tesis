@@ -121,6 +121,8 @@ def dumpdata(
             natural_foreign=True,
             natural_primary=True, indent=4,
             output=backup.output,
+            traceback=True,
+            verbosity=2,
         )
 
         logging.info(msg=f"Backup saved to {backup.output}")
@@ -193,7 +195,7 @@ def backup_prod(BASE_DIR):
         BASE_DIR,
         extra_backups = [
             ModelBackup(
-                models=["auth.User"],
+                models=["customauth.User"],
                 output=f"{backup_folder}/admin.json",
             )
         ]

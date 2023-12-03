@@ -67,7 +67,7 @@ docker compose run --rm django \
 Upload testing fixtures to database
 
 ```bash
-docker compose run --rm django python manage.py loaddata fixtures/wagtail_pages.json
+docker compose run --rm django python manage.py loaddata fixtures/admin.json fixtures/wagtail_pages.json
 ```
 
 ## Testing backup procedure
@@ -78,7 +78,6 @@ mkdir ~/fixture_backups
 ```bash
 docker compose run --rm \
   --env "ENVIRONMENT=production" \
-  --user "$(id -u)" \
   --volume "$HOME/fixture_backups:/app/fixture_backups" \
   --volume "./shscripts/:/app/shscripts/" \
   django python -m shscripts.backup
