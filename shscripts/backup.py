@@ -121,6 +121,8 @@ def dumpdata(
             natural_foreign=True,
             natural_primary=True, indent=4,
             output=backup.output,
+            traceback=True,
+            verbosity=2,
         )
 
         logging.info(msg=f"Backup saved to {backup.output}")
