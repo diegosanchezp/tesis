@@ -67,7 +67,7 @@ docker compose run --rm django \
 Upload testing fixtures to database
 
 ```bash
-docker compose run --rm django python manage.py loaddata fixtures/wagtail_pages.json
+docker compose run --rm django python manage.py loaddata fixtures/admin.json fixtures/wagtail_pages.json
 ```
 
 ## Testing backup procedure

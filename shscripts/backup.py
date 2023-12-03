@@ -195,7 +195,7 @@ def backup_prod(BASE_DIR):
         BASE_DIR,
         extra_backups = [
             ModelBackup(
-                models=["auth.User"],
+                models=["customauth.User"],
                 output=f"{backup_folder}/admin.json",
             )
         ]

@@ -29,3 +29,15 @@ sudo --preserve-env docker compose --file "$ROOT_DIR"/docker/production/docker-c
 sudo --preserve-env docker compose run --rm --interactive --tty django \
   python manage.py createsuperuser
 ```
+
+# Backups
+
+```bash
+cd tesis
+sudo --preserve-env docker compose run --rm \
+  --env "ENVIRONMENT=production" \
+  --user "$(id -u)" \
+  --volume "$HOME/fixture_backups:/app/fixture_backups" \
+  --volume "./shscripts/:/app/shscripts/" \
+  django python -m shscripts.backup
+```
