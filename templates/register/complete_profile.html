@@ -8,7 +8,7 @@
 
 {% block body %}
 
-<main class="flex flex-col justify-center items-center" x-data="complete_profile('{{urlCarrer}}', '{{formset_prefix}}')">
+<main class="flex flex-col justify-center items-center" x-data="complete_profile('{{urlCarrer}}', '{{formset_prefix}}')" @formerrors.document="set_form_errors">
     <div class="flex justify-center mt-10 mb-14">
         {% stepper number=1 text="Seleccionar perfil" left_line="false"  url=step_urls.select_perfil %}
         {% stepper number=2 text="Selecciona tu carrera" url=step_urls.select_carrera %}
@@ -40,38 +40,60 @@
     </div>
     {% endif %}
 
-    {% block form %}
+    {% comment %}
+      Sadly file fields has to be rendered outside the form, otherwise they will lose their value
+      when the form is rendered back after htmx request, see:
+    {% endcomment %}
+
+    {# Profile pic #}
+
+    <div class="flex flex-col justify-center text-center my-4">
+        <label for="{{ user_form.profile_pic.id_for_label }}">{{user_form.profile_pic.label}}</label>
+        <div class="my-4">
+            <i class="bi bi-person-circle text-[50px]"></i>
+        </div>
+        <input type="file"
+               class="self-center"
+               id="{{ user_form.profile_pic.id_for_label }}"
+               name="{{user_form.profile_pic.html_name}}"
+               form="abc-form"
+               {% if user_form.profile_pic.field.required %} required {% endif %}
+               >
+        {# use alpine to render the errors of the file field #}
+        <template x-if="errors['user_form']">
+            <ul class="text-red-600">
+                <template x-for="error in errors['user_form']['profile_pic']">
+                    <li x-text="error.message"></li>
+                </template>
+            </ul>
+        </template>
+    </div>
+
+
+        {% block form %}
         <form
-            id="form"
+            id="abc-form"
             class="grid grid-cols-2 gap-x-2 gap-y-4"
             enctype="multipart/form-data"
             method="post"
             hx-post=""
             hx-swap="outerHTML"
-            hx-target="#form"
+            hx-target="#abc-form"
+            hx-trigger="submit"
             >
+            {% csrf_token %}
             {# Render all of the form fields of the user_form excluding those that are hidden #}
             {% for field in user_form %}
-                {% if not field.is_hidden %}
+                {% if not field.is_hidden and field != user_form.profile_pic %}
                     <div
                         class="
                             flex flex-col
-                            {% if field == user_form.profile_pic %}
-                                col-span-full justify-self-center
-                                text-center my-4
-                            {% endif %}
                             {% if field == user_form.password1 %}
                                 col-start-1
                             {% endif %}
-                        "
-                    >
+                        ">
                         <label for="{{ field.id_for_label }}">{{field.label}}</label>
 
-                        {% if field == user_form.profile_pic %}
-                            <div class="my-4">
-                                <i class="bi bi-person-circle text-[50px]"></i>
-                            </div>
-                        {% endif %}
                         {# Render the input element #}
                         {{ field }}
 
@@ -116,21 +138,19 @@
 
             {# Entity form fields #}
             {% for field in entity_form.visible_fields %}
-                <div class="
-                    flex flex-col
-                    {% if field == entity_form.voucher %}
-                        col-span-full justify-self-center text-center my-4
-                    {% endif %}
-                ">
-                    <label for="{{ field.id_for_label }}">{{entity_form.voucher.label}}</label>
-                    {{ field }}
-                    <ul class="text-red-600">
-                        {% for error in field.errors %}
-                            <li>{{ error|escape }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
+                {% if field != entity_form.voucher %}
+                    <div class="flex flex-col">
+                        <label for="{{ field.id_for_label }}">{{field.label}}</label>
+                        {{ field }}
+                        <ul class="text-red-600">
+                            {% for error in field.errors %}
+                                <li>{{ error|escape }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
             {% endfor %}
+
 
             {# Render non_field_errors #}
             {% if entity_form.non_field_errors %}
@@ -169,17 +189,29 @@
 
             {% endfor %}
 
-            {% if not query_form.errors %}
-            <div class="col-span-full justify-self-center">
-
-                {% #button type="submit" %}
-                    Completar el registro
-                {% /button %}
-
-            </div>
-            {% endif %}
         </form>
-    {% endblock form %}
+        {% endblock form %}
+
+    {% include "register/file_field.html" with field=entity_form.voucher form_id="abc-form" required=entity_form.voucher.field.required %}
+    {# render errors of the below input unsing alpinejs #}
+    <template x-if="errors['entity_form']">
+        <ul class="col-span-full text-red-600">
+            <template x-for="error in errors['entity_form']['voucher']">
+                <li x-text="error.message"></li>
+            </template>
+        </ul>
+    </template>
+
+    {% if not query_form.errors %}
+        <div
+            class="col-span-full justify-self-center"
+            >
+            {% #button type="submit" form="abc-form" %}
+                Completar el registro
+            {% /button %}
+
+        </div>
+    {% endif %}
 </main>
 {% endblock %}
 

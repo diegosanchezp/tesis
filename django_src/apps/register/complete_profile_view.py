@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django_src.apps.register.models import Mentor, Student
 
 from render_block import render_block_to_string
-from django_htmx.http import HttpResponseClientRedirect
+from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 
 from .forms import StudentForm, UserCreationForm, MentorForm, QueryForm, get_MentorExperienceFormSet
 from .views import step_urls
@@ -200,6 +200,8 @@ def complete_profile_view(request):
         user_form = cast(UserCreationForm,context["user_form"])
         entity_form = cast(forms.ModelForm,context["entity_form"])
         query_form = cast(forms.ModelForm,context["query_form"])
+        profile = query_form.cleaned_data["profile"]
+
 
         # ---- case: both forms are valid ---- #
         if query_form.is_valid() and user_form.is_valid() and entity_form.is_valid():
@@ -213,7 +215,6 @@ def complete_profile_view(request):
             if isinstance(entity_form, MentorForm):
                 exp_formset = context["exp_formset"]
                 if exp_formset.is_valid():
-                    breakpoint()
                     user = create_user(user_form)
                     entity = create_mentor(user, entity_form, exp_formset)
 
@@ -228,6 +229,15 @@ def complete_profile_view(request):
 
         # Make a response with the rendered new list of themes
         htmx_reponse = HttpResponse(form_html)
+
+        trigger_client_event(
+            response=htmx_reponse,
+            name="formerrors",
+            params={
+                "user_form": user_form.errors.as_json(),
+                "entity_form": entity_form.errors.as_json(),
+            }
+        )
 
         return htmx_reponse
 

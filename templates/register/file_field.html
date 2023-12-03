@@ -1,0 +1,17 @@
+<div class="flex flex-col justify-center text-center my-4">
+
+    {% if not no_label %}
+        <label for="{{ field.id_for_label }}">{{field.label}}</label>
+    {% endif %}
+    <input type="file"
+           name="{{field.html_name}}"
+           form="{{ form_id }}"
+           {% if required %} required {% endif %}>
+    {% if field.errors %}
+        <ul class="col-span-full text-red-600">
+            {% for error in field.errors %}
+                <li>{{ error|escape }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>

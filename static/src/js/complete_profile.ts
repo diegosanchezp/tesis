@@ -9,17 +9,17 @@ document.addEventListener('alpine:initialized', () => {
     const profileInput = (document.querySelector("input[name='profile']") as HTMLInputElement)
 
     if(!profileInput){
-        console.log("profile input not found")
+        console.debug("profile input not found")
     }
 
     const profile = profileInput.value
 
     if(!document.querySelector("input[name='carreer']")){
-        console.log("carreer input not found")
+        console.debug("carreer input not found")
     }
 
     if(!profile){
-        console.log("profile input not found")
+        console.debug("profile input not found")
     }
 
     if(profile == "estudiante"){
@@ -27,9 +27,13 @@ document.addEventListener('alpine:initialized', () => {
 
     if(profile == "mentor"){
         if(!localStorage.getItem("mentor_cleaned_data")){
-            console.log("mentor_cleaned_data is not set on localStorage")
+            console.debug("mentor_cleaned_data is not set on localStorage")
         }
     }
+})
+
+document.addEventListener("DOMContentLoaded", () => {
+
 })
 
 // Component definition
@@ -58,54 +62,26 @@ const complete_profile = (urlCarrer: string, formsetPrefix: string) => ({
     urlCarreer: urlCarrer,
     formsetPrefix: formsetPrefix,
 
+    errors: {},
+
     init(){
-        console.log(this.interests)
-        console.log(this.formsetPrefix)
-        console.log(this.mentor_exp.length)
+        console.debug(this.interests)
+        console.debug(this.formsetPrefix)
+        console.debug(this.mentor_exp.length)
         if(this.specialization_storage !== "No tengo especialización"){
             this.specialization = this.specialization_storage
         }
         // Do some checks
     },
-    // submit_form(){
-    //     // Get the form data
-    //     const form = document.getElementById("form") as HTMLFormElement;
-    //
-    //     if(!form){
-    //         console.log("could not get form")
-    //         return
-    //     }
-    //
-    //     if(!form.checkValidity()){
-    //         console.log("form is not valid")
-    //         return
-    //     }
-    //
-    //     const formData = new FormData(form);
-    //
-    //     if(this.profile == "mentor"){
-    //         const prefix = formData.get("formset-prefix")
-    //
-    //         if (!prefix) {console.warn("no prefix found fr"); return}
-    //
-    //         for (const expertise of this.mentor_exp){
-    //             let i = 0
-    //             for (const [key, value] of Object.entries(expertise)) {
-    //                 formData.append(`${prefix}-${i}-${key}`, value)
-    //                 i+=1
-    //             }
-    //         }
-    //     }
-    //
-    //     debugger
-    //     htmx.ajax("POST","", {
-    //         values: Object.fromEntries(formData),
-    //         target: "#form",
-    //         swap: "outerHTML",
-    //     }).then(()=>{
-    //         console.log("form validated")
-    //     })
-    // },
+
+    // Event listener for setting error messages
+    set_form_errors(evt){
+        this.errors = {
+            entity_form: JSON.parse(evt.detail.entity_form),
+            user_form: JSON.parse(evt.detail.user_form)
+        }
+        console.debug(this.errors)
+    }
 })
 
 
