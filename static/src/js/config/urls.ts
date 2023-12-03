@@ -1,8 +1,9 @@
 export const base = "/register"
 export const registerUrls = {
-    complete_profile: (carreer: string, no_spec: boolean = false) => {
+    complete_profile: (carreer: string, profile: string, no_spec: boolean = false) => {
         const params = new URLSearchParams("")
         params.append("carreer", carreer)
+        params.append("profile", profile)
         if (no_spec) params.append("no_spec", "")
         return `/register/complete_profile?${params.toString()}`
     },

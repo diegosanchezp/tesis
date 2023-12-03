@@ -6,6 +6,8 @@ from .models import (
     CarrerSpecialization,
     InterestTheme,
     Student,
+    Mentor,
+    MentorExperience,
 )
 
 # Register your models here.
@@ -43,6 +45,33 @@ class FacultyAdmin(admin.ModelAdmin):
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     list_display = ("first_name","last_name","email",)
+
+    @admin.display(description="email")
+    def email(self,obj):
+        return obj.user.email
+
+    @admin.display(description="First name")
+    def first_name(self,obj):
+        return obj.user.first_name
+
+    @admin.display(description="Last name")
+    def last_name(self,obj):
+        return obj.user.last_name
+
+
+
+class MentorExperienceInline(admin.StackedInline):
+    model = MentorExperience
+    extra = 1
+
+@admin.register(Mentor)
+class MentorAdmin(admin.ModelAdmin):
+
+    list_display = ("first_name","last_name","email",)
+
+    inlines = [
+        MentorExperienceInline
+    ]
 
     @admin.display(description="email")
     def email(self,obj):

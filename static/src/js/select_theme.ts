@@ -45,7 +45,7 @@ const select_theme = (urlCarrer: string) => ({
     },
 
     get next_url(){
-        return registerUrls.complete_profile(this.carreer, true)
+        return registerUrls.complete_profile(this.carreer, this.profile, true)
     },
 })
 

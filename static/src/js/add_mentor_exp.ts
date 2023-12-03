@@ -108,6 +108,8 @@ const form_component = (form_prefix: string) => ({
         const formData = new FormData(form);
 
         formData.append("action", "validate")
+        formData.append("profile", this.profile)
+        formData.append("carreer", this.carreer)
 
         htmx.ajax("POST","", {
             values: Object.fromEntries(formData),

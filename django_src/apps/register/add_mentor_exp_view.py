@@ -1,4 +1,5 @@
 import json
+from django.http.request import QueryDict
 
 from django.urls.base import reverse_lazy
 
@@ -112,10 +113,17 @@ def add_mentor_exp_view(request):
 
         # Trigger a client event to let the client know that the formset has been
         # processed an validated
+
+        query_next_url = QueryDict(mutable=True)
+
+        query_next_url["profile"] = request.POST.get("profile")
+        query_next_url["carreer"] = request.POST.get("carreer")
+
+
         event_data = {
             # "form_dict": formset.data,
             "action": action,
-            "next_url": reverse_lazy("register:complete_profile"),
+            "next_url": f"{reverse_lazy('register:complete_profile')}?{query_next_url.urlencode()}",
             "form_valid": formset.is_valid() and all(
                 [len(data) > 0 for data in formset.cleaned_data]
             ),
