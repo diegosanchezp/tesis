@@ -40,6 +40,7 @@ const select_spec = (urlCarrer: string) => ({
             searchParams.append("theme", theme)
         })
 
+        searchParams.append("profile", this.profile)
         return `?${searchParams.toString()}`
     },
 
@@ -66,10 +67,11 @@ const select_spec = (urlCarrer: string) => ({
 
     /** crafts the url for the next step: choose themes */
     get next_url(){
+
         // If the user doesn't have a specialization, redirect to the interest themes page
         if (this.specialization_selected === this.no_tengo){
 
-            const themes_url = `/register/select_themes/${this.urlCarreer}`
+            const themes_url = registerUrls.select_themes(this.urlCarreer)
 
             // Add the selected themes as query parameters only if we have some
             if (this.themes.length > 0){
@@ -80,7 +82,7 @@ const select_spec = (urlCarrer: string) => ({
         }
 
         // User does have a specialization, go to the final step
-        return registerUrls.complete_profile(this.carreer)
+        return registerUrls.complete_profile(this.carreer, this.profile)
     },
 
     /** getter for filtering specializations names */

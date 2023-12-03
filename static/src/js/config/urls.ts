@@ -10,5 +10,8 @@ export const registerUrls = {
     select_specialization: (carreer: string) => {
         return `/register/select_carreer_specialization/${carreer}`
     },
+    select_themes: (carreer: string) => {
+        return `/register/select_themes/${carreer}`
+    },
     add_exp: `${base}/add_exp`
 }

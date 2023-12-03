@@ -18,7 +18,9 @@
             {# Student doesn't have a specialization, so he must of have selected themes #}
             {% if no_spec %}
                 {% stepper number=4 text="Temas de interés" url=step_urls.specialization %}
-                {% stepper number=5 text="Completa el perfil" right_line="false"   %}
+                {% stepper number=5 text="Completa el perfil" right_line="false" %}
+            {% else %}
+                {% stepper number=4 text="Completa el perfil" right_line="false" %}
             {% endif %}
         {% endif %}
 
@@ -47,27 +49,29 @@
 
     {# Profile pic #}
 
-    <div class="flex flex-col justify-center text-center my-4">
-        <label for="{{ user_form.profile_pic.id_for_label }}">{{user_form.profile_pic.label}}</label>
-        <div class="my-4">
-            <i class="bi bi-person-circle text-[50px]"></i>
+    {% if not query_form.errors %}
+        <div class="flex flex-col justify-center text-center my-4">
+            <label for="{{ user_form.profile_pic.id_for_label }}">{{user_form.profile_pic.label}}</label>
+            <div class="my-4">
+                <i class="bi bi-person-circle text-[50px]"></i>
+            </div>
+            <input type="file"
+                   class="self-center"
+                   id="{{ user_form.profile_pic.id_for_label }}"
+                   name="{{user_form.profile_pic.html_name}}"
+                   form="abc-form"
+                   {% if user_form.profile_pic.field.required %} required {% endif %}
+                   >
+            {# use alpine to render the errors of the file field #}
+            <template x-if="errors['user_form']">
+                <ul class="text-red-600">
+                    <template x-for="error in errors['user_form']['profile_pic']">
+                        <li x-text="error.message"></li>
+                    </template>
+                </ul>
+            </template>
         </div>
-        <input type="file"
-               class="self-center"
-               id="{{ user_form.profile_pic.id_for_label }}"
-               name="{{user_form.profile_pic.html_name}}"
-               form="abc-form"
-               {% if user_form.profile_pic.field.required %} required {% endif %}
-               >
-        {# use alpine to render the errors of the file field #}
-        <template x-if="errors['user_form']">
-            <ul class="text-red-600">
-                <template x-for="error in errors['user_form']['profile_pic']">
-                    <li x-text="error.message"></li>
-                </template>
-            </ul>
-        </template>
-    </div>
+    {% endif %}
 
 
         {% block form %}
@@ -192,15 +196,18 @@
         </form>
         {% endblock form %}
 
-    {% include "register/file_field.html" with field=entity_form.voucher form_id="abc-form" required=entity_form.voucher.field.required %}
-    {# render errors of the below input unsing alpinejs #}
-    <template x-if="errors['entity_form']">
-        <ul class="col-span-full text-red-600">
-            <template x-for="error in errors['entity_form']['voucher']">
-                <li x-text="error.message"></li>
-            </template>
-        </ul>
-    </template>
+
+    {% if not query_form.errors %}
+        {% include "register/file_field.html" with field=entity_form.voucher form_id="abc-form" required=entity_form.voucher.field.required %}
+        {# render errors of the below input unsing alpinejs #}
+        <template x-if="errors['entity_form']">
+            <ul class="col-span-full text-red-600">
+                <template x-for="error in errors['entity_form']['voucher']">
+                    <li x-text="error.message"></li>
+                </template>
+            </ul>
+        </template>
+    {% endif %}
 
     {% if not query_form.errors %}
         <div
