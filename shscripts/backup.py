@@ -110,6 +110,13 @@ def dumpdata(
             models=["wagtailcore.Page", "wagtailcore.Site", "wagtailimages.Image", "main.HeroSection", "main.HomePage"],
             output=f"{backup_folder}/wagtail_pages.json",
         ),
+        ModelBackup(
+            models=[
+                'register.Student', 'register.StudentInterest', 'register.InterestTheme',
+                'register.Mentor', 'register.MentorExperience',
+                'register.Faculty', 'register.Carreer', 'register.CarrerSpecialization',],
+            output=f"{backup_folder}/register.json",
+        )
     ] + extra_backups
 
     # Write backups to the folder
@@ -196,10 +203,11 @@ def backup_prod(BASE_DIR):
         extra_backups = [
             ModelBackup(
                 models=["customauth.User"],
-                output=f"{backup_folder}/admin.json",
+                output=f"{backup_folder}/users.json",
             )
         ]
     )
+
 
 def backup(BASE_DIR):
     """

@@ -71,17 +71,27 @@ docker compose run --rm django python manage.py loaddata fixtures/admin.json fix
 ```
 
 ## Testing backup procedure
+Create first the folder, otherwise the owner of the file will be root
+
 ```bash
 mkdir ~/fixture_backups
 ```
 
+Create an interactive container
+
 ```bash
 docker compose run --rm \
   --env "ENVIRONMENT=production" \
+  --user "$(id -u)" \
   --volume "$HOME/fixture_backups:/app/fixture_backups" \
   --volume "./shscripts/:/app/shscripts/" \
   django python -m shscripts.backup
 ```
+
+If you don't want to create a container every time, for debugging purposes, replace `python -m shscripts.backup` for `bash` in the command above. Same principle applies for the below command of resetting the database.
+
+**To add a new fixture**, needed if you want to backup new models, open `shscripts/backup.py`, add a new `ModelBackup` on function `dumpdata`.
+
 ## Resetting the database
 ```bash
 docker compose run --rm \
@@ -90,4 +100,8 @@ docker compose run --rm \
 ```
 
 ## Debugging the service containers
+
+```bash
+docker compose logs -f nginx django
+```
 
