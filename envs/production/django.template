@@ -1,6 +1,8 @@
 USE_DOCKER=
 
 SECRET_KEY=""
+ADMIN_USERNAME=""
+ADMIN_PASSWORD=""
 
 DJANGO_SETTINGS_MODULE=django_src.settings.production
 

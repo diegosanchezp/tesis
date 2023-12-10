@@ -28,6 +28,7 @@ def read_env(BASE_DIR):
     env.read_env(str(ENV_DIR / "postgres"))
     env.read_env(str(ENV_DIR / "django"))
     return env
+
 def setup_django(BASE_DIR):
     """
     Load settings and populate Django’s application registry.
@@ -107,7 +108,7 @@ def dumpdata(
     # Put in this list backups that apply to all environments
     backups = [
         ModelBackup(
-            models=["wagtailcore.Page", "wagtailcore.Site", "wagtailimages.Image", "main.HeroSection", "main.HomePage"],
+            models=["wagtailcore.Page", "wagtailcore.Site", "wagtailimages.Image", "main.HeroSection", "main.HomePage", "main.BlogIndex", "main.BlogPage"],
             output=f"{backup_folder}/wagtail_pages.json",
         ),
         ModelBackup(

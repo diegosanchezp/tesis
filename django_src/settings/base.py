@@ -152,6 +152,8 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
+ADMIN_USERNAME=env("ADMIN_USERNAME")
+
 # Internationalization
 # https://docs.djangoproject.com/en/stable/topics/i18n/
 

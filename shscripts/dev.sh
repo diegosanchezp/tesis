@@ -56,6 +56,9 @@ resetdb(){
     dockerpy python -m shscripts.reset_db "$@"
 }
 
+backupdb(){
+  dockerpy ENVIRONMENT=development python -m shscripts.backup
+}
 # Docker related
 runserver(){
   docker-compose run --rm --service-ports django

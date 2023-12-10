@@ -2,13 +2,15 @@ import logging
 from pathlib import Path
 import argparse
 
+
 from django import db
 from django.core.management import call_command
-from django_src.apps.register.upload_data import upload_data as register_upload_data
+from django.conf import settings
 import psycopg2
 from psycopg2 import errors
 import environ
 
+from django_src.apps.main.dev_data import upload_dev_data
 # This lines have to come before the below import otherwise it will
 # throw import error
 
@@ -93,7 +95,7 @@ def loaddata(BASE_DIR):
     """
 
     # Name of fixtures, this also defines the order in wich to load them
-    FIXTURES = ["admin", "wagtail_pages"]
+    FIXTURES = ["admin", "wagtail_pages", "register"]
 
     FIXTURE_FOLDER = get_fixture_folder(BASE_DIR)
 
@@ -111,7 +113,12 @@ def upload_data():
     Put here all of the functions that use ORM models
     for uploading data
     """
-    register_upload_data()
+
+    if settings.DEBUG:
+        upload_dev_data()
+    else:
+        # For now, only Load data fixtures to the database if we are resseting the production database
+        loaddata(BASE_DIR)
 
 if __name__ == "__main__":
 
@@ -148,6 +155,4 @@ if __name__ == "__main__":
     call_command("migrate", verbosity=1)
     logging.info("Database schema restored")
 
-    # Load data to the database
-    loaddata(BASE_DIR)
     upload_data()
