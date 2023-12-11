@@ -12,7 +12,9 @@ from wagtail.models import BaseViewRestriction
 app_label = "register"
 
 def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
+    # get_user_model doesn't works in data migrations because it sets required_ready to False
     User = apps.get_model(settings.AUTH_USER_MODEL)
+
     Permission = apps.get_model("auth", model_name="Permission")
     Group = apps.get_model("auth", model_name="Group")
     ContentType = apps.get_model("contenttypes.ContentType")
@@ -54,6 +56,7 @@ def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
     page_content_type, created = ContentType.objects.get_or_create(
         model="blogindex", app_label="main"
     )
+
     # Add BlogIndex as a child of the home page
     blog_index = BlogIndex.objects.create(
         # Wagtail Page data
@@ -91,14 +94,48 @@ def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
     )
 
 def remove_initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
-    pass
+
+    # Permission = apps.get_model("auth", model_name="Permission")
+    User = apps.get_model(settings.AUTH_USER_MODEL)
+    Group = apps.get_model("auth", model_name="Group")
+    # ContentType = apps.get_model("contenttypes.ContentType")
+    # GroupPagePermission = apps.get_model("wagtailcore", model_name="GroupPagePermission")
+
+    # Page = apps.get_model("wagtailcore", model_name="Page")
+
+    HomePage = apps.get_model("main", model_name="HomePage")
+    BlogIndex = apps.get_model("main", model_name="BlogIndex")
+
+    admin = User.objects.get(username=settings.ADMIN_USERNAME)
+
+    # Deletes the home page
+    HomePage.objects.get(
+        # Wagtail Page data
+        owner=admin,
+        slug="root_home",
+        path="00010002"
+    ).delete()
+
+    BlogIndex.objects.get(path="000100020001").delete()
+
+    # Delete the mentor group
+    Group.objects.get(name="Mentores").delete()
 
 class Migration(migrations.Migration):
 
     dependencies = [
+        # Admin user is created in this migration
         ('customauth', '0002_setup_admin'),
+
+        # We dependend on these Models
         ('main', '0002_blogpost'),
+
+        # access_admin, and add_page Admin datafixtures are created here
         ('wagtailadmin', '0003_admin_managed'),
+
+        # This dependency is just here, because of this
+        # https://docs.djangoproject.com/en/4.2/topics/migrations/#accessing-models-from-other-apps
+        ('wagtailcore', '0089_log_entry_data_json_null_to_object')
     ]
 
     operations = [
