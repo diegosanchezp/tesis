@@ -11,11 +11,13 @@ from django.contrib.auth import get_user_model
 def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
     User = get_user_model()
 
-    admin = User.objects.create_superuser(
-        username=os.environ["ADMIN_USERNAME"],
-        password=os.environ["ADMIN_PASSWORD"],
-    )
-
+    try:
+        admin = User.objects.get(username=os.environ["ADMIN_USERNAME"])
+    except User.DoesNotExist:
+        admin = User.objects.create_superuser(
+            username=os.environ["ADMIN_USERNAME"],
+            password=os.environ["ADMIN_PASSWORD"],
+        )
 def remove_initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
     pass
 

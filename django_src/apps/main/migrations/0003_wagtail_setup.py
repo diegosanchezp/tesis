@@ -10,7 +10,7 @@ from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from wagtail.models import BaseViewRestriction
 
 app_label = "register"
-
+home_page_path = "00010002"
 def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
     # get_user_model doesn't works in data migrations because it sets required_ready to False
     User = apps.get_model(settings.AUTH_USER_MODEL)
@@ -25,8 +25,10 @@ def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
     HomePage = apps.get_model("main", model_name="HomePage")
     BlogIndex = apps.get_model("main", model_name="BlogIndex")
 
+    # Admin is Created by 0002_setup_admin
     admin = User.objects.get(username=settings.ADMIN_USERNAME)
 
+    # Root page is created by wagtail's data migrations
     root_page = Page.objects.get(slug='root')
 
     # Add home page as a child of root, use low level tree beard api, because
@@ -35,23 +37,32 @@ def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
         model="homepage", app_label="main"
     )
 
-    # Create a bare bones home page
-    home_page = HomePage.objects.create(
-        # Wagtail Page data
-        owner=admin,
-        title="Home",
-        slug="root_home",
-        url_path="/",
-        content_type=page_content_type,
-        locale=root_page.locale,
-        # HomePage specific data
-        header_text="La Asociación de Egresados y Amigos de la UCV, te invitan a registrarte en la nueva plataforma de mentorías.",
-        header_cta="Registrarme",
-        # Tree beard low level data
-        path="00010002",
-        depth=2,
-        numchild=1,
-    )
+    try:
+        home_page = HomePage.objects.get(path=home_page_path)
+        home_page.owner=admin
+        home_page.title="Home"
+        home_page.slug="root_home"
+        home_page.url_path="/"
+        home_page.content_type=page_content_type
+        home_page.locale=root_page.locale
+    except HomePage.DoesNotExist:
+        # Create a bare bones home page
+        home_page = HomePage.objects.create(
+            # Wagtail Page data
+            owner=admin,
+            title="Home",
+            slug="root_home",
+            url_path="/",
+            content_type=page_content_type,
+            locale=root_page.locale,
+            # HomePage specific data
+            header_text="La Asociación de Egresados y Amigos de la UCV, te invitan a registrarte en la nueva plataforma de mentorías.",
+            header_cta="Registrarme",
+            # Tree beard low level data
+            path=home_page_path,
+            depth=2,
+            numchild=1,
+        )
 
     page_content_type, created = ContentType.objects.get_or_create(
         model="blogindex", app_label="main"
@@ -72,7 +83,6 @@ def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
         numchild=0,
     )
 
-
     # Only logged in users can see the blogposts
     blog_index.view_restrictions.create(
         restriction_type=BaseViewRestriction.LOGIN,
@@ -87,6 +97,7 @@ def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
     mentor_group.permissions.add(wagtail_access_admin)
 
     # Setup page permissions for the mentor groups
+    # add_page comes from wagtail's data migrations
     add_page_permission = Permission.objects.get(codename="add_page")
     group_permission = GroupPagePermission.objects.create(
         group=mentor_group, page=blog_index, permission_type="add",
@@ -95,13 +106,8 @@ def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
 
 def remove_initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
 
-    # Permission = apps.get_model("auth", model_name="Permission")
     User = apps.get_model(settings.AUTH_USER_MODEL)
     Group = apps.get_model("auth", model_name="Group")
-    # ContentType = apps.get_model("contenttypes.ContentType")
-    # GroupPagePermission = apps.get_model("wagtailcore", model_name="GroupPagePermission")
-
-    # Page = apps.get_model("wagtailcore", model_name="Page")
 
     HomePage = apps.get_model("main", model_name="HomePage")
     BlogIndex = apps.get_model("main", model_name="BlogIndex")
@@ -113,7 +119,7 @@ def remove_initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
         # Wagtail Page data
         owner=admin,
         slug="root_home",
-        path="00010002"
+        path=home_page_path
     ).delete()
 
     BlogIndex.objects.get(path="000100020001").delete()
