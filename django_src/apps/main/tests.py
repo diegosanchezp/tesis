@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from wagtail import hooks
 from wagtail.models import BaseViewRestriction
 from wagtail.test.utils import WagtailPageTestCase
+from wagtail.test.utils import form_data
 from wagtail.models import Page
 
 from .models import BlogPage, BlogIndex
@@ -34,12 +35,12 @@ class BlogPageTest(WagtailPageTestCase):
         cls.root_page = Page.objects.get(slug='root')
         cls.blog_index = BlogIndex.objects.get(slug="blogs", owner=cls.admin_user)
 
-        cls.mentor_user = cls.create_user(
+        cls.mentor_user = User.objects.create_user(
             username="pedro",
             first_name="Pedro",
             last_name="Rodriguez",
             email="pedro@mail.com",
-            password="password",
+            password="dev123456"
         )
 
         cls.mentor = Mentor.objects.create(
@@ -47,15 +48,24 @@ class BlogPageTest(WagtailPageTestCase):
             carreer=cls.computacion,
         )
 
+        # Add user to the wagtail editors group (needed to access the admin)
+        cls.editors_group = Group.objects.get(name='Editors')
+
+        cls.mentor_user.groups.add(cls.editors_group)
 
     def setUp(self):
         super().setUp()
 
         # Login
-        self.current_user = self.login(self.mentor_user)
+        # self.current_user = self.login(self.mentor_user)
 
     # ./manage.py test --keepdb django_src.apps.main.tests.BlogPageTest.test_hook_filter_user_pages
     def test_hook_filter_user_pages(self):
+
+        # Login the user
+        self.assertTrue(self.client.login(
+            username=self.mentor_user.username, password="dev123456",
+        ))
 
         # Get the url of the view that list all the pages
         url = reverse_lazy("wagtailadmin_explore_root")
@@ -78,12 +88,38 @@ class BlogPageTest(WagtailPageTestCase):
 
         self.assertEquals(blog_child.view_restrictions.count(), 1)
 
-        # Add user to the wagtail editors group (needed to access the admin)
-        editors_group = Group.objects.get(name='Editors')
-
-        self.current_user.groups.add(editors_group)
 
         # Since the hook is already is registered there is no need to do it again
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
+
+    # ./manage.py test --keepdb django_src.apps.main.tests.BlogPageTest.test_privacy_set_hook
+    def test_privacy_set_hook(self):
+        """
+        Test that when creating a page whe login privacy setting of a page is set.
+        """
+        self.assertTrue(self.client.login(
+            username=self.mentor_user.username, password="dev123456",
+        ))
+
+        self.assertTrue(self.mentor_user.is_authenticated)
+
+        url = reverse_lazy("wagtailadmin_pages:add", args=("main", "blogpage", self.blog_index.id))
+
+        response = self.client.post(
+            path=url,
+            data={
+                "title": "Private Home Page",
+                "slug": "private-homepage",
+                "content": form_data.rich_text("<p>My private home page</p>"),
+                "action-submit": "Submit for moderation",
+            }
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+        created_blog = BlogPage.objects.get(slug="private-homepage")
+
+        self.assertTrue(created_blog.view_restrictions.filter(restriction_type=BaseViewRestriction.LOGIN).exists())
+
