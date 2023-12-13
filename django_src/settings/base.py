@@ -12,6 +12,7 @@ env = environ.Env(
     AWS_S3_REGION_NAME=(str,""),
     AWS_S3_URL_PROTOCOL=(str,"https:"),
     AWS_STORAGE_BUCKET_NAME=(str,"false_bucket_name"),
+    ADMIN_USERNAME=(str,""),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
