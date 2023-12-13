@@ -54,7 +54,7 @@ docker compose run --rm django python manage.py collectstatic \
 Start all services in detached mode
 
 ```bash
-docker-compose up --detach
+docker compose up --detach
 ```
 
 Run migrations ( create database tables )
