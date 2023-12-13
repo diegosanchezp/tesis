@@ -14,7 +14,8 @@ from shscripts.backup import (
     setup_django
 )
 
-# python -m django_src.apps.main.dev_data
+# python -m django_src.apps.main.dev_data upload
+# python -m django_src.apps.main.dev_data reset
 def mentors(apps: Apps):
     """
     Create two mentors

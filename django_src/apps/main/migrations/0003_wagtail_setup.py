@@ -11,6 +11,7 @@ from wagtail.models import BaseViewRestriction
 
 app_label = "register"
 home_page_path = "00010002"
+
 def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
     # get_user_model doesn't works in data migrations because it sets required_ready to False
     User = apps.get_model(settings.AUTH_USER_MODEL)
@@ -45,6 +46,10 @@ def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
         home_page.url_path="/"
         home_page.content_type=page_content_type
         home_page.locale=root_page.locale
+        # I think this is not needed, it is suposed to be depth 2 already
+        # home_page.depth=2
+        home_page.numchild=1
+        home_page.save()
     except HomePage.DoesNotExist:
         # Create a bare bones home page
         home_page = HomePage.objects.create(
@@ -109,18 +114,15 @@ def remove_initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
     User = apps.get_model(settings.AUTH_USER_MODEL)
     Group = apps.get_model("auth", model_name="Group")
 
-    HomePage = apps.get_model("main", model_name="HomePage")
+    # I don't know how to revert back the state of the home page to what it was previously
+    # Maybe i could save it in a json file and load it back here
+    # Can I leverage postgres for this?
+
+    # HomePage = apps.get_model("main", model_name="HomePage")
+
     BlogIndex = apps.get_model("main", model_name="BlogIndex")
 
     admin = User.objects.get(username=settings.ADMIN_USERNAME)
-
-    # Deletes the home page
-    HomePage.objects.get(
-        # Wagtail Page data
-        owner=admin,
-        slug="root_home",
-        path=home_page_path
-    ).delete()
 
     BlogIndex.objects.get(path="000100020001").delete()
 
