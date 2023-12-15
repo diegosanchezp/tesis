@@ -20,6 +20,8 @@ def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
     Group = apps.get_model("auth", model_name="Group")
     ContentType = apps.get_model("contenttypes.ContentType")
     GroupPagePermission = apps.get_model("wagtailcore", model_name="GroupPagePermission")
+    Collection = apps.get_model("wagtailcore", model_name="Collection")
+    GroupCollectionPermission = apps.get_model("wagtailcore", model_name="GroupCollectionPermission")
 
     Page = apps.get_model("wagtailcore", model_name="Page")
 
@@ -104,10 +106,36 @@ def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
     # Setup page permissions for the mentor groups
     # add_page comes from wagtail's data migrations
     add_page_permission = Permission.objects.get(codename="add_page")
+
     group_permission = GroupPagePermission.objects.create(
         group=mentor_group, page=blog_index, permission_type="add",
         permission=add_page_permission,
     )
+
+    # Create a collection for the mentors
+    mentores_collection = Collection.objects.create(
+        # Wagtail data
+        name="Mentores",
+        # Tree beard low level data
+        path="00010001",
+        depth=2,
+        numchild=0,
+    )
+
+    # Add permissions to the mentor group to add documents and images to the mentores collection
+    add_document_permission = Permission.objects.get(codename="add_document")
+    add_image_permission = Permission.objects.get(codename="add_image")
+
+    GroupCollectionPermission.objects.create(
+        group=mentor_group, collection=mentores_collection,
+        permission=add_document_permission,
+    )
+
+    GroupCollectionPermission.objects.create(
+        group=mentor_group, collection=mentores_collection,
+        permission=add_image_permission,
+    )
+
 
 def remove_initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
 

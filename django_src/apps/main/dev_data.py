@@ -4,6 +4,7 @@ import argparse
 
 from datetime import date
 
+from django.db.utils import IntegrityError
 from django.db import transaction
 from django.contrib.auth import get_user_model
 from django.conf import settings
@@ -239,6 +240,9 @@ def dev_pages(apps: Apps):
             site.save()
         except Site.DoesNotExist:
             # Don't bother updating the site because it is already updated
+            pass
+        except IntegrityError:
+            # Delete the wagtail provided site beacuse it is already updated
             pass
 
 def reset_dev_pages(apps):
