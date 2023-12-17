@@ -19,13 +19,17 @@ def filter_user_pages(parent_page: Page, pages, request: HttpRequest):
     return pages.filter(owner=request.user)
 
 @hooks.register("after_create_page")
+@hooks.register("after_edit_page")
 def set_privacy_page_create(request, page):
     """
     Set the privacy of the page such that only logged in users can see it
     """
+    if not Mentor.objects.filter(user=request.user).exists():
+        return page
 
     # Add the login restriction to the page
     page.view_restrictions.create(restriction_type=BaseViewRestriction.LOGIN)
+    return page
 
 
 @hooks.register("construct_document_chooser_queryset")

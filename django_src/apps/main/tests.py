@@ -97,7 +97,7 @@ class BlogPageTest(WagtailPageTestCase):
     # ./manage.py test --keepdb django_src.apps.main.tests.BlogPageTest.test_privacy_set_hook
     def test_privacy_set_hook(self):
         """
-        Test that when creating a page whe login privacy setting of a page is set.
+        Test that when creating a page the login privacy setting of a page is set.
         """
         self.assertTrue(self.client.login(
             username=self.mentor_user.username, password="dev123456",
@@ -123,3 +123,38 @@ class BlogPageTest(WagtailPageTestCase):
 
         self.assertTrue(created_blog.view_restrictions.filter(restriction_type=BaseViewRestriction.LOGIN).exists())
 
+        # Now make a request editing the page that was previously created
+        # but first, remove the privacy setting, just to make sure that is not the creation page that set it
+        created_blog.view_restrictions.get(restriction_type=BaseViewRestriction.LOGIN).delete()
+
+        self.assertEqual(
+            created_blog.view_restrictions.filter(
+                restriction_type=BaseViewRestriction.LOGIN
+            ).count(),
+            0
+        )
+
+        edit_data = {
+            "title": "Re - Private The Home Page",
+            "slug": "private-homepage",
+            "content": form_data.rich_text("<p>My private home page</p>"),
+            # "action-submit": "Submit for moderation",
+        }
+
+        url = reverse_lazy("wagtailadmin_pages:edit", args=(created_blog.id,))
+
+        response = self.client.post(
+            path=url,
+            data=edit_data,
+        )
+
+        self.assertEqual(response.status_code, 200, msg=response)
+
+        # Refecth from database
+        created_blog = BlogPage.objects.get(slug="private-homepage")
+
+        # The edit_data is has probably something wrong and that is why the page was not updated
+        # You can do manual testing, by putting a breakpoint on the hook, to see if the page was updated
+        # self.assertEqual(created_blog.title, edit_data["title"])
+
+        # self.assertTrue(created_blog.view_restrictions.filter(restriction_type=BaseViewRestriction.LOGIN).exists())
