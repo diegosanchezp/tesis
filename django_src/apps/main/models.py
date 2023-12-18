@@ -14,7 +14,7 @@ from wagtail.admin.panels import (
     MultiFieldPanel,
     InlinePanel,
 )
-
+from wagtail.fields import RichTextField
 # Create your models here.
 class HeroSection(Orderable):
     page = ParentalKey(
@@ -97,3 +97,45 @@ class HomePage(Page):
             heading=_("Factores promocionales")
         ),
     ]
+
+    # Block the creation of child pages
+    subpage_types = ['BlogIndex']
+
+class BlogIndex(Page):
+    """
+    A page to list all the BlogPages
+    """
+
+    # no label specified in subpage_types, because BlogPage is in the same app
+    subpage_types = ['BlogPage']
+
+class BlogPage(Page):
+    template = "main/blog.html" # Todo
+    page_description = _("Blog")
+
+    # Optional image
+    thumbnail = models.ForeignKey(
+        "wagtailimages.Image",
+        verbose_name=_("Imagen del blog"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text=_("Thumbnail del blog"),
+    )
+
+    # When set to True, the Wagtail editor will not allow any users to edit the content of the page,
+    # only the owner
+    locked = True
+
+    content = RichTextField(
+        verbose_name=_("Contenido del blog")
+    )
+
+    content_panels = Page.content_panels + [
+        FieldPanel("thumbnail"),
+        FieldPanel("content")
+    ]
+
+    # Block the creation of child pages
+    subpage_types = []

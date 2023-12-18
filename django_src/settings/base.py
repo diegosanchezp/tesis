@@ -12,6 +12,7 @@ env = environ.Env(
     AWS_S3_REGION_NAME=(str,""),
     AWS_S3_URL_PROTOCOL=(str,"https:"),
     AWS_STORAGE_BUCKET_NAME=(str,"false_bucket_name"),
+    ADMIN_USERNAME=(str,""),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -151,6 +152,8 @@ AUTHENTICATION_BACKENDS = [
     # `allauth` specific authentication methods, such as login by e-mail
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
+
+ADMIN_USERNAME=env("ADMIN_USERNAME")
 
 # Internationalization
 # https://docs.djangoproject.com/en/stable/topics/i18n/

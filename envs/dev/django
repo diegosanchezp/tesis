@@ -5,6 +5,8 @@ PIPENV_CACHE_DIR=/app/.pipcache
 SECRET_KEY="django-insecure-ljhb6%7olggtla2gbam+d5u=7w5#&&dyl%6f*+a96@lcw(azwk"
 
 DJANGO_SETTINGS_MODULE=django_src.settings.development
+ADMIN_USERNAME="admin"
+ADMIN_PASSWORD="dev123456"
 
 # NGINX proxy, and docker-compose host
 ALLOWED_HOSTS="localhost, 0.0.0.0, 127.0.0.1, host.docker.internal"

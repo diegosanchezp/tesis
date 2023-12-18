@@ -67,3 +67,7 @@ CSRF_TRUSTED_ORIGINS = load_env_array("CSRF_TRUSTED_ORIGINS")
 
 # Should probably move this to a testing.py settings file
 MEDIA_ROOT_TEST = os.path.join(BASE_DIR, "tests", "media")
+
+# Wagtail needs this for send emails, otherwise might get
+# OSError: [Errno 99] Cannot assign requested address, sending emails
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
