@@ -10,6 +10,7 @@ module.exports = {
     extend: {},
   },
   plugins: [
-    require('flowbite/plugin')
+    require('flowbite-typography'),
+    require('flowbite/plugin'),
   ],
 }

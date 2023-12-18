@@ -110,7 +110,7 @@ class BlogIndex(Page):
     subpage_types = ['BlogPage']
 
 class BlogPage(Page):
-    template = "" # Todo
+    template = "main/blog.html" # Todo
     page_description = _("Blog")
 
     # Optional image
