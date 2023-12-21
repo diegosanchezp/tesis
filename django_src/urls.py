@@ -14,7 +14,7 @@ from django_src.apps.main.views import PrivateMediaView
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
-from django_src.apps.main.views import ComponentsDemoView
+from django_src.apps.main.views import ComponentsDemoView, color_demo_view
 
 urlpatterns = [
 
@@ -83,6 +83,7 @@ urlpatterns += [
     # Wagtail
     path('cms/', include(wagtailadmin_urls)),
     path('documents/', include(wagtaildocs_urls)),
+    path("color_demo/<str:color>", color_demo_view, name="color_demo"), # Delete later
     # End wagtail
 
     # Landing page Wagtail
