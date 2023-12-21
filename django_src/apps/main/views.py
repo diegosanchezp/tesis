@@ -4,7 +4,8 @@ import os
 from django.views.generic.base import TemplateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
-
+from django.template.response import TemplateResponse # Delete
+from django.views.decorators.http import require_http_methods # Delete
 # Create your views here.
 
 class PrivateMediaView(LoginRequiredMixin, View):
@@ -37,3 +38,16 @@ class ComponentsDemoView(TemplateView):
         # Parametrized template name
         self.template_name = f"components/demos/{kwargs.get('template_name')}.html"
         return super().get(request,*args,**kwargs)
+
+# Delete later
+@require_http_methods(["GET",])
+def color_demo_view(request, color: str):
+
+    template_name = "color_demo.html"
+
+    if color == "gris":
+        bg_color = "bg-slate-100"
+    else:
+        bg_color = "bg-[#FFF9DD]"
+
+    return TemplateResponse(request, template_name, {"bg_color": bg_color})

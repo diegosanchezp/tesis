@@ -2,3 +2,4 @@ components:
   stepper: "components/stepper.html"
   profile_selector: "components/profile_selector.html"
   button: "components/button.html"
+  navbar: "components/navbar.html"
