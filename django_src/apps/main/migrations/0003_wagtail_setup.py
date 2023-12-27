@@ -124,6 +124,7 @@ def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
 
     # Add permissions to the mentor group to add documents and images to the mentores collection
     add_document_permission = Permission.objects.get(codename="add_document")
+
     add_image_permission = Permission.objects.get(codename="add_image")
 
     GroupCollectionPermission.objects.create(
@@ -169,9 +170,16 @@ class Migration(migrations.Migration):
         # access_admin, and add_page Admin datafixtures are created here
         ('wagtailadmin', '0003_admin_managed'),
 
+        # To acces add_document permission
+        ("wagtaildocs", "0012_uploadeddocument"),
+
+        # To acces add_image permission
+        ("wagtailimages","0025_alter_image_file_alter_rendition_file"),
+
         # This dependency is just here, because of this
         # https://docs.djangoproject.com/en/4.2/topics/migrations/#accessing-models-from-other-apps
-        ('wagtailcore', '0089_log_entry_data_json_null_to_object')
+        ('wagtailcore', '0089_log_entry_data_json_null_to_object'),
+
     ]
 
     operations = [

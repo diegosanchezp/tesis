@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.apps import apps
 from django.apps.registry import Apps
-
+from django_src.apps.register.upload_data import create_carreers
 from shscripts.backup import (
     setup_django
 )
@@ -284,6 +284,7 @@ def reset_dev_pages(apps):
         ).delete()
 
 def upload_dev_data():
+    create_carreers()
     dev_pages(apps)
     mentors(apps)
 
