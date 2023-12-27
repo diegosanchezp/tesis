@@ -13,6 +13,7 @@ Configurar record DNS de tipo A para que apunte a la ip publica de la instancia 
 Este paso es requerido para los certificados https
 
 # Generar certificados https
+
 ```bash
 load_env env/production/host
 ```
@@ -24,6 +25,17 @@ sudo --preserve-env docker compose --file "$ROOT_DIR"/docker/production/docker-c
   -d tesis.diegojsanchez.com
 ```
 
+El comando de arriba sirve también para renovar el certificado. 
+
+Si los contenedores están activos, hay que pararlos y después activarlos, para que ngnix pueda leer el nuevo certificado.
+
+```bash
+sudo --preserve-env docker compose stop
+```
+
+```bash
+sudo --preserve-env docker compose start
+```
 # Generar usuario superadmin
 ```bash
 sudo --preserve-env docker compose run --rm --interactive --tty django \
