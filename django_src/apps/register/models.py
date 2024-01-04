@@ -1,7 +1,119 @@
+
+import mimetypes
+
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinLengthValidator
 from django.utils.translation import gettext_lazy as _
+
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+
+def get_file_type(voucher):
+    """
+    Returns the type of file for a voucher
+    """
+
+    mime_type, _ = mimetypes.guess_type(voucher.path)
+    if not mime_type:
+        return
+
+    if "image" in mime_type:
+        return "image"
+
+    _, extension = mime_type.split('/')
+    if extension == "pdf":
+        return extension
+
+class RegisterApprovalStates(models.TextChoices):
+    """
+    Aproval States for an entity
+    """
+
+    # The inital state, Waiting for approval.
+    WAITING = "WAITING", _("Esperando aprobación")
+
+    # Student Approved
+    APPROVED = "APPROVED", _("Aprobado")
+
+    # Rejected
+    REJECTED = "REJECTED", _("Rechazado")
+
+class RegisterApprovalEvents(models.TextChoices):
+    """
+    Events that can happen in the approval process
+    """
+    REJECT = "REJECT", _("Rechazar")
+    APPROVE = "APPROVE", _("Aprobar")
+
+class RegisterApprovals(models.Model):
+
+    # Generic relation for user that it is subject to approval or rejection
+    # Can be of two types: Student or Mentor
+    # user_id = models.PositiveIntegerField()
+    user_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    # user = GenericForeignKey("user_type", "user_id")
+    user = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="my_approvals",
+    )
+    # -----
+
+    # An admin that approves, rejects, etc, the user
+    admin = models.ForeignKey(
+        verbose_name=_("Administrador"),
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="register_approvals",
+        null=True,
+        blank=True,
+    )
+
+    state = models.TextField(
+        _("Estatus"),
+        choices=RegisterApprovalStates.choices,
+    )
+
+    date = models.DateTimeField(
+        verbose_name=_("Fecha"),
+        auto_now=True,
+    )
+
+    class Meta:
+        verbose_name = _("Aprobación de registro")
+        verbose_name_plural = _("Aprobaciones de registro")
+
+    def __str__(self) -> str:
+        return f"{self.user} {self.user_type.model} {self.state} "
+
+    @property
+    def voucher(self):
+        if self.user_type.model == "mentor":
+            voucher = self.user.mentor.voucher
+        elif self.user_type.model == "student":
+            voucher = self.user.student.voucher
+        else:
+            return
+
+        return voucher
+
+    @property
+    def voucher_file_type(self):
+        if self.voucher:
+            return get_file_type(self.voucher)
+
+
+
+approval_state_machine = {
+    RegisterApprovalStates.WAITING: {
+        RegisterApprovalEvents.REJECT: RegisterApprovalStates.REJECTED,
+        RegisterApprovalEvents.APPROVE: RegisterApprovalStates.APPROVED,
+    },
+    RegisterApprovalStates.REJECTED: {
+        RegisterApprovalEvents.APPROVE: RegisterApprovalStates.APPROVED,
+    }
+}
 
 # Create your models here.
 class Student(models.Model):
@@ -13,6 +125,12 @@ class Student(models.Model):
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="student",
+    )
+
+    register_state = models.TextField(
+        _("Estatus de Registro"),
+        choices=RegisterApprovalStates.choices,
+        default=RegisterApprovalStates.WAITING,
     )
 
     interests=models.ManyToManyField(
@@ -44,6 +162,10 @@ class Student(models.Model):
         null=True,
         blank=True,
     )
+
+    class Meta:
+        verbose_name = _("Estudiante")
+        verbose_name_plural = _("Estudiantes")
 
     def __str__(self) -> str:
         return f"{self.user.first_name} {self.user.last_name}"
@@ -106,11 +228,23 @@ class Mentor(models.Model):
     # the students to whom the mentor has mentored
     students = models.ManyToManyField(
         to="Student",
-        verbose_name=_("Estudiantes mentoreados")
+        verbose_name=_("Estudiantes mentoreados"),
+        blank=True,
     )
+
+    register_state = models.TextField(
+        _("Estatus de Registro"),
+        choices=RegisterApprovalStates.choices,
+        default=RegisterApprovalStates.WAITING,
+    )
+
+    class Meta:
+        verbose_name = _("Mentor")
+        verbose_name_plural = _("Mentores")
 
     def __str__(self) -> str:
         return f"{self.user.first_name} {self.user.last_name}"
+
 
 class MentorExperience(models.Model):
     """

@@ -1,12 +1,18 @@
 from datetime import date
 from django import forms
-
+from django.db.models import Q
 from django.contrib.auth.forms import BaseUserCreationForm
 from django.contrib.auth import get_user_model
-from django.core.validators import MinLengthValidator
+from django.contrib.contenttypes.models import ContentType
+from django.db.models.query import QuerySet
+
 from django_src.apps.register.models import (
-    Carreer, Mentor, Student, MentorExperience
+    Carreer, Mentor, Student, MentorExperience,
+    RegisterApprovals,
+    RegisterApprovalStates, RegisterApprovalEvents,
+    approval_state_machine,
 )
+
 from django.core.exceptions import ValidationError
 
 from django.utils.translation import gettext_lazy as _
@@ -277,3 +283,101 @@ class MentorForm(forms.ModelForm):
         widgets = {
             "carreer": forms.HiddenInput()
         }
+
+class UserTypeChoiceField(forms.ModelChoiceField):
+    """
+    Just to get a better name for the options of this field
+    """
+    def label_from_instance(self, obj: ContentType):
+        translate={
+            "mentor": _("Mentor"),
+            "student": _("Estudiante"),
+        }
+        return f"{translate[obj.model]}"
+
+class ApprovalsFilterForm(forms.Form):
+
+
+    # --- Filters ---
+    name = forms.CharField(
+        label=_("Nombre"),
+        strip=True,
+        required=False,
+    )
+
+    status = forms.ChoiceField(
+        label=_("Estatus"),
+        choices=[("all", _("Todos"))] + RegisterApprovalStates.choices,
+        required=False,
+    )
+
+    action = forms.ChoiceField(
+        label=_("Acciones"),
+        choices=RegisterApprovalEvents.choices + [("search", _("Buscar"))],
+        required=True,
+    )
+
+    user_type = UserTypeChoiceField(
+        label=_("Tipo"),
+        queryset=ContentType.objects.filter(Q(model="mentor") | Q(model="student")),
+        to_field_name="model",
+        empty_label=_("Todos"),
+        required=False,
+    )
+
+    # --- End Filters ---
+    approvals=forms.ModelMultipleChoiceField(queryset=None, required=False)
+
+    def __init__(self, *args, approvals=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # This field is not rendered
+        if approvals is None:
+            # Users that are in the approval request table
+            approvals = RegisterApprovals.objects.all()
+
+        self.initial["status"] = "all"
+        self.fields["approvals"].queryset = approvals
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if not cleaned_data:
+            return cleaned_data
+
+        # Validate that the action is valid for the current state
+
+        approvals: QuerySet[RegisterApprovals] | None = cleaned_data.get("approvals")
+        action: RegisterApprovalEvents | None = cleaned_data.get("action")
+
+        if not action:
+            return cleaned_data
+
+        approval_errors = []
+
+        if action in [RegisterApprovalEvents.APPROVE, RegisterApprovalEvents.REJECT]:
+
+            if not approvals:
+                return cleaned_data
+
+            for approval in approvals:
+
+                try:
+                    approval_state_machine[approval.state][action]
+                except KeyError:
+                    # If there is no next state, it means that the action is not valid for the current state
+                    approval_errors.append(
+                        ValidationError(
+                            _("Acción %(accion)s, es inválida para el estado %(state)s de %(user)s"),
+                            params={
+                                "accion": RegisterApprovalEvents[action].label,
+                                "state": RegisterApprovalStates[approval.state].label,
+                                "user": f"{approval.user.first_name} {approval.user.last_name}",
+                            },
+                            code="invalid_action",
+                        )
+                    )
+
+            # Raise the errors if any
+            if len(approval_errors) > 0:
+                raise ValidationError(approval_errors)

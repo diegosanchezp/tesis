@@ -19,6 +19,7 @@ from django_src.apps.register.models import (
     Mentor, MentorExperience,
     Faculty, Carreer,
     InterestTheme,
+    RegisterApprovals, RegisterApprovalStates,
 )
 from django_src.apps.register.forms import (
     StudentForm,
@@ -1337,6 +1338,11 @@ class TestCompleteMentorProfileView(TestCaseWithData):
         response = cast(HttpResponse, profile_view.complete_profile_view(request))
 
         self.assertEqual(response.url, reverse_lazy("register:success"))
+        try:
+            register_approval = RegisterApprovals.objects.get(user__email=user_form.cleaned_data["email"])
+            self.assertEqual(register_approval.state, RegisterApprovalStates.WAITING)
+        except RegisterApprovals.DoesNotExist:
+            self.fail("RegisterApproval was not created")
 
         # Test that the voucher was saved
         mentor = Mentor.objects.get(user__email=user_form.cleaned_data['email'])

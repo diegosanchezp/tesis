@@ -8,6 +8,7 @@ from .models import (
     Student,
     Mentor,
     MentorExperience,
+    RegisterApprovals,
 )
 
 # Register your models here.
@@ -84,3 +85,11 @@ class MentorAdmin(admin.ModelAdmin):
     @admin.display(description="Last name")
     def last_name(self,obj):
         return obj.user.last_name
+
+@admin.register(RegisterApprovals)
+class RegisterApprovalAdmin(admin.ModelAdmin):
+    list_display = ("user","user_type", "date")
+
+    @admin.display(description="email")
+    def user(self,obj):
+        return obj.user.email
