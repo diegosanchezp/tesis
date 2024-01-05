@@ -6,7 +6,6 @@ from django.conf import settings
 from django.core.validators import MinLengthValidator
 from django.utils.translation import gettext_lazy as _
 
-from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
 def get_file_type(voucher):
@@ -128,12 +127,6 @@ class Student(models.Model):
         related_name="student",
     )
 
-    register_state = models.TextField(
-        _("Estatus de Registro"),
-        choices=RegisterApprovalStates.choices,
-        default=RegisterApprovalStates.WAITING,
-    )
-
     interests=models.ManyToManyField(
         to="InterestTheme",
         verbose_name=_("Intereses"),
@@ -231,12 +224,6 @@ class Mentor(models.Model):
         to="Student",
         verbose_name=_("Estudiantes mentoreados"),
         blank=True,
-    )
-
-    register_state = models.TextField(
-        _("Estatus de Registro"),
-        choices=RegisterApprovalStates.choices,
-        default=RegisterApprovalStates.WAITING,
     )
 
     class Meta:
