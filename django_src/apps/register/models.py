@@ -14,7 +14,8 @@ def get_file_type(voucher):
     Returns the type of file for a voucher
     """
 
-    mime_type, _ = mimetypes.guess_type(voucher.path)
+    # voucher.storage
+    mime_type, _ = mimetypes.guess_type(voucher.name)
     if not mime_type:
         return
 
