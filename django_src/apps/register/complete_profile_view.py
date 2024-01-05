@@ -1,9 +1,15 @@
 from typing import Literal, cast
 from django import forms
+from django.db import models
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.urls import reverse_lazy
-from django_src.apps.register.models import Mentor, Student
+from django.contrib.contenttypes.models import ContentType
+
+from django_src.apps.register.models import (
+    Mentor, Student,
+    RegisterApprovals, RegisterApprovalStates,
+)
 
 from render_block import render_block_to_string
 from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
@@ -137,7 +143,24 @@ def get_context(
 
     return context
 
+def create_approval(user, entity_cls: type[models.Model]):
+    """
+    Creates a register approval for an admin to review
+    """
+    entity_type = ContentType.objects.get_for_model(entity_cls)
+    approval = RegisterApprovals.objects.create(
+        user=user,
+        user_type=entity_type,
+        state=RegisterApprovalStates.WAITING,
+    )
+
+    return approval
+
+
 def create_student(user, student_form: StudentForm) -> Student:
+    """
+    Creates a student instance and relates it to the user
+    """
 
     # Create an instance of the student object but don't save it to DB
     student = student_form.save(commit=False)
@@ -152,6 +175,7 @@ def create_student(user, student_form: StudentForm) -> Student:
 
 def create_mentor(user, mentor_form: MentorForm, experience_form) -> Mentor:
     """
+    Creates a mentor instance and relates it to the user
     """
 
     # Create an instance of the mentor object but don't save it to DB
@@ -200,7 +224,6 @@ def complete_profile_view(request):
         user_form = cast(UserCreationForm,context["user_form"])
         entity_form = cast(forms.ModelForm,context["entity_form"])
         query_form = cast(forms.ModelForm,context["query_form"])
-        profile = query_form.cleaned_data["profile"]
 
 
         # ---- case: both forms are valid ---- #
@@ -211,12 +234,16 @@ def complete_profile_view(request):
             if isinstance(entity_form, StudentForm):
                 user = create_user(user_form)
                 entity = create_student(user, entity_form)
+                # Create the registration approval
+                create_approval(user, Student)
 
             if isinstance(entity_form, MentorForm):
                 exp_formset = context["exp_formset"]
                 if exp_formset.is_valid():
                     user = create_user(user_form)
                     entity = create_mentor(user, entity_form, exp_formset)
+                    # Create the registration approval
+                    create_approval(user, Mentor)
 
             if entity:
                 # put here a success message using django messages

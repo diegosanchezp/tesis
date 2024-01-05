@@ -29,7 +29,7 @@ def read_env(BASE_DIR):
     env.read_env(str(ENV_DIR / "django"))
     return env
 
-def setup_django(BASE_DIR):
+def setup_django(BASE_DIR, DJANGO_SETTINGS_MODULE: str = 'django_src.settings.development'):
     """
     Load settings and populate Django’s application registry.
     This step is required django components in standalone mode.
@@ -40,7 +40,7 @@ def setup_django(BASE_DIR):
     # otherwise we can't do imports like from django_src.settings
     sys.path.append(str(BASE_DIR))
 
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_src.settings.development')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', DJANGO_SETTINGS_MODULE)
     django.setup()
 
 def get_fixture_path(BASE_DIR):
