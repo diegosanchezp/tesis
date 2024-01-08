@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.validators import MinLengthValidator
 from django.utils.translation import gettext_lazy as _
 
+from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
 def get_file_type(voucher):
@@ -190,6 +191,13 @@ class InterestTheme(models.Model):
         verbose_name=_("Nombre"),
     )
 
+    pro_carreers_match = GenericRelation(
+        "ThemeSpecProCarreer",
+        related_query_name="interest_theme",
+        content_type_field="content_type",
+        object_id_field="object_id",
+    )
+
     def __str__(self) -> str:
         return f"{self.name}"
 
@@ -325,5 +333,33 @@ class CarrerSpecialization(models.Model):
         on_delete=models.CASCADE,
     )
 
+    pro_carreers_match = GenericRelation(
+        to="ThemeSpecProCarreer",
+        related_query_name="carreer_specialization",
+        content_type_field="content_type",
+        object_id_field="object_id",
+
+    )
+
     def __str__(self) -> str:
         return f"{self.name}"
+
+class ThemeSpecProCarreer(models.Model):
+    """
+    A model that makes the relation between a Professional Carreer, a Theme Specification
+    or Carreer Specialization
+    """
+
+    weight = models.PositiveIntegerField(default=0, blank=False, null=False)
+
+    # For generic relationships
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    pro_career = models.ForeignKey(
+        verbose_name=_("Carrera profesional"),
+        to="pro_carreer.ProfessionalCarreer",
+        on_delete=models.CASCADE,
+        related_name="weighted_themespecs",
+    )
