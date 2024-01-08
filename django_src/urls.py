@@ -23,6 +23,7 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     #path('accounts/', include('allauth.urls')),
     path('register/', include('django_src.apps.register.urls', namespace="register")),
+    path('pro_carrer/', include('django_src.pro_carreer.urls', namespace="pro_carreers")),
 ]
 
 if settings.DEBUG:
