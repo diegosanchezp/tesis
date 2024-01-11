@@ -15,9 +15,9 @@ export type myAlpineStore = {
     name: string
     store: any
     persist: boolean
-    as: string
-    persist_value: string
-    persist_prop: string
+    as?: string
+    persist_value?: string
+    persist_prop?: string
 }
 
 
