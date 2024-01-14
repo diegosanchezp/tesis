@@ -138,6 +138,7 @@ class Student(models.Model):
     specialization=models.ForeignKey(
         to="CarrerSpecialization",
         null=True,
+        blank=True,
         verbose_name=_("Especialización"),
         on_delete=models.SET_NULL,
         related_name="students",

@@ -31,7 +31,7 @@
     "@alpinejs/persist": "^3.13.2",
     "alpinejs": "^3.13.1",
     "cytoscape": "^3.28.1",
-    "cytoscape-elk": "^2.2.0",
+    "cytoscape-cola": "^2.5.1",
     "cytoscape-popper": "^2.0.0",
     "flowbite": "^1.8.0",
     "htmx.org": "^1.9.6",

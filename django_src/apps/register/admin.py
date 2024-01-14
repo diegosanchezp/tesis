@@ -4,7 +4,8 @@ from .models import (
     Faculty,
     Carreer,
     CarrerSpecialization,
-    InterestTheme,
+    InterestTheme, StudentInterest,
+    ThemeSpecProCarreer,
     Student,
     Mentor,
     MentorExperience,
@@ -42,9 +43,16 @@ class FacultyAdmin(admin.ModelAdmin):
         CarreerInline
     ]
 
+class StudentInterestInline(admin.StackedInline):
+    model = StudentInterest
+    extra = 1
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
+
+    fields = ["specialization", "user", "carreer", "voucher"]
+    inlines = [StudentInterestInline]
+
     list_display = ("first_name","last_name","email",)
 
     @admin.display(description="email")
@@ -93,3 +101,9 @@ class RegisterApprovalAdmin(admin.ModelAdmin):
     @admin.display(description="email")
     def user(self,obj):
         return obj.user.email
+
+@admin.register(ThemeSpecProCarreer)
+class ThemeSpecProCarreerAdmin(admin.ModelAdmin):
+
+    list_display = ("content_object", "pro_career", "content_type")
+

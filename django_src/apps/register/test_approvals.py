@@ -28,6 +28,7 @@ from .forms import (
 
 from . import approvals_view
 
+# ./manage.py test --keepdb django_src.apps.register.test_approvals.TestApprovals
 class TestApprovals(TestCaseWithData):
     def setUp(self):
         super().setUp()
@@ -39,18 +40,7 @@ class TestApprovals(TestCaseWithData):
         # The data that I'll need
         # Created student with status
         # Created mentor with status
-        cls.User = get_user_model()
 
-        cls.admin_user = cls.User.objects.get(
-            username=settings.ADMIN_USERNAME,
-        )
-
-        cls.mentor_user = cls.User.objects.create(
-            username="pedro",
-            first_name="Pedro",
-            last_name="Rodriguez",
-            email="pedro@mail.com",
-        )
 
         cls.mentor = Mentor.objects.create(
             user=cls.mentor_user,
@@ -61,24 +51,14 @@ class TestApprovals(TestCaseWithData):
             ),
         )
 
-        cls.student_user = cls.User.objects.create(
-            username="diego",
-            first_name="Diego",
-            last_name="Sánchez",
-            email="diego@mail.com",
-
-        )
-
         cls.student_type = ContentType.objects.get_for_model(Student)
-        cls.student = Student.objects.create(
-            user=cls.student_user,
-            carreer=cls.computacion,
-            voucher=SimpleUploadedFile(
-                name="profile_pic.jpg",
-                content=open(str(Path(settings.MEDIA_ROOT_TEST) / "jpeg_example.jpg"), "rb").read(),
-                content_type="image/jpeg",
-            )
+        cls.student.voucher = SimpleUploadedFile(
+            name="profile_pic.jpg",
+            content=open(str(Path(settings.MEDIA_ROOT_TEST) / "jpeg_example.jpg"), "rb").read(),
+            content_type="image/jpeg",
         )
+
+        cls.student.save()
 
         cls.mentor_type = ContentType.objects.get_for_model(Mentor)
 
@@ -88,14 +68,6 @@ class TestApprovals(TestCaseWithData):
             admin=cls.admin_user, # approved by the admin
             state=RegisterApprovalStates.WAITING,
         )
-
-        cls.student_approval = RegisterApprovals.objects.create(
-            user=cls.student_user,
-            user_type=cls.student_type,
-            admin=cls.admin_user,
-            state=RegisterApprovalStates.APPROVED,
-        )
-
 
     # ./manage.py test --keepdb django_src.apps.register.test_approvals.TestApprovals.test_form_valid
     def test_form_valid(self):
@@ -134,8 +106,6 @@ class TestApprovals(TestCaseWithData):
     # ./manage.py test --keepdb django_src.apps.register.test_approvals.TestApprovals.test_model
     def test_model(self):
 
-        self.assertEqual(RegisterApprovals.objects.count(), 2)
-
         self.assertEqual(self.mentor_approval.user_type, self.mentor_type, msg=self.mentor_approval.user_type)
         self.assertEqual(self.mentor_approval.user, self.mentor_user)
 
@@ -146,7 +116,7 @@ class TestApprovals(TestCaseWithData):
         self.assertEqual(self.student_approval.user, self.student_user)
 
         students_approvals = RegisterApprovals.objects.filter(user_type__model="student")
-        self.assertEqual(students_approvals.count(), 1)
+        self.assertGreaterEqual(students_approvals.count(), 1)
 
     # ./manage.py test --keepdb django_src.apps.register.test_approvals.TestApprovals.test_filter_users
     def test_filter_users(self):

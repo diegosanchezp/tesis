@@ -1,4 +1,10 @@
 from django.test import TestCase
+from django.contrib.auth import get_user_model
+from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+from django_src.apps.register.models import (
+    RegisterApprovals,
+)
 
 from .models import (
     Student,
@@ -6,6 +12,7 @@ from .models import (
     Faculty, Carreer,
     InterestTheme,
 )
+from .upload_data import create_student
 
 class TestCaseWithData(TestCase):
     """
@@ -18,6 +25,12 @@ class TestCaseWithData(TestCase):
 
         cls.faculty, created = Faculty.objects.get_or_create(
             name="Ciencias",
+        )
+
+        cls.User = get_user_model()
+
+        cls.admin_user = cls.User.objects.get(
+            username=settings.ADMIN_USERNAME,
         )
 
         cls.computacion, created = cls.faculty.carreers.get_or_create(name="Computación")
@@ -47,3 +60,17 @@ class TestCaseWithData(TestCase):
 
         cls.computacion.interest_themes.add(*cls.computacion_interests)
         cls.matematicas.interest_themes.add(*cls.mates_interest_set)
+
+        cls.student_user, cls.student, cls.student_approval, cls.unapproved_student_user, cls.unapproved_student, cls.unapproved_student_approval = create_student(
+            cls.User, Student, RegisterApprovals, ContentType,
+            cls.computacion
+        )
+
+        cls.mentor_user = cls.User.objects.create(
+            username="pedro",
+            first_name="Pedro",
+            last_name="Rodriguez",
+            email="pedro@mail.com",
+        )
+        cls.mentor_user.set_password("dev123456")
+        cls.mentor_user.save()
