@@ -1,0 +1,17 @@
+{% load slippers %}
+
+<tr id="weighted-{{spec_procareer.content_object.id}}" class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+    <td class="pr-4">{{ spec_procareer.weight }}</td>
+    <td class="pr-4">{{ spec_procareer.content_object.name }}</td>
+    <td class="flex gap-x-2">
+        <form hx-post="" hx-target="#weighted-{{spec_procareer.content_object.id}}" hx-swap="delete">
+            <input type="hidden" name="weighted_spec" value="{{ spec_procareer.id }}">
+            <input type="hidden" name="specialization" value="{{ spec_procareer.content_object.id }}">
+            {% #button icon_right="bi bi-dash" type="submit" title="Eliminar" name="action" value=actions.DELETE_SPECIALIZATION %}
+            {% /button %}
+        </form>
+    </td>
+</tr>
+
+{# to be replaced when a new match is created #}
+<tr id="specialization-matches"></tr>

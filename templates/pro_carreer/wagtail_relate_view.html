@@ -1,0 +1,110 @@
+{% extends "wagtailadmin/base.html" %}
+
+{% load django_htmx django_vite slippers %}
+
+{% block titletag %}Relacionar especialización o tema de interés{% endblock %}
+
+{# CSS and JS #}
+{% block extra_css %}
+    {# - Global stylesheet #}
+    {% if settings.DEBUG %}
+      {# For hot module reload use vite_asset, which inserts a javascript file #}
+      {% vite_asset 'css/main.css' %}
+    {% else %}
+      {# In production use an actual css file, tailwind compiled #}
+      <link rel="stylesheet" href="{% vite_asset_url 'css/main.css' %}">
+    {% endif %}
+
+    {# Bootstrap icons #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    {# ==== JavaScripts ==== #}
+
+    {# - ViteJS hot module reload #}
+    {% block vite %}
+        {% if settings.DEBUG %}
+            {% vite_hmr_client %}
+        {% endif %}
+    {% endblock %}
+
+    {% if settings.DEBUG %}
+        {# https://django-htmx.readthedocs.io/en/latest/extension_script.html #}
+        {% django_htmx_script %}
+    {% endif %}
+
+    {% block extrascripts %}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.2.12/pdfobject.min.js" integrity="sha512-lDL6DD6x4foKuSTkRUKIMQJAoisDeojVPXknggl4fZWMr2/M/hMiKLs6sqUvxP/T2zXdrDMbLJ0/ru8QSZrnoQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        {% vite_asset 'js/htmx.ts' %}
+        {% vite_asset 'js/approve_entity.ts' %}
+    {% endblock extrascripts %}
+
+{% endblock extra_css %}
+
+{% block content %}
+
+    <a href="{% url 'relate_theme_spec' pk_pro_career=pro_career.pk %}">
+        {% include "wagtailadmin/shared/header.html" with title=pro_career.title %}
+    </a>
+
+    <div class="nice-padding">
+        <h2 class="text-xl">Relacionar especialización a la carrera profesional</h2>
+
+        {# Render al existing specialization<->professional carreer matches #}
+        <table class="table-auto">
+            <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th class="py-3 pr-4 text-left">Importancia</th>
+                    <th class="py-3 pr-4 text-left">Especialización</th>
+                    <th class="py-3 text-left">Acción</th>
+                </tr>
+            </thead>
+            <tbody >
+                {# Todo optimize this with a select related #}
+                {% for spec_procareer in specs_pro_carreers %}
+                    {% include "pro_carreer/spec_procareer_match.html" with spec_procareer=spec_procareer actions=RelateActions %}
+                {% endfor %}
+                <tr>
+                    <td>
+                        <input
+                            type="number" name="weight" min="0"
+                            required id="id_weight"
+                            form="form-career-specialization"
+                            class="w-[1rem]"
+                        >
+                    </td>
+                    <td>
+                        <select form="form-career-specialization" name="specialization" required id="id_specialization">
+                            <option value="">--Selecciona una opción--</option>
+                            {% for specialization in spec_form.fields.specialization.queryset %}
+                                <option value="{{specialization.pk}}">{{specialization.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        {% #button icon_left="bi bi-plus" type="submit" form="form-career-specialization" name="action" value=RelateActions.RELATE_SPECIALIZATION %}
+                            Crear
+                        {% /button %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- For adding new professional carreer -->
+    </div>
+
+    <form
+        id="form-career-specialization"
+        enctype="multipart/form-data"
+        method="post"
+        hx-post=""
+        hx-target="#specialization-matches"
+        hx-swap="outerHTML"
+    >
+    </form>
+
+    {# CSFR Token for making POST, PUT, DELETE request with htmx #}
+    <script>
+      document.body.addEventListener('htmx:configRequest', (event) => {
+        event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+      });
+    </script>
+{% endblock content %}

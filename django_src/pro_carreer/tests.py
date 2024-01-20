@@ -1,3 +1,4 @@
+from os import environ
 from django.urls.base import reverse_lazy
 from django.db.models.query import QuerySet
 
@@ -24,6 +25,7 @@ from django_src.pro_carreer import student_pro_carreer_view
 from .test_data import (
     create_pro_carreers, create_pro_interes_themes
 )
+from .forms import SpecRelateForm, RelateActions, DeleteSpecRelateForm
 
 from django_src.apps.register.test_utils import TestCaseWithData
 # Create your tests here.
@@ -57,16 +59,11 @@ class TestStudentProCarreerView(TestCaseWithData):
         cls.computacion.carrerspecialization_set.add(
             cls.ati
         )
+        pro_carreers = create_pro_carreers()
 
-
-        # Wagtail's root page
-        cls.root_page = Page.objects.get(slug='root')
-
-        pro_careers = create_pro_carreers()
-
-        cls.pro_careers_index = pro_careers.pro_career_index
-        cls.frontend_dev = pro_careers.frontend_dev
-        cls.fullstack_dev = pro_careers.fullstack_dev
+        cls.frontend_dev = pro_carreers.frontend_dev
+        cls.fullstack_dev = pro_carreers.fullstack_dev
+        cls.pro_career_index = pro_carreers.pro_career_index
 
         # ---- Scenario: Student has interests, ie doesn't have specialization ----
         interest_themes_match = create_pro_interes_themes()
@@ -171,3 +168,133 @@ class TestStudentProCarreerView(TestCaseWithData):
 
             # Should be redirected to login page
             self.assertEqual(response.status_code, 302)
+
+class TestSpecThemeMatchView(TestCaseWithData):
+    """
+    Test the Wagtail view that creates the matches between the professional carreers
+    and the specialization themes
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+        pro_carreers = create_pro_carreers()
+
+        cls.frontend_dev = pro_carreers.frontend_dev
+        cls.fullstack_dev = pro_carreers.fullstack_dev
+        cls.pro_career_index = pro_carreers.pro_career_index
+
+    def setUp(self):
+
+        super().setUp()
+
+        self.url = reverse_lazy("relate_theme_spec", kwargs={"pk_pro_career":self.fullstack_dev.pk})
+
+        # Login the admin user, need it to populate request.user
+        self.assertTrue(self.client.login(
+            username=self.admin_user, password=environ["ADMIN_PASSWORD"],
+        ))
+
+    # ./manage.py test --keepdb django_src.pro_carreer.tests.TestSpecThemeMatchView.test_create_spec_match
+    def test_create_spec_match(self):
+
+        # Check that ati doesnt have any weighted matches with the fullstack dev
+        spec_type = ContentType.objects.get_for_model(CarrerSpecialization)
+
+        self.assertEqual(self.ati.pro_carreers_match.filter(content_type=spec_type).count(), 0)
+
+        response = self.client.post(
+            path=self.url,
+            headers={"HX-Request": "true"},
+            data={
+                "action": RelateActions.RELATE_SPECIALIZATION,
+                "weight": 10,
+                "specialization": self.ati.pk,
+            }
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        try:
+            spec_match = self.ati.pro_carreers_match.get(pro_career=self.fullstack_dev)
+        except:
+            self.fail("The professional career match was not created")
+
+        response_html = response.content.decode()
+        self.assertIn("<tr", response_html)
+        self.assertIn(spec_match.content_object.name, response_html)
+
+
+    # ./manage.py test --keepdb django_src.pro_carreer.tests.TestSpecThemeMatchView.test_forms
+    def test_forms(self):
+
+        form = SpecRelateForm(
+            data={
+                "weight": 10,
+                "specialization": self.ati.pk,
+            }
+        )
+
+        self.assertTrue(form.is_valid(), msg=form.errors)
+
+    # ./manage.py test --keepdb django_src.pro_carreer.tests.TestSpecThemeMatchView.test_delete_weighted_spec
+    def test_delete_weighted_spec(self):
+
+        # Create a weighted match
+        weighted_spec = self.ati.pro_carreers_match.create(
+            pro_career=self.fullstack_dev,
+            weight=10,
+        )
+
+        response = self.client.post(
+            path=self.url,
+            headers={"HX-Request": "true"},
+            data={
+                "action": RelateActions.DELETE_SPECIALIZATION.value,
+                "specialization": self.ati.pk,
+                "weighted_spec": weighted_spec.pk,
+            }
+        )
+
+        response_html = response.content.decode()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_html, "ok")
+
+        # Create again, because is delete by the call to the view
+        weighted_spec, created = self.ati.pro_carreers_match.get_or_create(
+            pro_career=self.fullstack_dev,
+            weight=10,
+        )
+        self.assertTrue(created)
+
+        valid_form = DeleteSpecRelateForm(
+            data={
+                "specialization": self.ati.pk,
+                "weighted_spec": weighted_spec.pk,
+            }
+        )
+
+        self.assertTrue(valid_form.is_valid(), msg=valid_form.errors)
+
+        # Invalid case: when the weighted spec doesnt belong to the specialization
+
+        html_theme, created = InterestTheme.objects.get_or_create(
+            name="HTML",
+        )
+
+        html_fullstack_dev = html_theme.pro_carreers_match.create(
+            weight="10", pro_career=self.fullstack_dev,
+        )
+
+        invalid_form = DeleteSpecRelateForm(
+            data={
+                "specialization": self.ati.pk,
+                "weighted_spec": html_fullstack_dev.pk,
+            }
+        )
+
+        self.assertFalse(invalid_form.is_valid())
+        # Should render error
+        self.assertIn("__all__", invalid_form.errors)
