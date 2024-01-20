@@ -364,3 +364,23 @@ class ThemeSpecProCarreer(models.Model):
         on_delete=models.CASCADE,
         related_name="weighted_themespecs",
     )
+
+    class Meta:
+        unique_together = [["pro_career", "object_id"]]
+
+    def __str__(self) -> str:
+
+        theme_type = ContentType.objects.get_for_model(InterestTheme)
+        spec_type = ContentType.objects.get_for_model(CarrerSpecialization)
+
+        object_str = ""
+
+        if self.content_type == theme_type:
+
+            object_str = self.content_object.name
+
+        if self.content_type == spec_type:
+
+            object_str = self.content_object.name
+
+        return f"{self.pro_career.slug} weight={self.weight} {object_str}"
