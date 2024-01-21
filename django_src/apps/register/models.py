@@ -366,7 +366,7 @@ class ThemeSpecProCarreer(models.Model):
     )
 
     class Meta:
-        unique_together = [["pro_career", "object_id"]]
+        unique_together = [["pro_career", "content_type", "object_id"]]
 
     def __str__(self) -> str:
 

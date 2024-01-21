@@ -42,62 +42,56 @@
 
 {% block content %}
 
+    {# Wagtail styled title #}
     <a href="{% url 'relate_theme_spec' pk_pro_career=pro_career.pk %}">
         {% include "wagtailadmin/shared/header.html" with title=pro_career.title %}
     </a>
-
     <div class="nice-padding">
-        <h2 class="text-xl">Relacionar especialización a la carrera profesional</h2>
+        {# Welcome message #}
+        <div
+            id="welcome-message"
+            class="mb-6 text-center"
+        >
+            <p>Relaciona una especialización o un tema de interés.</p>
+            <p>La <span class="font-bold">importancia</span> ayuda a determinar que tan fuerte es la relación con la carrera profesional.</p>
+            </div>
+        <main class="flex justify-between">
+            <section>
+                <h2 class="text-xl">Relacionar especialización a la carrera profesional</h2>
 
-        {# Render al existing specialization<->professional carreer matches #}
-        <table class="table-auto">
-            <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                <tr>
-                    <th class="py-3 pr-4 text-left">Importancia</th>
-                    <th class="py-3 pr-4 text-left">Especialización</th>
-                    <th class="py-3 text-left">Acción</th>
-                </tr>
-            </thead>
-            <tbody >
-                {# Todo optimize this with a select related #}
-                {% for spec_procareer in specs_pro_carreers %}
-                    {% include "pro_carreer/spec_procareer_match.html" with spec_procareer=spec_procareer actions=RelateActions %}
-                {% endfor %}
-                <tr>
-                    <td>
-                        <input
-                            type="number" name="weight" min="0"
-                            required id="id_weight"
-                            form="form-career-specialization"
-                            class="w-[1rem]"
-                        >
-                    </td>
-                    <td>
-                        <select form="form-career-specialization" name="specialization" required id="id_specialization">
-                            <option value="">--Selecciona una opción--</option>
-                            {% for specialization in spec_form.fields.specialization.queryset %}
-                                <option value="{{specialization.pk}}">{{specialization.name}}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td>
-                        {% #button icon_left="bi bi-plus" type="submit" form="form-career-specialization" name="action" value=RelateActions.RELATE_SPECIALIZATION %}
-                            Crear
-                        {% /button %}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <!-- For adding new professional carreer -->
+                <!-- For adding matches between specialization and professional carreer -->
+                {% include "pro_carreer/spec_theme_table.html" with form_id="form-career-specialization" form=spec_form content_objects=specs_pro_carreers insert_placeholder="specialization-matches" %}
+            </section>
+
+            <section>
+                <h2 class="text-xl">Relacionar tema de interés a la carrera profesional</h2>
+
+                <!-- For adding matches between themes and professional carreer -->
+                {% include "pro_carreer/spec_theme_table.html" with form_id="form-career-theme" form=theme_form content_objects=themes_pro_carreers insert_placeholder="themes-matches" %}
+            </section>
+        </main>
     </div>
 
+
+    {# These forms have to be put outside the table #}
+
+    <!-- For adding matches between specialization and professional carreer -->
     <form
         id="form-career-specialization"
-        enctype="multipart/form-data"
         method="post"
         hx-post=""
-        hx-target="#specialization-matches"
-        hx-swap="outerHTML"
+        hx-target="#{{ spec_form.model_type }}-form"
+        hx-swap="beforebegin"
+    >
+    </form>
+
+    <!-- For adding matches between themes and professional carreer -->
+    <form
+        id="form-career-theme"
+        method="post"
+        hx-post=""
+        hx-target="#{{ theme_form.model_type }}-form"
+        hx-swap="beforebegin"
     >
     </form>
 

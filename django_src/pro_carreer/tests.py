@@ -16,7 +16,7 @@ from django_src.pro_carreer.models import (
 from django_src.apps.register.models import (
     CarrerSpecialization,
     InterestTheme,
-    RegisterApprovals, RegisterApprovalStates,
+    ThemeSpecProCarreer,
     Student,
 )
 
@@ -25,7 +25,7 @@ from django_src.pro_carreer import student_pro_carreer_view
 from .test_data import (
     create_pro_carreers, create_pro_interes_themes
 )
-from .forms import SpecRelateForm, RelateActions, DeleteSpecRelateForm
+from .forms import ThemeSpecRelateForm, RelateActions, DeleteThemeSpecRelateForm
 
 from django_src.apps.register.test_utils import TestCaseWithData
 # Create your tests here.
@@ -169,6 +169,7 @@ class TestStudentProCarreerView(TestCaseWithData):
             # Should be redirected to login page
             self.assertEqual(response.status_code, 302)
 
+# ./manage.py test --keepdb django_src.pro_carreer.tests.TestSpecThemeMatchView
 class TestSpecThemeMatchView(TestCaseWithData):
     """
     Test the Wagtail view that creates the matches between the professional carreers
@@ -185,6 +186,11 @@ class TestSpecThemeMatchView(TestCaseWithData):
         cls.fullstack_dev = pro_carreers.fullstack_dev
         cls.pro_career_index = pro_carreers.pro_career_index
 
+
+        cls.html_theme, created = InterestTheme.objects.get_or_create(
+            name="HTML",
+        )
+
     def setUp(self):
 
         super().setUp()
@@ -195,6 +201,8 @@ class TestSpecThemeMatchView(TestCaseWithData):
         self.assertTrue(self.client.login(
             username=self.admin_user, password=environ["ADMIN_PASSWORD"],
         ))
+
+        self.theme_type = ContentType.objects.get_for_model(InterestTheme)
 
     # ./manage.py test --keepdb django_src.pro_carreer.tests.TestSpecThemeMatchView.test_create_spec_match
     def test_create_spec_match(self):
@@ -208,9 +216,12 @@ class TestSpecThemeMatchView(TestCaseWithData):
             path=self.url,
             headers={"HX-Request": "true"},
             data={
-                "action": RelateActions.RELATE_SPECIALIZATION,
+                # Action forms
+                "action": RelateActions.RELATE_THEME_SPEC,
+                "model_type": CarrerSpecialization.__name__,
+                # Theme spec form fields
                 "weight": 10,
-                "specialization": self.ati.pk,
+                "theme_spec": self.ati.pk,
             }
         )
 
@@ -226,17 +237,48 @@ class TestSpecThemeMatchView(TestCaseWithData):
         self.assertIn(spec_match.content_object.name, response_html)
 
 
+    # ./manage.py test --keepdb django_src.pro_carreer.tests.TestSpecThemeMatchView.test_create_theme_match
+    def test_create_theme_match(self):
+
+        self.assertEqual(self.html_theme.pro_carreers_match.filter(content_type=self.theme_type).count(), 0)
+
+        response = self.client.post(
+            path=self.url,
+            headers={"HX-Request": "true"},
+            data={
+                # Action forms
+                "action": RelateActions.RELATE_THEME_SPEC,
+                "model_type": InterestTheme.__name__,
+                # Theme spec form fields
+                "weight": 10,
+                "theme_spec": self.html_theme.pk,
+            }
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        try:
+            theme_match = self.html_theme.pro_carreers_match.get(pro_career=self.fullstack_dev)
+        except ThemeSpecProCarreer.DoesNotExist:
+            self.fail("The theme relation with professional careermatch was not created")
+
+        response_html = response.content.decode()
+
+        self.assertIn(theme_match.content_object.name, response_html)
+
     # ./manage.py test --keepdb django_src.pro_carreer.tests.TestSpecThemeMatchView.test_forms
     def test_forms(self):
 
-        form = SpecRelateForm(
+        form = ThemeSpecRelateForm(
+            model=CarrerSpecialization,
             data={
                 "weight": 10,
-                "specialization": self.ati.pk,
+                "theme_spec": self.ati.pk,
             }
         )
 
         self.assertTrue(form.is_valid(), msg=form.errors)
+        self.assertEqual(form.model_type, CarrerSpecialization.__name__)
 
     # ./manage.py test --keepdb django_src.pro_carreer.tests.TestSpecThemeMatchView.test_delete_weighted_spec
     def test_delete_weighted_spec(self):
@@ -251,8 +293,9 @@ class TestSpecThemeMatchView(TestCaseWithData):
             path=self.url,
             headers={"HX-Request": "true"},
             data={
-                "action": RelateActions.DELETE_SPECIALIZATION.value,
-                "specialization": self.ati.pk,
+                "action": RelateActions.DELETE_THEME_SPEC.value,
+                "model_type": CarrerSpecialization.__name__,
+                "theme_spec": self.ati.pk,
                 "weighted_spec": weighted_spec.pk,
             }
         )
@@ -269,9 +312,10 @@ class TestSpecThemeMatchView(TestCaseWithData):
         )
         self.assertTrue(created)
 
-        valid_form = DeleteSpecRelateForm(
+        valid_form = DeleteThemeSpecRelateForm(
+            model = CarrerSpecialization,
             data={
-                "specialization": self.ati.pk,
+                "theme_spec": self.ati.pk,
                 "weighted_spec": weighted_spec.pk,
             }
         )
@@ -288,9 +332,12 @@ class TestSpecThemeMatchView(TestCaseWithData):
             weight="10", pro_career=self.fullstack_dev,
         )
 
-        invalid_form = DeleteSpecRelateForm(
+        # Check Invalid case: when the weighted spec doesnt belong to the 
+        # theme or spec
+        invalid_form = DeleteThemeSpecRelateForm(
+            model = CarrerSpecialization,
             data={
-                "specialization": self.ati.pk,
+                "theme_spec": self.ati.pk,
                 "weighted_spec": html_fullstack_dev.pk,
             }
         )
@@ -298,3 +345,29 @@ class TestSpecThemeMatchView(TestCaseWithData):
         self.assertFalse(invalid_form.is_valid())
         # Should render error
         self.assertIn("__all__", invalid_form.errors)
+
+    # ./manage.py test --keepdb django_src.pro_carreer.tests.TestSpecThemeMatchView.test_delete_weighted_theme
+    def test_delete_weighted_theme(self):
+
+        # Create a weighted match
+        weighted_spec = self.html_theme.pro_carreers_match.create(
+            pro_career=self.fullstack_dev,
+            weight=10,
+        )
+
+        response = self.client.post(
+            path=self.url,
+            headers={"HX-Request": "true"},
+            data={
+                "action": RelateActions.DELETE_THEME_SPEC.value,
+                "model_type": InterestTheme.__name__,
+                "theme_spec": self.html_theme.pk,
+                "weighted_spec": weighted_spec.pk,
+            }
+        )
+
+        response_html = response.content.decode()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(ThemeSpecProCarreer.objects.filter(pk=weighted_spec.pk, content_type=self.theme_type).exists())
+

@@ -1,0 +1,49 @@
+{% load django_htmx slippers %}
+
+<table class="table-auto max-w-[50%]">
+    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <tr>
+            <th class="py-3 pr-4 text-left">Importancia</th>
+            <th class="py-3 pr-4 text-left">
+                {% if form.model_type == "CarrerSpecialization" %}
+                    Especialización
+                {% else %}
+                    Tema de Interés
+                {% endif %}
+            </th>
+            <th class="py-3 text-left">Acción</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {# Todo optimize this with a select related #}
+        {% for spec_procareer in content_objects %}
+            {% include "pro_carreer/spec_procareer_match.html" with theme_spec=spec_procareer actions=RelateActions model_type=form.model_type insert_placeholder=insert_placeholder theme_spec_form=form %}
+        {% endfor %}
+
+        <tr id="{{form.model_type}}-form">
+            <td>
+                <input
+                    type="number" name="weight" min="0"
+                    required id="id_weight"
+                    form="{{ form_id }}"
+                    style="width: 6rem;"
+                >
+            </td>
+            <td>
+                <select style="width: 15rem;" class="text-base" form="{{ form_id }}" name="theme_spec" required id="id_specialization">
+                    <option value="">--Selecciona una opción--</option>
+                    {% for theme_spec in form.fields.theme_spec.queryset %}
+                        <option value="{{theme_spec.pk}}">{{theme_spec.name}}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td class="flex items-center justify-center px-2">
+                <input type="hidden" name="model_type" value="{{form.model_type}}" form="{{ form_id }}">
+                {% #button icon_left="bi bi-plus" type="submit" form=form_id name="action" value=RelateActions.RELATE_THEME_SPEC %}
+                    Crear
+                {% /button %}
+            </td>
+        </tr>
+    </tbody>
+</table>

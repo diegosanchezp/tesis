@@ -8,42 +8,71 @@ from django.utils.translation import gettext_lazy as _
 
 from django import forms
 
-class BaseRelateForm(forms.Form):
+# class BaseRelateForm(forms.Form):
+#
+#     weight = forms.IntegerField(
+#         required=True,
+#         min_value=0,
+#     )
+
+class RelateActions(models.TextChoices):
+    RELATE_THEME_SPEC = "relate_specialization", _("Relacionar")
+    DELETE_THEME_SPEC = "delete_specialization", _("Eliminar")
+
+class ActionForm(forms.Form):
+
+    action = forms.ChoiceField(
+        choices=RelateActions.choices,
+        widget=forms.HiddenInput,
+    )
+
+    model_type = forms.ChoiceField(
+        choices=[
+            (CarrerSpecialization.__name__,CarrerSpecialization.__name__),
+            (InterestTheme.__name__,InterestTheme.__name__),
+        ],
+        widget=forms.HiddenInput,
+    )
+
+class ThemeSpecRelateForm(forms.Form):
+    """
+    Form for relating specialization with professional career
+    """
 
     weight = forms.IntegerField(
         required=True,
         min_value=0,
     )
 
-class RelateActions(models.TextChoices):
-    RELATE_SPECIALIZATION = "relate_specialization", _("Relacionar especialización")
-    DELETE_SPECIALIZATION = "delete_specialization", _("Eliminar especialización")
-    RELATE_THEME = "relate_theme", _("Relacionar tema de interes")
-    DELETE_THEME = "delete_theme", _("Eliminar tema de interes")
-
-class ActionForm(forms.Form):
-
-    action = forms.ChoiceField(
-        choices=RelateActions.choices,
+    # Can be of type theme of spec
+    theme_spec = forms.ModelChoiceField(
+        queryset=None,
     )
 
-class SpecRelateForm(BaseRelateForm):
-    """
-    Form for relating specialization with professional career
-    """
+    model_type: str
 
-    specialization = forms.ModelChoiceField(
+    def __init__(self, model: type[CarrerSpecialization] | type[InterestTheme], *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.model_type = model.__name__
+        self.fields["theme_spec"].queryset = model.objects.all()
+
+
+class DeleteThemeSpecRelateForm(forms.Form):
+
+    theme_spec = forms.ModelChoiceField(
         queryset=CarrerSpecialization.objects.all()
     )
 
-class DeleteSpecRelateForm(forms.Form):
-
-    specialization = forms.ModelChoiceField(
-        queryset=CarrerSpecialization.objects.all()
-    )
     weighted_spec = forms.ModelChoiceField(
         queryset=ThemeSpecProCarreer.objects.all()
     )
+
+    model_type: str
+
+    def __init__(self, model: type[CarrerSpecialization] | type[InterestTheme], *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.model_type = model.__name__
+        self.fields["theme_spec"].queryset = model.objects.all()
 
     def clean(self):
         cleaned_data = super().clean()
@@ -51,7 +80,7 @@ class DeleteSpecRelateForm(forms.Form):
         if not cleaned_data:
             return
 
-        specialization = cleaned_data.get("specialization")
+        specialization = cleaned_data.get("theme_spec")
         weighted_spec = cleaned_data.get("weighted_spec")
 
         if not weighted_spec and not specialization:
@@ -62,14 +91,3 @@ class DeleteSpecRelateForm(forms.Form):
             raise forms.ValidationError(
                 _("La especialización no pertenece a este peso")
             )
-
-
-class ThemeRelateForm(BaseRelateForm):
-    """
-    Form for relating interest themes with professional career
-    """
-
-    theme = forms.ModelChoiceField(
-        queryset=InterestTheme.objects.all()
-    )
-
