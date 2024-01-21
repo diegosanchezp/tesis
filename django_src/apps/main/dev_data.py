@@ -10,13 +10,22 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.apps import apps
 from django.apps.registry import Apps
-from django_src.apps.register.upload_data import create_carreers
+from django_src.apps.register.upload_data import (
+    create_carreers,
+    students,
+)
+from django_src.pro_carreer.test_data import (
+    create_pro_carreers, delete_pro_carreers,
+    create_pro_interes_themes, delete_pro_interes_themes,
+)
 from shscripts.backup import (
     setup_django
 )
 
 # python -m django_src.apps.main.dev_data upload
 # python -m django_src.apps.main.dev_data reset
+
+
 def mentors(apps: Apps):
     """
     Create two mentors
@@ -283,13 +292,23 @@ def reset_dev_pages(apps):
             uploaded_by_user=admin,
         ).delete()
 
+# Data dependency
+# -> Right hand function depends on the created data of the left hand function
+#
 def upload_dev_data():
     create_carreers()
-    dev_pages(apps)
+    create_pro_carreers()
+    students(apps)
     mentors(apps)
+    dev_pages(apps)
+    create_pro_interes_themes()
 
 def reset():
     reset_mentors(apps)
+    students(apps, delete=True)
+    delete_pro_carreers()
+    delete_pro_interes_themes()
+
     # The bad thing about deleting the images is that it deletes them from the file system
     # reset_dev_pages(apps)
 
