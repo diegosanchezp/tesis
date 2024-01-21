@@ -16,7 +16,7 @@ django-widget-tweaks = "*"
 argon2-cffi = "*"
 django-allauth = "~=0.54.0"
 django-vite = "*"
-wagtail = "*"
+wagtail = ">=5.2.2"
 jinja2 = "*"
 django-storages = {version = "*", extras = ["s3"]}
 wagtail-storages = "*"
