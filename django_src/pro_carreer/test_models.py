@@ -2,12 +2,16 @@ from datetime import date, timedelta
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from .test_data import create_pro_carreers, create_pro_interes_themes
+from wagtail.images.views.serve import generate_image_url
 
 from django.contrib.contenttypes.models import ContentType
 
 from wagtail.models import (
     Page,
 )
+from wagtail.images.models import Image
+
+from wagtail.images.tests.utils import get_test_image_file
 
 from django_src.apps.register.test_utils import (
     TestCaseWithData
@@ -81,4 +85,19 @@ class ModelTests(TestCaseWithData):
         )
 
         breakpoint()
+
+    # ./manage.py test --keepdb django_src.pro_carreer.test_models.ModelTests.test_wagtail_image
+    def test_wagtail_image(self):
+
+        image = Image.objects.create(
+            title="Test image",
+            file=get_test_image_file(filename="test_rf1.png"),
+        )
+
+        self.fullstack_dev.image = image
+        self.fullstack_dev.save()
+        rendition = self.fullstack_dev.image.get_rendition("original")
+        self.assertIsNotNone(rendition)
+        self.assertIsNotNone(rendition.url)
+        self.assertIsNot(rendition.url, "")
 

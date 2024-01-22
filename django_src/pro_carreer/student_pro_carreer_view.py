@@ -200,13 +200,14 @@ def get_graph_data():
             # Career spec are the leaf nodes
             if pro_career.title not in pro_careers_added:
 
+                imgURL = pro_career.image.get_rendition("original").url if pro_career.image else ""
                 elements_nodes.append({
                     "data": {
                         "id": pro_career.title,
                         "name": pro_career.title,
                         "description": pro_career.short_description,
                         "NodeType": "ProfessionalCareer",
-                        "imgURL": "", # todo
+                        "imgURL": imgURL,
                     },
                 })
 
