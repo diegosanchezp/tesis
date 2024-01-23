@@ -19,7 +19,7 @@ const baseconfig: UserConfig = {
   base: '/static/',
   server: {
     host: 'localhost',
-    port: 3000,
+    port: 5173,
     open: false,
     watch: {
       usePolling: false,
