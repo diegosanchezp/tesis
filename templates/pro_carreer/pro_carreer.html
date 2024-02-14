@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% load static slippers wagtailimages_tags wagtailcore_tags %}
+
+{% block body %}
+
+{% #navbar %}{% /navbar %}
+
+<main class="px-20 max-w-[1920px] mx-auto">
+
+      {% include "pro_carreer/detail_breadcrumbs.html" with page=page %}
+
+      {% #pro_career_tabs page=page current_tab="Info" %}{% /pro_career_tabs %}
+
+      {# Content #}
+
+      <div class="flex items-center justify-between gap-x-8">
+          <article id="page-content" class="prose lg:prose-xl mt-8 max-w-none 2xl:w-[82%] lg:w-[80%]">
+              <h1>{{ page.title }}</h1>
+              {# Render streamfield content #}
+              {% for block in page.content %}
+                  {% if block.block_type == 'image' %}
+                      <div class="not-prose flex items-center justify-center w-full">
+                          {# {% img block.value %} #}
+                          {% include_block block %}
+                      </div>
+                  {% else %}
+                      {% include_block block %}
+                  {% endif %}
+              {% endfor %}
+          </article>
+
+          {# Avatar #}
+          <aside id="mentors-list"
+              class="self-start flex flex-col gap-y-4 mt-8 ml-6 2xl:w-[18%] lg:w-[20%] overflow-y-auto max-h-screen"
+          >
+              <h3 class="text-lg font-medium">Mentores que ejercen esta carrera</h3>
+
+              {% for mentor in mentors %}
+              <a href="{{ mentor.get_absolute_url }}" class="flex items-center gap-4" title="Ver perfil">
+                      {% include "pro_carreer/mentor_avatar.html" with mentor=experience.mentor %}
+                      <div class="font-medium dark:text-white">
+                          <div>{{mentor.user.first_name }} {{ mentor.user.last_name }}</div>
+                      </div>
+                  </a>
+              {% endfor %}
+          </aside>
+      </div>
+
+</main>
+{% endblock body %}
+

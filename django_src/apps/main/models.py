@@ -99,7 +99,7 @@ class HomePage(Page):
     ]
 
     # Block the creation of child pages
-    subpage_types = ['BlogIndex']
+    subpage_types = ['BlogIndex', 'pro_carreer.ProCarreerIndex', ]
 
 class BlogIndex(Page):
     """

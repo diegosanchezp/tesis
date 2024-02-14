@@ -1,0 +1,11 @@
+{% comment %}
+  field: django.forms.Field, "a field from a form"
+{% endcomment %}
+
+{% if field.errors %}
+    <ul class="text-red-600">
+        {% for error in field.errors %}
+            <li>{{ error|escape }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}

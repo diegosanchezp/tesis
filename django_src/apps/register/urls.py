@@ -12,5 +12,8 @@ urlpatterns = [
     path("complete_profile/", complete_profile_view, name="complete_profile"),
     path("add_exp/", add_mentor_exp_view, name="add_exp"),
     path("success/", register_sucess_view, name="success"),
+    # Todo
+    # path("mentors/<int:pk>",mentor_detail_view, name="mentor_detail")
     path("", MainView.as_view(), name="index"),
+
 ]

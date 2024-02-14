@@ -2,18 +2,13 @@ from django_src.apps.register.models import (
     CarrerSpecialization, InterestTheme, ThemeSpecProCarreer
 )
 
+from .models import ProCarreerExperience, get_rating_range_selected, get_rating_range_unselected
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
 from django import forms
-
-# class BaseRelateForm(forms.Form):
-#
-#     weight = forms.IntegerField(
-#         required=True,
-#         min_value=0,
-#     )
 
 class RelateActions(models.TextChoices):
     RELATE_THEME_SPEC = "relate_specialization", _("Relacionar")
@@ -91,3 +86,57 @@ class DeleteThemeSpecRelateForm(forms.Form):
             raise forms.ValidationError(
                 _("La especialización no pertenece a este peso")
             )
+
+class ProCareerExpForm(forms.ModelForm):
+
+    class Meta:
+        model = ProCarreerExperience
+        widgets = {
+            "experience": forms.Textarea(
+                attrs={
+                    "rows": 5, "class": "w-full",
+                    "required": True,
+                }
+            ),
+            "init_year": forms.DateInput(attrs={"type": "date", "required": True}),
+            "end_year": forms.DateInput(attrs={"type": "date", "required": True}),
+        }
+        exclude = [
+            "pro_carreer", "mentor",
+        ]
+
+
+    @property
+    def rating_range_selected(self):
+        """
+        Get a range object for the selected stars
+
+        Use in django templates
+        """
+        if not self.is_valid():
+            return get_rating_range_selected(self.cleaned_data["rating"])
+
+    @property
+    def rating_range_unselected(self):
+        """
+        Get a range object for the unfilled stars
+
+        Use in django templates
+        """
+        if not self.is_valid():
+            return get_rating_range_unselected(self.cleaned_data["rating"])
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if not cleaned_data:
+            return cleaned_data
+
+        init_year = cleaned_data.get("init_year")
+        end_year = cleaned_data.get("end_year")
+
+        if not init_year or not end_year:
+            return cleaned_data
+
+        if init_year > end_year:
+            self.add_error(field="init_year", error=_("El año de inicio no puede ser mayor al año actual"))

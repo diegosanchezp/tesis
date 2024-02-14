@@ -1,8 +1,9 @@
+from dataclasses import dataclass
 from pathlib import Path
-import os
 import argparse
-
-from datetime import date
+from django_src.apps.register.test_data.mentors import (
+    MentorData
+)
 
 from django.db.utils import IntegrityError
 from django.db import transaction
@@ -11,12 +12,16 @@ from django.conf import settings
 from django.apps import apps
 from django.apps.registry import Apps
 from django_src.apps.register.upload_data import (
+    MentorData,
     create_carreers,
     students,
+    mentors,
+    reset_mentors,
 )
 from django_src.pro_carreer.test_data import (
     create_pro_carreers, delete_pro_carreers,
     create_pro_interes_themes, delete_pro_interes_themes,
+
 )
 from shscripts.backup import (
     setup_django
@@ -26,108 +31,6 @@ from shscripts.backup import (
 # python -m django_src.apps.main.dev_data reset
 
 
-def mentors(apps: Apps):
-    """
-    Create two mentors
-    so it can be checked that no mentors can edit each other posts
-    """
-
-    Mentor = apps.get_model(app_label="register", model_name="Mentor")
-    Carreer = apps.get_model(app_label="register", model_name="Carreer")
-    Group = apps.get_model("auth", model_name="Group")
-    User = get_user_model()
-    BlogIndex = apps.get_model(app_label="main", model_name="BlogIndex")
-    BlogPage = apps.get_model(app_label="main", model_name="BlogPage")
-
-    with transaction.atomic():
-        mentor1_user = User.objects.create(
-            username="mentor1@mail.com",
-            first_name="Mentor1",
-            last_name="Test",
-            email="mentor1@mail.com",
-        )
-        mentor1_user.set_password(os.environ["ADMIN_PASSWORD"])
-
-        mentor1 = Mentor.objects.create(
-            user=mentor1_user,
-            carreer=Carreer.objects.get(name="Computación"),
-        )
-
-        mentor1_user.set_password(os.environ["ADMIN_PASSWORD"])
-        mentor1_user.save()
-
-        mentor1.experiences.create(
-            name="Front end developer",
-            company="Meta",
-            current=False,
-            init_year=date(year=2010,month=12,day=1),
-            end_year=date(year=2012,month=6,day=12),
-            description="Doing frontend things @Meta, formerly Facebook",
-        )
-
-        mentor2_user = User.objects.create(
-            username="mentor2@mail.com",
-            first_name="Mentor2",
-            last_name="Test",
-            email="mentor2@mail.com",
-        )
-
-        mentor2_user.set_password(os.environ["ADMIN_PASSWORD"])
-        mentor2_user.save()
-
-        mentor2 = Mentor.objects.create(
-            user=mentor2_user,
-            carreer=Carreer.objects.get(name="Computación"),
-        )
-        mentor2.experiences.create(
-            name="Full Stack Dev",
-            company="Google",
-            current=False,
-            init_year=date(year=2013,month=12,day=1),
-            end_year=date(year=2015,month=6,day=12),
-            description="Full Stack dev @Google",
-        )
-        # Add the users to the mentors group
-        mentors_group = Group.objects.get(name='Mentores')
-
-        mentor1_user.groups.add(mentors_group)
-        mentor2_user.groups.add(mentors_group)
-
-        # Create two blogs for the mentors
-        blog_index = BlogIndex.objects.get()
-
-        blog_index.add_child(instance=BlogPage(
-            owner=mentor1_user,
-            title="Blog Mentor 1",
-            slug="blog-mentor-1",
-            content="<p>Mentor 1 Blog Post's</p>",
-        ))
-
-        blog_index.add_child(instance=BlogPage(
-            owner=mentor2_user,
-            title="Blog Mentor 2",
-            slug="blog-mentor-2",
-            content="<p>Mentor 2 Blog Post's</p>",
-        ))
-
-def reset_mentors(apps: Apps):
-    """
-    Delete all mentors
-    """
-
-    with transaction.atomic():
-        User = get_user_model()
-        BlogPage = apps.get_model(app_label="main", model_name="BlogPage")
-
-        mentors_emails = ["mentor1@mail.com", "mentor2@mail.com"]
-
-        # Delete all of the blog posts owned by the mentors
-        BlogPage.objects.filter(owner__email__in=mentors_emails).delete()
-
-        mentors = User.objects.filter(
-            email__in=mentors_emails,
-        )
-        mentors.delete()
 
 def dev_pages(apps: Apps):
     """
@@ -296,10 +199,18 @@ def reset_dev_pages(apps):
 # -> Right hand function depends on the created data of the left hand function
 #
 def upload_dev_data():
-    create_carreers()
-    create_pro_carreers()
+    carreer_list = create_carreers()
     students(apps)
-    mentors(apps)
+
+    mentor_list = mentors(apps)
+    mentor_data = MentorData()
+    pro_career_list = create_pro_carreers()
+
+    mentor_data.create(
+        computacion=carreer_list.computacion,
+        full_stack_dev=pro_career_list.fullstack_dev,
+    )
+
     dev_pages(apps)
     create_pro_interes_themes()
 

@@ -37,6 +37,9 @@ devDependencies:
   '@rollup/plugin-inject':
     specifier: ^5.0.5
     version: 5.0.5
+  '@tailwindcss/typography':
+    specifier: ^0.5.10
+    version: 0.5.10(tailwindcss@3.3.3)
   '@types/alpinejs':
     specifier: ^3.13.2
     version: 3.13.2
@@ -58,9 +61,6 @@ devDependencies:
   autoprefixer:
     specifier: ^10.4.14
     version: 10.4.14(postcss@8.4.27)
-  flowbite-typography:
-    specifier: ^1.0.3
-    version: 1.0.3(tailwindcss@3.3.3)
   postcss:
     specifier: ^8.4.27
     version: 8.4.27
@@ -394,6 +394,18 @@ packages:
       '@types/estree': 1.0.3
       estree-walker: 2.0.2
       picomatch: 2.3.1
+    dev: true
+
+  /@tailwindcss/typography@0.5.10(tailwindcss@3.3.3):
+    resolution: {integrity: sha512-Pe8BuPJQJd3FfRnm6H0ulKIGoMEQS+Vq01R6M5aCrFB/ccR/shT+0kXLjouGC1gFLm9hopTFN+DMP0pfwRWzPw==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0 || insiders'
+    dependencies:
+      lodash.castarray: 4.4.0
+      lodash.isplainobject: 4.0.6
+      lodash.merge: 4.6.2
+      postcss-selector-parser: 6.0.10
+      tailwindcss: 3.3.3(ts-node@10.9.1)
     dev: true
 
   /@tsconfig/node10@1.0.9:
@@ -734,17 +746,6 @@ packages:
       to-regex-range: 5.0.1
     dev: true
 
-  /flowbite-typography@1.0.3(tailwindcss@3.3.3):
-    resolution: {integrity: sha512-UbdQFIIOb7xx2TS+QQrqr79B6ZSkSZurxYWzV0npth6Wns3/j7KfeDJoH9QFU+Zs7zjrvejNtyzgzWLWyCrdiA==}
-    peerDependencies:
-      tailwindcss: '>=3.0.0 || insiders'
-    dependencies:
-      lodash.castarray: 4.4.0
-      lodash.isplainobject: 4.0.6
-      lodash.merge: 4.6.2
-      tailwindcss: 3.3.3(ts-node@10.9.1)
-    dev: true
-
   /flowbite@1.8.0:
     resolution: {integrity: sha512-8IRvTPmNRoGEQ6lxhhFzTnBCPV8Ik8oFf15LnVR2u3O1GQ8cXHaMgEE0bsCL2DHRGvO4Ww9EitcRsGO7PTibvA==}
     dependencies:
@@ -1046,6 +1047,14 @@ packages:
     dependencies:
       postcss: 8.4.27
       postcss-selector-parser: 6.0.13
+    dev: true
+
+  /postcss-selector-parser@6.0.10:
+    resolution: {integrity: sha512-IQ7TZdoaqbT+LCpShg46jnZVlhWD2w6iQYAcYXfHARZ7X1t/UGhhceQDs5X0cGqKvYlHNOuv7Oa1xmb0oQuA3w==}
+    engines: {node: '>=4'}
+    dependencies:
+      cssesc: 3.0.0
+      util-deprecate: 1.0.2
     dev: true
 
   /postcss-selector-parser@6.0.13:

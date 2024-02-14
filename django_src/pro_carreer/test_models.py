@@ -2,7 +2,7 @@ from datetime import date, timedelta
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from .test_data import create_pro_carreers, create_pro_interes_themes
-from wagtail.images.views.serve import generate_image_url
+from .experience_view import get_distribution
 
 from django.contrib.contenttypes.models import ContentType
 
@@ -20,6 +20,8 @@ from django_src.apps.register.models import (
     Mentor, Faculty, ThemeSpecProCarreer,
     CarrerSpecialization, InterestTheme,
 )
+
+from django_src.apps.register.test_data.mentors import MentorData
 
 # ./manage.py test --keepdb django_src.pro_carreer.test_models.ModelTests
 class ModelTests(TestCaseWithData):
@@ -44,6 +46,9 @@ class ModelTests(TestCaseWithData):
 
         cls.fullstack_dev = pro_careers.fullstack_dev
         cls.frontend_dev = pro_careers.frontend_dev
+
+        mentors = MentorData()
+        mentors.create(cls.computacion, cls.fullstack_dev)
 
     # ./manage.py test --keepdb django_src.pro_carreer.test_models.ModelTests.test_models
     def test_models(self):
@@ -101,3 +106,31 @@ class ModelTests(TestCaseWithData):
         self.assertIsNotNone(rendition.url)
         self.assertIsNot(rendition.url, "")
 
+    # ./manage.py test --keepdb django_src.pro_carreer.test_models.ModelTests.test_get_avg
+    def test_get_avg(self):
+        init_year=date(year=2015, month=1, day=1)
+
+        self.fullstack_dev.career_experiences.create(
+            mentor=self.mentor,
+            experience="I have been working as a full stack developer for 5 years",
+            rating=5,
+            init_year=init_year,
+            end_year=init_year + timedelta(days=365*5),
+        )
+
+        self.fullstack_dev.career_experiences.create(
+            mentor=self.mentor,
+            experience="Blah blah",
+            rating=4,
+            init_year=init_year,
+            end_year=init_year + timedelta(days=365*5),
+        )
+
+
+        distribution = get_distribution(self.fullstack_dev)
+        self.assertTrue(isinstance(distribution, dict))
+        self.assertEqual(len(distribution), 5)
+        self.assertEqual(distribution['five_star'], 50.0)
+        self.assertEqual(distribution['four_star'], 50.0)
+
+        print(distribution)
