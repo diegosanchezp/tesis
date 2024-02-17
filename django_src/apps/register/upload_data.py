@@ -1,9 +1,13 @@
 from pathlib import Path
 import os
+from datetime import date
 
 from shscripts.backup import (
     setup_django
 )
+
+from .test_data.mentors import MentorData
+from django_src.pro_carreer.test_data import create_pro_carreers
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.conf import settings
@@ -12,6 +16,7 @@ from django.apps.registry import Apps
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
+from dataclasses import dataclass
 
 
 app_label = "register"
@@ -100,6 +105,7 @@ def delete_student(User):
     student_user.delete()
     unapproved_student.delete()
 
+
 def create_interest_themes(carreer):
     """
     Create interest themes for a carrer
@@ -144,10 +150,10 @@ def create_carreers():
             name="Ciencias",
         )
 
-        ciencias.carreers.create(name="Geoquímica")
-        ciencias.carreers.create(name="Matemática")
-        ciencias.carreers.create(name="Química")
-        ciencias.carreers.create(name="Biología")
+        geoquimica = ciencias.carreers.create(name="Geoquímica")
+        matematica = ciencias.carreers.create(name="Matemática")
+        quimica = ciencias.carreers.create(name="Química")
+        biologia = ciencias.carreers.create(name="Biología")
         computacion = ciencias.carreers.create(name="Computación")
 
         computacion_specialization =[
@@ -223,6 +229,30 @@ def create_carreers():
             name="Odontología",
         )
 
+        from django_src.apps.register.models import Carreer, Faculty
+
+        @dataclass
+        class ModelList:
+            computacion: Carreer
+            geoquimica: Carreer
+            matematica: Carreer
+            quimica: Carreer
+            biologia: Carreer
+            ingenieria: Faculty
+            medicina: Faculty
+            odontologia: Faculty
+
+        return ModelList(
+            geoquimica=geoquimica,
+            matematica=matematica,
+            quimica=quimica,
+            biologia=biologia,
+            computacion=computacion,
+            ingenieria=ingenieria,
+            medicina=medicina,
+            odontologia=odontologia,
+        )
+
 def students(apps: Apps, delete=False):
     """
     Creates the student
@@ -241,12 +271,138 @@ def students(apps: Apps, delete=False):
     else:
         delete_student(User)
 
+def mentors(apps: Apps):
+    """
+    Create two mentors
+    so it can be checked that no mentors can edit each other posts
+    """
+
+    Mentor = apps.get_model(app_label="register", model_name="Mentor")
+    Carreer = apps.get_model(app_label="register", model_name="Carreer")
+    Group = apps.get_model("auth", model_name="Group")
+    User = get_user_model()
+    BlogIndex = apps.get_model(app_label="main", model_name="BlogIndex")
+    BlogPage = apps.get_model(app_label="main", model_name="BlogPage")
+
+    with transaction.atomic():
+        mentor1_user = User.objects.create(
+            username="mentor1@mail.com",
+            first_name="Mentor1",
+            last_name="Test",
+            email="mentor1@mail.com",
+        )
+        mentor1_user.set_password(os.environ["ADMIN_PASSWORD"])
+
+        mentor1 = Mentor.objects.create(
+            user=mentor1_user,
+            carreer=Carreer.objects.get(name="Computación"),
+        )
+
+        mentor1_user.set_password(os.environ["ADMIN_PASSWORD"])
+        mentor1_user.save()
+
+        mentor1.experiences.create(
+            name="Front end developer",
+            company="Meta",
+            current=False,
+            init_year=date(year=2010,month=12,day=1),
+            end_year=date(year=2012,month=6,day=12),
+            description="Doing frontend things @Meta, formerly Facebook",
+        )
+
+        mentor2_user = User.objects.create(
+            username="mentor2@mail.com",
+            first_name="Mentor2",
+            last_name="Test",
+            email="mentor2@mail.com",
+        )
+
+        mentor2_user.set_password(os.environ["ADMIN_PASSWORD"])
+        mentor2_user.save()
+
+        mentor2 = Mentor.objects.create(
+            user=mentor2_user,
+            carreer=Carreer.objects.get(name="Computación"),
+        )
+        mentor2.experiences.create(
+            name="Full Stack Dev",
+            company="Google",
+            current=False,
+            init_year=date(year=2013,month=12,day=1),
+            end_year=date(year=2015,month=6,day=12),
+            description="Full Stack dev @Google",
+        )
+        # Add the users to the mentors group
+        mentors_group = Group.objects.get(name='Mentores')
+
+        mentor1_user.groups.add(mentors_group)
+        mentor2_user.groups.add(mentors_group)
+
+        # Create two blogs for the mentors
+        blog_index = BlogIndex.objects.get()
+
+        blog_index.add_child(instance=BlogPage(
+            owner=mentor1_user,
+            title="Blog Mentor 1",
+            slug="blog-mentor-1",
+            content="<p>Mentor 1 Blog Post's</p>",
+        ))
+
+        blog_index.add_child(instance=BlogPage(
+            owner=mentor2_user,
+            title="Blog Mentor 2",
+            slug="blog-mentor-2",
+            content="<p>Mentor 2 Blog Post's</p>",
+        ))
+
+        from django_src.apps.register.models import Mentor
+        from django_src.apps.main.models import BlogIndex
+
+        @dataclass
+        class ModelList:
+            mentor1: Mentor
+            mentor2: Mentor
+            blog_index: BlogIndex
+
+
+        return ModelList(
+            mentor1=mentor1,
+            mentor2=mentor2,
+            blog_index=blog_index,
+        )
+
+def reset_mentors(apps: Apps):
+    """
+    Delete all mentors
+    """
+
+    with transaction.atomic():
+        User = get_user_model()
+        BlogPage = apps.get_model(app_label="main", model_name="BlogPage")
+
+        mentors_emails = ["mentor1@mail.com", "mentor2@mail.com"]
+
+        # Delete all of the blog posts owned by the mentors
+        BlogPage.objects.filter(owner__email__in=mentors_emails).delete()
+
+        mentors = User.objects.filter(
+            email__in=mentors_emails,
+        )
+        mentors.delete()
+
 def upload_data():
     """
     Put here all of the functions that create carreers
     """
-    create_carreers()
+    carreer_list = create_carreers()
     students(apps)
+    mentors(apps)
+    mentor_data = MentorData()
+    pro_career_list = create_pro_carreers()
+    mentor_data.create(
+        computacion=carreer_list.computacion,
+        full_stack_dev=pro_career_list.fullstack_dev,
+    )
 
 
 def main():

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% load static django_vite slippers wagtailimages_tags wagtailcore_tags %}
+
+{% comment %}
+Context:
+- experiences: django.core.paginator.Page[ProCarreerExperience]
+- distribution: dict
+- page_number: int
+- is_mentor: bool
+- mentor_experience: pro_career.models.ProCarreerExperience | None
+{% endcomment %}
+
+{% block body %}
+
+{% #navbar %}{% /navbar %}
+
+
+{% if is_mentor and not mentor_experience %}
+    <div id="advertisement-add-exp" class="flex gap-x-2 bg-slate-100 justify-center py-4 items-center">
+        <p>Si ejerciste esta carrera ¡ Añade tu experiencia profesional !</p>
+        {% #button id="add-exp-btn" icon_right="bi bi-arrow-right text-white" type="button" name="action" value="render_empty_exp_form" hx-get=page.add_query_string hx-target="#edit-or-add-experience" hx-swap="outerHTML"  %}
+            Añadir
+        {% /button %}
+    </div>
+{% endif %}
+
+<div class="px-20 max-w-[1920px] mx-auto">
+
+  {% include "pro_carreer/detail_breadcrumbs.html" with page=page %}
+
+  {% #pro_career_tabs page=page current_tab="Experiencias" %}{% /pro_career_tabs %}
+
+  <main class="flex place-content-between">
+      <section id="experiences" class="2xl:w-[88%] lg:w-[80%]">
+          {# If mentor is navigating this view the show his experience first #}
+          <div id="edit-or-add-experience">
+          </div>
+          {% if mentor_experience %}
+              {% include "pro_carreer/mentor_exp.html" with mentor_experience=mentor_experience mentor=mentor_experience.mentor state="viewing" %}
+          {% endif %}
+
+          <div id="experience-list">
+              {% for experience in experiences %}
+                  {# Experience #}
+                  <div class="flex flex-col gap-y-4">
+                      {% include "pro_carreer/mentor_exp.html" with mentor_experience=experience mentor=experience.mentor %}
+                  </div>
+              {% endfor %}
+          </div>
+          <div id="experience-pagination" class="flex justify-center items-center">
+              {% include "components/pagination.html" with page_obj=experiences search_query_params="tab=experiencias" %}
+          </div>
+      </section>
+
+      {% block rating_distribution %}
+          <section
+              id="rating-distribution"
+              hx-get="?tab=experiencias&action=render_distribution"
+              hx-trigger="render_distribution from:body"
+              hx-target="this"
+              hx-swap="outerHTML"
+              class="ml-6 2xl:w-[12%] lg:w-[20%]"
+          >
+              <h2 class="font-bold">Resumen</h2>
+              <div id="five-star-distribution" class="flex gap-x-2 mt-2">
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <p>{{distribution.five_star|floatformat:1}} %</p>
+              </div>
+
+              <div id="four-star-distribution" class="flex gap-x-2 mt-2">
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star"></i>
+                  <p>{{distribution.four_star|floatformat:1}} %</p>
+              </div>
+              <div id="three-star-distribution" class="flex gap-x-2 mt-2">
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star"></i>
+                  <i class="bi bi-star"></i>
+                  <p>{{distribution.three_star|floatformat:1}} %</p>
+              </div>
+              <div id="two-star-distribution" class="flex gap-x-2 mt-2">
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star"></i>
+                  <i class="bi bi-star"></i>
+                  <i class="bi bi-star"></i>
+                  <p>{{distribution.two_star|floatformat:1}} %</p>
+              </div>
+              <div id="one-star-distribution" class="flex gap-x-2 mt-2">
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star"></i>
+                  <i class="bi bi-star"></i>
+                  <i class="bi bi-star"></i>
+                  <i class="bi bi-star"></i>
+                  <p>{{distribution.one_star|floatformat:1}} %</p>
+              </div>
+          </section>
+      {% endblock rating_distribution %}
+  </main>
+
+</div>
+{% endblock body %}
+
+{% block extrascripts %}
+
+    {% vite_asset 'js/htmx.ts' %}
+    {% vite_asset 'js/pro_career_experience.ts' %}
+{% endblock extrascripts %}

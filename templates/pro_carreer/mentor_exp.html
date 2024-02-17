@@ -1,0 +1,158 @@
+{% comment %}
+  Mentor experience component, used for editing and adding new experiences.
+
+  context:
+  - mentor_experience: django_src.pro_carreer.ProCarreerExperience
+  - mentor: django_src.apps.register.models.Mentor
+  - form: django_src.pro_carreer.forms.ProCareerExpForm, activates edit mode
+  - state: str, "adding", "editing", "viewing"
+
+  depends on:
+  - js/pro_career/experience.ts
+{% endcomment %}
+
+{% load slippers %}
+
+{# Main container #}
+<form 
+    {% if state == "viewing" %}id="{{ mentor.user.username }}-exp"{%else%}id="my-exp-editing"{% endif %}
+    hx-target="this" hx-swap="outerHTML">
+    {# Profile #}
+    <div class="flex place-content-between" >
+        <div class="flex items-center gap-4" title="Ver perfil">
+            {# TODO - Add link to profile #}
+            <a href="{{ mentor.get_absolute_url }}" class="self-start">
+                {% include "pro_carreer/mentor_avatar.html" with mentor=mentor %}
+            </a>
+
+            <div class="font-medium dark:text-white">
+                <a href="{{ mentor.get_absolute_url }}" class="font-bold">{{ mentor.user.first_name }} {{ mentor.user.last_name }}</a>
+                <div class="flex gap-x-2 items-baseline">
+                    <p>
+                        Ejerció esta carrera desde
+
+                        {% if form %}
+                            {# todo input #}
+                            <div class="flex flex-col gap-y-2">
+                                {{ form.init_year }}
+                                {% include "pro_carreer/form_error.html" with field=form.init_year %}
+                            </div>
+                        {% else %}
+                            <div class="flex gap-y-2">
+                                {{ mentor_experience.init_year.year }}
+                            </div>
+                        {% endif %}
+                        hasta
+                        {% if form %}
+                            <div class="flex gap-y-2 flex-col">
+                                {{ form.end_year }}
+                                {% include "pro_carreer/form_error.html" with field=form.end_year %}
+                            </div>
+                        {% else %}
+                            {{mentor_experience.end_year.year}}</p>
+                        {% endif %}
+                    {% if form %}
+                            {# todo input #}
+                            <span>@ </span>
+                            <div class="flex flex-col gap-y-2">
+                                {{ form.company }}
+                                {% include "pro_carreer/form_error.html" with field=form.company %}
+                            </div>
+                    {% else %}
+                        <p class="border border-solid border-black rounded p-1">@{{mentor_experience.company}}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% if state == "viewing" %}
+            {% #button icon_left="bi bi-pen text-white" type="button" hx-get=mentor_experience.edit_querystring name="action" value="render_exp_form"  %}
+                Editar
+            {% /button %}
+        {% endif %}
+
+        {% if form %}
+            <div class="flex">
+            {% if state == "adding" %}
+                {% #button icon_left="bi bi-floppy text-white" type="submit" hx-post=" " name="action" value="add_exp"  %}
+                    Guardar
+                {% /button %}
+            {% else %}
+                {# Default state: editing #}
+                <input type="hidden" name="pk" value="{{ mentor_experience.pk }}">
+                <div>
+                {% #button icon_left="bi bi-floppy text-white" type="submit" hx-post=" " name="action" value="edit_exp"  %}
+                    Guardar
+                {% /button %}
+                {% #button icon_left="bi bi-trash text-white" type="submit" hx-post=" " hx-swap="delete" name="action" value="delete_exp" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center me-2 ml-2" %}
+                    Borrar
+                {% /button %}
+                </div>
+            {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+
+    {% if form %}
+        {# Ratings component #}
+        <div
+            x-data="ratings(
+            {% if not form.is_bound %}
+                {{mentor_experience.rating}}
+            {% else %}
+                {{form.rating.value}}
+            {% endif %}
+            )"
+            x-bind="setSelected" class="flex gap-x-2 mt-2">
+
+            <input type="hidden" name="rating" :value="current_rating">
+
+            {% if state == "adding" %}
+                {% if form.is_bound %}
+                    {# Add selected and unselected stars from the selected rating in the form #}
+                    {% for rating_num in form.rating_range_selected %}
+                        <i x-data="rating({{rating_num}}, 'selected',{{form.rating.value}})" x-bind="handleSelects" class="bi" :class="state == 'selected' ? 'bi-star-fill' : 'bi-star' " ></i>
+                    {% endfor %}
+                    {% for rating_num in form.rating_range_unselected %}
+                        <i x-data="rating({{rating_num}}, 'unselected', {{form.rating.value}})" x-bind="handleSelects" class="bi" :class="state == 'selected' ? 'bi-star-fill' : 'bi-star' " ></i>
+                    {% endfor %}
+                {% else %}
+                    {# Only add unselected because there is no rating defined by the mentor #}
+                    {% for rating_num in rating_range_unselected %}
+                        <i x-data="rating({{rating_num}}, 'unselected', 0)" x-bind="handleSelects" class="bi" :class="state == 'selected' ? 'bi-star-fill' : 'bi-star' " ></i>
+                    {% endfor %}
+                {% endif %}
+            {% else %}
+                {% for rating_num in mentor_experience.rating_range_selected %}
+                    <i x-data="rating({{rating_num}}, 'selected',{{mentor_experience.rating}})" x-bind="handleSelects" class="bi" :class="state == 'selected' ? 'bi-star-fill' : 'bi-star' " ></i>
+                {% endfor %}
+                {% for rating_num in mentor_experience.rating_range_unselected %}
+                    <i x-data="rating({{rating_num}}, 'unselected', {{mentor_experience.rating}})" x-bind="handleSelects" class="bi" :class="state == 'selected' ? 'bi-star-fill' : 'bi-star' " ></i>
+                {% endfor %}
+            {% endif %}
+
+        </div>
+    {% else %}
+
+      <!-- Static non-editable ratings -->
+      <div class="flex gap-x-2 mt-2">
+          {% for rating_num in mentor_experience.rating_range_selected %}
+              <i class="bi bi-star-fill"></i>
+          {% endfor %}
+          {% for rating_num in mentor_experience.rating_range_unselected %}
+              <i class="bi bi-star"></i>
+          {% endfor %}
+      </div>
+    {% endif %}
+
+    {# Exp description #}
+    <p class="mt-2">
+        {% if form %}
+            {{ form.experience }}
+        {% else %}
+            {{ mentor_experience.experience }}
+        {% endif %}
+    </p>
+
+    <hr class="bg-gray-200 my-4">
+</form>

@@ -1,0 +1,33 @@
+{% load slippers wagtailcore_tags  %}
+
+{% comment %}
+  page: wagtail.models.Page
+  current_tab: str
+{% endcomment %}
+
+{% var page %}
+{% var current_tab %}
+
+  {# Tabs component #}
+
+{% with selected_classes="inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active hover:border-gray-300" unselect_classes="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600" %}
+    <div class="text-base font-medium text-center text-gray-500 border-b border-gray-200 my-4">
+        <ul class="flex flex-wrap -mb-px">
+
+            <li class="me-2">
+                <a
+                    href="{% pageurl page %}"
+                    class="{% if current_tab == "Info" %}{{selected_classes}}{% else %}{{ unselect_classes }}{% endif %}" {% if current_tab == "Info" %}aria-current="page"{% endif %}>Info</a>
+            </li>
+
+            <li class="me-2">
+                <a href="{% pageurl page %}?tab=experiencias"
+                class="{% if current_tab == "Experiencias" %}{{selected_classes}}{% else %}{{ unselect_classes }}{% endif %}" {% if current_tab == "Info" %}aria-current="page"{% endif %}>Experiencias</a>
+            </li>
+
+            <li class="me-2">
+                <a href="{% pageurl page %}?tab=recursos" class="{% if current_tab == "Recursos" %}{{selected_classes}}{% else %}{{ unselect_classes }}{% endif %}" {% if current_tab == "Info" %}aria-current="page"{% endif %}>Recursos</a>
+            </li>
+        </ul>
+    </div>
+{% endwith %}

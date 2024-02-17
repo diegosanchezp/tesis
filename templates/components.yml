@@ -3,3 +3,4 @@ components:
   profile_selector: "components/profile_selector.html"
   button: "components/button.html"
   navbar: "components/navbar.html"
+  pro_career_tabs: "components/pro_career/detail_tabs.html"
