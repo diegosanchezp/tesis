@@ -13,7 +13,7 @@ Context:
 
 {% block body %}
 
-{% #navbar %}{% /navbar %}
+{% #navbar request=request %}{% /navbar %}
 
 
 {% if is_mentor and not mentor_experience %}

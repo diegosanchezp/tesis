@@ -22,7 +22,7 @@
         <div class="flex items-center gap-4" title="Ver perfil">
             {# TODO - Add link to profile #}
             <a href="{{ mentor.get_absolute_url }}" class="self-start">
-                {% include "pro_carreer/mentor_avatar.html" with mentor=mentor %}
+                {% include "pro_carreer/mentor_avatar.html" with user=mentor.user %}
             </a>
 
             <div class="font-medium dark:text-white">
