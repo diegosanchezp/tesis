@@ -4,7 +4,7 @@
 
 {% block body %}
 
-{% #navbar %}{% /navbar %}
+{% #navbar request=request %}{% /navbar %}
 
 <main class="px-20 max-w-[1920px] mx-auto">
 
@@ -38,7 +38,7 @@
 
               {% for mentor in mentors %}
               <a href="{{ mentor.get_absolute_url }}" class="flex items-center gap-4" title="Ver perfil">
-                      {% include "pro_carreer/mentor_avatar.html" with mentor=experience.mentor %}
+                      {% include "pro_carreer/mentor_avatar.html" with user=mentor.user %}
                       <div class="font-medium dark:text-white">
                           <div>{{mentor.user.first_name }} {{ mentor.user.last_name }}</div>
                       </div>

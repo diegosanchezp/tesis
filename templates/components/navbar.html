@@ -1,7 +1,30 @@
+{% comment %}
+  required context:
+  - request
+  - is_student
+
+{% endcomment %}
 {% load slippers %}
 
 <nav class="flex px-2 py-2 bg-[#006090] items-baseline justify-between items-center">
     <i class="bi bi-list text-white text-3xl self-center"></i>
+    <ul id="navbar-text-links" class="ml-2 w-full">
+        <li>
+            <a
+                class="text-white"
+                href="
+                {# if logged in user is student #}
+                {% if request.user.student %}
+                    {% url "pro_carreer:student_carreer_match" %}
+                {# if logged in user is mentor #}
+                {% elif request.user.mentor %}
+                    {# todo #}
+                    {# {% url "" %} #}
+                {% endif %}">
+                Home
+            </a>
+        </li>
+    </ul>
 
     <ul class="flex text-white items-center">
         <li class="">Dashboard</li>
@@ -9,6 +32,8 @@
             <div class="bg-white h-[20px] w-[1px]"></div>
         </li>
         {# Profile section #}
-        <li><i class="bi bi-person text-[32px] text-white"></i></li>
+        <li>
+            {% include "pro_carreer/mentor_avatar.html" with user=request.user border_color="white" %}
+        </li>
     </ul>
 </nav>

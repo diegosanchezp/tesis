@@ -1,11 +1,17 @@
-{% if mentor.user.profile_pic %}
-  <img
-      class="w-12 h-12 rounded-full"
-      src="{{mentor.user.profile_pic.url}}"
-      alt="profile picture"
-  >
+{% comment %}
+  optional context
+  border_color: string, default black
+{% endcomment %}
+{% if user.profile_pic %}
+    <div class="w-12 h-12">
+        <img
+            class="rounded-full"
+            src="{{user.profile_pic.url}}"
+            alt="profile picture"
+            >
+    </div>
 {% else %}
-  <div class="flex items-center justify-center w-12 h-12 rounded-full border-2 border-solid border-black">
+<div class="flex items-center justify-center w-12 h-12 rounded-full border-2 border-solid border-{{border_color|default:"black"}}">
       <i class="bi bi-person-fill text-3xl"></i>
   </div>
 {% endif %}
