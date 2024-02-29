@@ -28,6 +28,7 @@ django-render-block = "*"
 django-stubs = "*"
 djangorestframework-stubs = "*"
 inotify = "*"
+ipython = "*"
 
 [requires]
 python_version = "3.11.4"

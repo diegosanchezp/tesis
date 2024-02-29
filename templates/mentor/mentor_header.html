@@ -1,0 +1,33 @@
+<section
+    id="mentor-header-description"
+    class="mb-20"
+>
+    <div id="grey-bg" class="w-full bg-[#FFF9DD]">
+        <div
+            id="mentor-profile-pic-and-name-lastname"
+            class="flex gap-x-8 w-full relative top-[62px] px-20 max-w-[1920px] mx-auto"
+            >
+            <div id="mentor-profile-pic">
+                {% if mentor.user.profile_pic %}
+                    <div class="w-44 h-44 flex items-center">
+                        <img
+                            class="rounded-full"
+                            src="{{mentor.user.profile_pic.url}}"
+                            alt="profile picture"
+                            >
+                    </div>
+                {% else %}
+                    <div class="flex items-center justify-center w-44 h-44 rounded-full border-2 border-solid border-{{border_color|default:"black"}} bg-white">
+                        <i class="bi bi-person-fill text-5xl"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <div
+                id="mentor-name-lastname"
+                class="place-self-center bg-gradient-to-t from-white to-[#FFF9DD] pt-3 pb-2 px-2 rounded-t-lg border-transparent"
+                >
+                <p class="font-semibold text-2xl">{{ mentor.user.first_name }} {{ mentor.user.last_name }}</p>
+            </div>
+        </div>
+    </div>
+</section>

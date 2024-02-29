@@ -4,3 +4,4 @@ components:
   button: "components/button.html"
   navbar: "components/navbar.html"
   pro_career_tabs: "components/pro_career/detail_tabs.html"
+  mentor_tabs: "mentor/tabs.html"

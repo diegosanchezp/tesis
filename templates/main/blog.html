@@ -4,12 +4,47 @@
 {% load django_vite slippers %}
 
 {% block body %}
-  <main class="px-20">
-      <h1 class="font-bold text-2xl">{{ page.title }}</h1>
-      <p>Publicado el: {{ page.first_published_at }}</p>
-      <p>Última edición {{ page.last_published_at }}</p>
-      <article class="format lg:format-lg">
-          {{ page.content|richtext }}
-      </article>
+  <main>
+
+    {% #navbar request=request %}{% /navbar %}
+
+    <div id="article-header" class="flex flex-col gap-y-8 bg-gradient-to-t from-white to-[#FFF9DD] rounded-t-lg border-transparent">
+        <div id="goback-profile" class="flex gap-x-4 items-center py-4 px-4">
+            <i class="bi bi-arrow-left"></i>
+            <a href="{% url "mentor:blogs" username=page.owner %}">Regresar al perfil</a>
+        </div>
+
+
+        <div class="mx-20 max-w-[1920px] mx-auto">
+
+            <div class="flex items-center gap-x-4 mb-8">
+                {% include "pro_carreer/mentor_avatar.html" with user=request.user border_color="black" %}
+                <a href="{{ mentor.get_absolute_url }}">{{page.owner.first_name}} {{page.owner.last_name}}</a>
+            </div>
+
+            <h1 class="text-6xl">{{ page.title }}</h1>
+            <div class="flex gap-x-4 mt-4">
+                <p><span class="font-semibold">Publicado el</span>: {{ page.first_published_at|date:"j" }} de {{ page.first_published_at|date:"F Y" }}</p>
+                <p><span class="font-semibold">Última edición:</span> {{ page.first_published_at|date:"j" }} de {{ page.last_published_at|date:"F Y" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="blog-container" class="mx-20 max-w-[1920px] mx-auto">
+        <article id="blog-content" class="prose lg:prose-xl mt-8 max-w-none mx-auto w-full">
+            {# Render streamfield content #}
+            {% for block in page.content %}
+                {% if block.block_type == 'image' %}
+                    <div class="not-prose flex items-center justify-center w-full">
+                        {# {% img block.value %} #}
+                        {% include_block block %}
+                    </div>
+                {% else %}
+                    {% include_block block %}
+                {% endif %}
+            {% endfor %}
+        </article>
+    </div>
+
   </main>
 {% endblock body %}

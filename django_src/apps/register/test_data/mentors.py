@@ -1,6 +1,7 @@
 import os
 from datetime import date, timedelta
 
+import argparse
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 
@@ -46,6 +47,8 @@ class MentorData:
         self.mentor2 = Mentor(
             user=self.mentor2_user,
         )
+
+
 
     def save_mentor(self, mentor):
         try:
@@ -118,6 +121,27 @@ class MentorData:
             end_year=date(year=2020, month=1, day=1),
         )
 
+        # Professional experience timeline
+
+        end_year_mentor2 = date(year=2015,month=6,day=12)
+
+        self.mentor2.experiences.create(
+            name="Full Stack Dev",
+            company="Google",
+            current=False,
+            init_year=date(year=2013,month=12,day=1),
+            end_year=end_year_mentor2,
+            description="Full Stack developer, did some bleeding edge backend things and frontend things",
+        )
+        self.mentor2.experiences.create(
+            name="VR developer",
+            company="Meta",
+            current=True,
+            init_year=end_year_mentor2,
+            description="Doing VR things @Meta, formerly Facebook",
+        )
+
+
     def get(self):
         """
         Get the objects from the database
@@ -135,14 +159,36 @@ class MentorData:
         self.delete_mentor(self.mentor2_user)
 
 
-# python -m django_src.apps.register.test_data.mentors
+# python -m django_src.apps.register.test_data.mentors --action create
+# python -m django_src.apps.register.test_data.mentors --action delete
+
 if __name__ == "__main__":
     setup_django(".")
 
     from django_src.apps.register.models import Carreer
     from django_src.pro_carreer.models import ProfessionalCarreer
 
+
+    # Beging parser setup
+    parser = argparse.ArgumentParser(
+        description="Reset database script"
+    )
+
+    parser.add_argument(
+        "--action",
+        help="Delete uploaded data or create it",
+        choices=["create", "delete"],
+        default="create",
+    )
+
+    args = parser.parse_args()
+
     computacion = Carreer.objects.get(name="Computación")
     full_stack_dev = ProfessionalCarreer.objects.get(title="Full stack Developer")
+
     mentor_data = MentorData()
-    mentor_data.create(computacion, full_stack_dev)
+
+    if args.action == "create":
+        mentor_data.create(computacion, full_stack_dev)
+    elif args.action == "delete":
+        mentor_data.delete()

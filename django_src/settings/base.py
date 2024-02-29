@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django_src.apps.register.apps.RegisterConfig",
     "django_src.apps.auth.apps.AuthConfig",
     "django_src.pro_carreer.apps.ProCarreerConfig",
+    "django_src.mentor.apps.MentorConfig",
     # ---- Third party ----
     # API REST
     "rest_framework",

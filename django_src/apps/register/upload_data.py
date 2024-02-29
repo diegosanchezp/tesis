@@ -345,14 +345,14 @@ def mentors(apps: Apps):
             owner=mentor1_user,
             title="Blog Mentor 1",
             slug="blog-mentor-1",
-            content="<p>Mentor 1 Blog Post's</p>",
+            # content="<p>Mentor 1 Blog Post's</p>",
         ))
 
         blog_index.add_child(instance=BlogPage(
             owner=mentor2_user,
             title="Blog Mentor 2",
             slug="blog-mentor-2",
-            content="<p>Mentor 2 Blog Post's</p>",
+            # content="<p>Mentor 2 Blog Post's</p>",
         ))
 
         from django_src.apps.register.models import Mentor

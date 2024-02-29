@@ -242,8 +242,7 @@ class Mentor(models.Model):
 
     def get_absolute_url(self) -> str:
         # Todo
-        return "/mentor/"
-        # return reverse_lazy("register:mentor_detail", kwargs={"pk": self.pk})
+        return reverse_lazy("mentor:profile", kwargs={"username": self.user.username})
 
     def __str__(self) -> str:
         return f"{self.user.first_name} {self.user.last_name}"
