@@ -4,6 +4,7 @@ from datetime import date, timedelta
 import argparse
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
+from django.conf import settings
 
 from shscripts.backup import setup_django
 
@@ -17,14 +18,20 @@ class MentorData:
 
     def __init__(self):
 
-        from django_src.apps.register.models import Mentor
+        from django_src.apps.register.models import Mentor, RegisterApprovalStates
+        from django_src.mentor.models import Mentorship, MentorshipTask
         from django_src.apps.main.models import BlogPage
         from django_src.pro_carreer.models import ProCarreerExperience
+        from django.contrib.contenttypes.models import ContentType
 
 
         self.User = get_user_model()
         self.MentorModel = Mentor
+        self.RegisterApprovalStates = RegisterApprovalStates
         self.ProCarreerExperience = ProCarreerExperience
+        self.Mentorship = Mentorship
+        self.MentorshipTask = MentorshipTask
+        self.ContentType = ContentType
 
         self.mentor1_user = self.User(
             username="mentor1",
@@ -71,19 +78,28 @@ class MentorData:
         computacion: apps.register.models.Carreer
         """
 
+        self.mentor_type = self.ContentType.objects.get_for_model(self.MentorModel)
+
         from django.contrib.auth.models import Group
 
         self.save_mentor(self.mentor1_user)
         self.save_mentor(self.mentor2_user)
 
+        self.admin_user = self.User.objects.get(
+            username=settings.ADMIN_USERNAME,
+        )
         mentors_group = Group.objects.get(name='Mentores')
 
         mentor1 = self.mentor1
         mentor1.carreer = computacion
         mentor1.save()
 
-        self.mentor2.carreer = computacion
-        self.mentor2.save()
+        # Approval for mentor1
+        self.mentor1_user.my_approvals.create(
+            admin=self.admin_user,
+            state=self.RegisterApprovalStates.APPROVED,
+            user_type=self.mentor_type,
+        )
 
         mentor1 = self.mentor1
 
@@ -96,6 +112,7 @@ class MentorData:
             description="Doing frontend things @Meta, formerly Facebook",
         )
         init_year=date(year=2015, month=1, day=1)
+
 
         self.mentor1_user.groups.add(mentors_group)
         self.mentor2_user.groups.add(mentors_group)
@@ -110,6 +127,10 @@ class MentorData:
             end_year=init_year + timedelta(days=365*5),
         )
 
+        # ------ Mentor 2 ------ #
+
+        self.mentor2.carreer = computacion
+        self.mentor2.save()
 
         self.ProCarreerExperience.objects.create(
             mentor=self.mentor2,
@@ -120,6 +141,7 @@ class MentorData:
             init_year=date(year=2015, month=1, day=1),
             end_year=date(year=2020, month=1, day=1),
         )
+
 
         # Professional experience timeline
 
@@ -141,6 +163,12 @@ class MentorData:
             description="Doing VR things @Meta, formerly Facebook",
         )
 
+        # Approval for mentor2
+        self.mentor2_user.my_approvals.create(
+            admin=self.admin_user,
+            state=self.RegisterApprovalStates.APPROVED,
+            user_type=self.mentor_type,
+        )
 
     def get(self):
         """

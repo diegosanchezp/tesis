@@ -25,10 +25,12 @@ django-htmx = "*"
 django-render-block = "*"
 
 [dev-packages]
-django-stubs = "*"
 djangorestframework-stubs = "*"
 inotify = "*"
 ipython = "*"
+pip = "*"
+install = "*"
+django-stubs = {version = "*", extras = ["compatible-mypy"]}
 
 [requires]
 python_version = "3.11.4"

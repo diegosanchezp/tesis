@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load django_vite slippers %}
+
+{% comment %}
+  required context:
+  - mentorship_form: MentorshipForm
+  - mentorship_tasks_form: MentorshipTaskFormSet
+{% endcomment %}
+
+{% block title %}
+Crear mentoría
+{% endblock title %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+{% endblock %}
+
+{% block body %}
+
+{% #navbar request=request %}{% /navbar %}
+<main class="px-20">
+
+    {% block forms %}
+        <form
+            id="mentorship-form"
+            class=""
+            method="post"
+        >
+
+        {% csrf_token %}
+
+        {# Render all of the form fields of the form excluding those that are hidden #}
+        {% for field in mentorship_form %}
+
+            {# label #}
+            {% if not field.is_hidden %}
+                <label for="{{ field.id_for_label }}">{{field.label}}</label>
+            {% endif %}
+
+            {# TODO: Render the input element with <input> #}
+            {{ field }}
+
+            {# Render the error list of the filed #}
+            {% if field.errors %}
+                <ul class="text-red-600">
+                    {% for error in field.errors %}
+                        <li>{{ error|escape }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endfor %}
+
+
+        {# Render the task formset #}
+        {# todo: styling #}
+
+        {# formset.management_form #}
+        <div id="mentorship_tasks_form">
+            {% block tasks_formset %}
+                {{ mentorship_tasks_form.as_div }}
+            {% endblock tasks_formset %}
+        </div>
+
+        {% #button type="submit" name="action" value="validate_add_tasks" icon_left="bi bi-plus" hx-post=" " hx-target="#mentorship_tasks_form" hx-swap="innerHTML" %}
+            Añadir otra tarea
+        {% /button %}
+
+        {% #button type="submit" name="action" value="create" icon_left="bi bi-plus" %}
+            Guardar
+        {% /button %}
+
+        </form>
+    {% endblock forms %}
+</main>
+{% endblock body %}

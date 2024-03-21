@@ -7,7 +7,11 @@ module.exports = {
     "./node_modules/flowbite/**/*.js",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        "ucv-yellow": "#FFF9DD"
+      },
+    },
   },
   plugins: [
     require('@tailwindcss/typography'),
