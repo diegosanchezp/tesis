@@ -48,15 +48,20 @@ class Mentorship(models.Model):
         """
         return reverse_lazy("mentor:get_tasks", kwargs={"mentorship_pk": self.pk})
 
+    def get_absolute_url(self):
+        """
+        URL to the mentorship detail view
+        """
+        return reverse_lazy("mentor:mentorship_detail", kwargs={"mentorship_pk": self.pk})
+
 class MentorshipTask(models.Model):
     """
     MentorshipTask serves as template of tasks that a student has to complete
     """
 
     name = models.CharField(
-        verbose_name="",
+        verbose_name=_("Nombre de la tarea"),
         max_length=255,
-        help_text=_("Nombre de la tarea")
     )
 
     mentorship = models.ForeignKey(
@@ -148,7 +153,7 @@ class MentorshipRequest(models.Model):
         to="Mentorship",
         on_delete=models.CASCADE,
         related_name="mentorship_requests",
-        verbose_name=_("Solicitudes"),
+        verbose_name=_("Mentoría"),
     )
 
     # Student that made the request
@@ -156,7 +161,7 @@ class MentorshipRequest(models.Model):
         to="register.Student",
         on_delete=models.CASCADE,
         related_name="mentorship_requests",
-        verbose_name=_("Solicitudes de mentorías"),
+        verbose_name=_("Estudiante"),
     )
 
     status = models.CharField(
@@ -197,3 +202,9 @@ class MentorshipRequest(models.Model):
 
         return reverse_lazy("mentor:change_mentorship_status", kwargs={"mentorship_req_pk": self.pk})
 
+    def get_readable_status(self):
+        """
+        Gets the verbose name
+        """
+        if isinstance(self.status, str):
+            return self.State[self.status].label

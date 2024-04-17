@@ -1,0 +1,18 @@
+{% comment %}
+context
+- 'attrs': dict[str,str]
+
+takes a dict as input as and returns this string format: key="value"
+
+taken from forms/templates/django/forms/widgets/attrs.html
+
+{% endcomment %}
+
+{% for name, value in attrs.items %}
+    {% if value is not False %}
+        {{ name }}
+        {% if value is not True %}
+            ="{{ value|stringformat:'s' }}"
+        {% endif %}
+    {% endif %}
+{% endfor %}

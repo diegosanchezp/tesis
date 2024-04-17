@@ -2,6 +2,7 @@ from django_src.apps.register.test_utils import TestCaseWithData
 from django_src.apps.register.test_data.mentors import MentorData
 
 from django_src.pro_carreer.test_data import create_pro_carreers
+from .test_data import MentorshipData
 
 class TestCaseMentorData(TestCaseWithData):
 
@@ -19,3 +20,8 @@ class TestCaseMentorData(TestCaseWithData):
         cls.mentor_data.get()
         cls.mentor1 = cls.mentor_data.mentor1
         cls.mentor2 = cls.mentor_data.mentor2
+
+        cls.mentorship_data = MentorshipData(cls.mentor_data, cls.student_data)
+
+        cls.mentorship_data.create()
+        cls.mentorship_data.get()

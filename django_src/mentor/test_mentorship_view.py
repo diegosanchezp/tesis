@@ -1,15 +1,58 @@
 from os import environ
 
-from .mentorship_view import create_mentorship
-from .models import Mentorship, MentorshipRequest, MentorshipTask, StudentMentorshipTask
+from django.http.response import HttpResponse, HttpResponseForbidden
+from django.test.client import RequestFactory
 
-from django.urls.base import reverse_lazy
-from .test_data import MentorshipData
+from .models import Mentorship, MentorshipRequest, StudentMentorshipTask
+from .forms import MentorshipForm
+from .utils import login_and_approved
 from .test_utils import TestCaseMentorData
+from django.urls.base import reverse_lazy
+
+# ./manage.py test --keepdb django_src.mentor.test_mentorship_view.TestUtils
+class TestUtils(TestCaseMentorData):
+    """
+    Test the utilty functions
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+    def setUp(self):
+        super().setUp()
+
+        # Every test needs access to the request factory.
+        self.factory = RequestFactory()
+
+    # ./manage.py test --keepdb django_src.mentor.test_mentorship_view.TestUtils.test_login_approved_decorator
+    def test_login_approved_decorator(self):
+        """
+        Test that the login_and_approved decorator works as expected
+        """
+        @login_and_approved
+        def test_func(request):
+            return HttpResponse("OK")
+
+        # Create an instance of a GET request.
+        request = self.factory.get("")
+
+        # You can simulate a logged-in user by setting request.user manually.
+
+        # Test that the user is approved
+        request.user = self.mentor1.user
+        response = test_func(request)
+        self.assertEqual(response.status_code, HttpResponse.status_code)
+
+        # Test that the user is NOT approved
+        request.user = self.student_data.unapproved_student.user
+        response = test_func(request)
+
+        self.assertEqual(response.status_code, HttpResponseForbidden.status_code)
+
 
 # ./manage.py test --keepdb django_src.mentor.test_mentorship_view.TestCreateMentorshipView
 class TestCreateMentorshipView(TestCaseMentorData):
-
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -59,7 +102,7 @@ class TestCreateMentorshipView(TestCaseMentorData):
     # ./manage.py test --keepdb django_src.mentor.test_mentorship_view.TestCreateMentorshipView.test_create_mentorship
     def test_create_mentorship(self):
 
-        mentorship_name = "Creación de curriculum"
+        mentorship_name = "Creación de curriculum!"
 
         data = {
             "name": mentorship_name, # name of the mentorship
@@ -85,19 +128,18 @@ class TestCreateMentorshipView(TestCaseMentorData):
             self.fail(msg="Mentorship not found")
 
         self.assertEqual(mentorship.tasks.count(),data["form-TOTAL_FORMS"])
+    # ./manage.py test --keepdb django_src.mentor.test_mentorship_view.TestCreateMentorshipView.test_render_forms
+    def test_render_forms(self):
+        form = MentorshipForm()
+
 
 # ./manage.py test --keepdb django_src.mentor.test_mentorship_view.TestRequestMentorshipView
 class TestRequestMentorshipView(TestCaseMentorData):
-
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
 
-        cls.mentorship = Mentorship(
-            name="Creación de curriculum",
-            mentor=cls.mentor1,
-        )
-        cls.mentorship.save()
+        cls.mentorship = cls.mentorship_data.mentorship1
 
     def setUp(self):
 
@@ -110,6 +152,9 @@ class TestRequestMentorshipView(TestCaseMentorData):
 
     # ./manage.py test --keepdb django_src.mentor.test_mentorship_view.TestRequestMentorshipView.test_make_mentorship_request
     def test_make_mentorship_request(self):
+
+        # Delete mentorship request other unique error will be raised
+        self.mentorship.mentorship_requests.filter(student=self.student).delete()
 
         response = self.client.post(
             path=reverse_lazy("mentor:request_mentorship", kwargs={"mentorship_pk": self.mentorship.pk})
@@ -126,11 +171,6 @@ class TestRequestMentorshipView(TestCaseMentorData):
 
     # ./manage.py test --keepdb django_src.mentor.test_mentorship_view.TestRequestMentorshipView.test_list_menthorships
     def test_list_menthorships(self):
-
-        # Create a mentorship request, so cancel button is shown
-        self.mentorship_request = self.mentorship.mentorship_requests.create(
-            student=self.student,
-        )
 
         # Add another mentorship that the student hasn't requested
         self.mentorship2 = Mentorship(
@@ -158,20 +198,19 @@ class TestChangeMentorshipStatusView(TestCaseMentorData):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        mentorship_data = MentorshipData(cls.mentor_data)
+        mentorship_data = cls.mentorship_data
 
-        mentorship_data.create()
-        mentorship_data.get()
 
         cls.mentorship1 = mentorship_data.mentorship1
 
-        cls.m_task1 = mentorship_data.m_task1
-        cls.m_task2 = mentorship_data.m_task2
-        cls.m_task3 = mentorship_data.m_task3
+        cls.m_task1 = mentorship_data.m1_task1
+        cls.m_task2 = mentorship_data.m1_task2
+        cls.m_task3 = mentorship_data.m1_task3
 
-        cls.mentorship_request = cls.mentorship1.mentorship_requests.create(
-            student=cls.student,
-        )
+        # Set the mentorship request status to requested
+        cls.mentorship_request = cls.mentorship_data.mentorship1.mentorship_requests.first()
+        cls.mentorship_request.status = MentorshipRequest.State.REQUESTED
+        cls.mentorship_request.save()
 
         # For invalid cases
         cls.mentorship2 = Mentorship(
@@ -202,8 +241,7 @@ class TestChangeMentorshipStatusView(TestCaseMentorData):
             }
         )
 
-        breakpoint()
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, response.content.decode())
 
         # refetch mentorship_request
         re_mentorship_request = MentorshipRequest.objects.get(pk=self.mentorship_request.pk)
@@ -235,6 +273,65 @@ class TestChangeMentorshipStatusView(TestCaseMentorData):
         )
 
         self.assertEqual(response.status_code, 400)
+        response_html = response.content.decode()
+        self.assertIsNotNone(response_html)
+        print(response_html)
+
+# ./manage.py test --keepdb django_src.mentor.test_mentorship_view.TestMentorshipDetailView
+class TestMentorshipDetailView(TestCaseMentorData):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.mentorship1 = cls.mentorship_data.mentorship1
+
+    def setUp(self):
+        super().setUp()
+
+        self.mentor = self.mentorship1.mentor
+
+        # Login the mentor user
+        self.assertTrue(self.client.login(
+            username=self.mentor.user, password=environ["ADMIN_PASSWORD"],
+        ))
+
+    # ./manage.py test --keepdb django_src.mentor.test_mentorship_view.TestMentorshipDetailView.test_detail_view
+    def test_detail_view(self):
+        # make the last of the tasks of the mentorship completed
+        m_task = self.student.mentorship_tasks.filter(task__mentorship=self.mentorship1).last()
+        if m_task:
+            m_task.state = StudentMentorshipTask.State.COMPLETED
+            m_task.save()
+
+        response = self.client.get(
+            path=reverse_lazy("mentor:mentorship_detail", kwargs={"mentorship_pk": self.mentorship1.pk})
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        students = response.context["students_info"]
+        student_mentorship_info = students.get(student=self.student)
+
+        print(student_mentorship_info)
+        student_tasks = self.student.mentorship_tasks.filter(task__mentorship=self.mentorship1)
+
+        self.assertEqual(student_mentorship_info["is_completed"], False)
+        self.assertEqual(student_mentorship_info["tasks_completed"], student_tasks.filter(state=StudentMentorshipTask.State.COMPLETED).count())
+
+        self.assertEqual(student_mentorship_info["tasks_num"], student_tasks.count())
+
+    # ./manage.py test --keepdb django_src.mentor.test_mentorship_view.TestMentorshipDetailView.test_get_edit_form
+    def test_get_edit_form(self):
+
+        response = self.client.get(
+            path=reverse_lazy("mentor:edit_mentorship", kwargs={"mentorship_pk": self.mentorship1.pk}),
+            data={
+                "action": "get_edit_form",
+            },
+            headers={"HX-Request": "true"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+
         response_html = response.content.decode()
         self.assertIsNotNone(response_html)
         print(response_html)

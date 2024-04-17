@@ -2,5 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .page-x-spacing {
+    @apply px-20;
+  }
+}
+
 /* https://alpinejs.dev/directives/cloak */
 [x-cloak] { display: none !important; }

@@ -12,7 +12,7 @@ from .models import (
     Faculty, Carreer,
     InterestTheme,
 )
-from .upload_data import create_student
+from .test_data.students import StudentData
 
 class TestCaseWithData(TestCase):
     """
@@ -61,10 +61,16 @@ class TestCaseWithData(TestCase):
         cls.computacion.interest_themes.add(*cls.computacion_interests)
         cls.matematicas.interest_themes.add(*cls.mates_interest_set)
 
-        cls.student_user, cls.student, cls.student_approval, cls.unapproved_student_user, cls.unapproved_student, cls.unapproved_student_approval = create_student(
-            cls.User, Student, RegisterApprovals, ContentType,
-            cls.computacion
-        )
+        cls.student_data = StudentData()
+        cls.student_data.create()
+
+        cls.student_user = cls.student_data.student_user
+        cls.student = cls.student_data.student
+        cls.student_approval = cls.student_data.student_approval
+
+        cls.unapproved_student_user = cls.student_data.unapproved_student_user
+        cls.unapproved_student = cls.student_data.unapproved_student
+        cls.unapproved_student_approval = cls.student_data.unapproved_student_approval
 
         cls.mentor_user = cls.User.objects.create(
             username="pedro",

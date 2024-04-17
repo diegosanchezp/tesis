@@ -1,0 +1,66 @@
+{% load slippers %}
+
+{% comment %}
+Renders the mentorship form and the mentorship tasks formset for already created mentorship
+
+Context:
+  mentorship_tasks_form: forms.MentorshipTaskFormSet
+  mentorship: mentor.models.Mentorship
+{% endcomment %}
+
+<h2 class="text-3xl mb-4">Editar mentoría</h2>
+
+{% block mentorship_and_tasks_form %}
+<form id="mentorship-and-tasks-form" hx-post="{% url 'mentor:edit_mentorship' mentorship_pk=mentorship.pk %}" hx-swap="outerHTML" hx-target="#mentorship-info">
+    <div id="mentorship-form">
+        {% include "mentor/forms/mentorship_form.html" with form=mentorship_form %}
+    </div>
+
+    <div id="edit-actions" class="flex gap-x-4 my-4">
+        {% #button type="submit" name="action" value="edit" icon_left="bi bi-floppy" %}
+            Guardar
+        {% /button %}
+
+        {% #button type="button" name="action" value="render_mentorship_info" hx-get=" " hx-target="#mentorship-info" hx-swap="outerHTML" %}
+            Cancelar edición
+        {% /button %}
+    </div>
+
+    <div id="edit_mentorship_tasks_form">
+        {% block tasks_formset %}
+            {{ mentorship_tasks_form.management_form }}
+            <ol class="list-decimal list-inside">
+                {% for form in mentorship_tasks_form %}
+                    {% with form=form.get_context.form fields=form.get_context.fields hidden_fields=form.get_context.hidden_fields errors=form.get_context.errors %}
+                        {% for field, errors in fields %}
+                            <li class="flex gap-x-4 items-end mb-2 items-end">
+                                <div class="grow">
+                                    {% include "forms/render_field.html" %}
+                                </div>
+                                {% if not forloop.parentloop.last %}
+                                    {# Delete task button #}
+                                    {% if form.instance.pk %}
+                                        {% url 'mentor:delete_task' task_pk=form.instance.pk as hx_delete %}
+                                        {% #button variant="red" title="Borrar esta tarea" hx-delete=hx_delete hx-target="#edit_mentorship_tasks_form" hx-swap="innerHTML" %}
+                                            -
+                                        {% /button %}
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if forloop.parentloop.last %}
+                                    <div>
+                                        {% url 'mentor:edit_mentorship' mentorship_pk=mentorship.pk as hx_post %}
+                                        {% #button type="button" name="action" value="validate_add_tasks" icon_left="bi bi-plus" hx-post=hx_post hx-target="#edit_mentorship_tasks_form" hx-swap="innerHTML" %}
+                                            Añadir otra tarea
+                                        {% /button %}
+                                    </div>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    {% endwith %}
+                {% endfor %}
+            </ol>
+        {% endblock tasks_formset %}
+    </div>
+</form>
+{% endblock mentorship_and_tasks_form %}

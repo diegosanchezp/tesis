@@ -1,9 +1,9 @@
 from django.views.decorators.http import require_GET
 from django.contrib.auth.decorators import login_required
 from django.template.response import TemplateResponse
-from django.db.models import Case, Value, When, Q, F
+from django.db.models import Q
 
-from django_src.apps.register.models import Student
+from django_src.apps.register.models import Student, Mentor
 from .models import MentorshipRequest
 from .utils import get_mentor, is_approved
 
@@ -55,4 +55,26 @@ def list_mentorships(request, username):
 
     response = TemplateResponse(request, template_name, context)
     return response
+
+@require_GET
+@login_required
+@is_approved
+def my_mentorships(request):
+    """
+    Render the mentorships of the mentor that is logged in
+    """
+
+    template_name = 'mentor/my_mentorships.html'
+    mentor = get_mentor(request.user.username, prefetch_related="mentorships")
+
+
+    context = {
+        "mentor": mentor,
+        "mentorships": mentor.mentorships.order_by("name"),
+    }
+
+    response = TemplateResponse(request, template_name, context)
+
+    return response
+
 

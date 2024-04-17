@@ -1,0 +1,36 @@
+{% comment %}
+
+Renders a radio field
+
+context:
+- field: BoundField
+{% endcomment %}
+
+{% load widget_tweaks %}
+<fieldset>
+    <legend
+        {% if sr_only %}
+            class="sr-only"
+        {% else %}
+            class="block mb-2 text-sm font-medium text-gray-900 {% if field.errors %} text-red-600 {% endif %}"
+        {% endif %}
+    >
+        {{ field.label }}
+    </legend>
+    {% for radio in field %}
+        <div class="flex items-center mb-4">
+            {# |add_class:"w-4 h-4 border-gray-300 focus:ring-2 focus:ring-blue-300" #}
+            <input
+                class="w-4 h-4 border-gray-300 focus:ring-2 focus:ring-blue-300"
+                id="{{ radio.id_for_label }}"
+                type="{{ radio.data.type }}"
+                name="{{ radio.data.name }}"{% if radio.data.value != None %}
+                value="{{ radio.data.value|stringformat:'s' }}"{% endif %}
+                {% include "forms/widgets/attrs.html" with attrs=radio.data.attrs %}
+            >
+            <label for="{{ radio.id_for_label }}" class="block ms-2 text-sm font-medium text-gray-900">
+                {{ radio.data.label }}
+            </label>
+        </div>
+    {% endfor %}
+</fieldset>

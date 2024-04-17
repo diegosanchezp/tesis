@@ -5,6 +5,7 @@ from shscripts.backup import setup_django
 from django_src.test_utils import parse_test_data_args
 
 from django_src.apps.register.test_data.mentors import MentorData
+from django_src.apps.register.test_data.students import StudentData
 
 class MentorshipData:
     """
@@ -14,30 +15,37 @@ class MentorshipData:
     3. delete
     """
 
-    def __init__(self, mentor_data: MentorData):
-        from django_src.mentor.models import MentorshipRequest, MentorshipTask, Mentorship
+    def __init__(self, mentor_data: MentorData, student_data: StudentData):
+        from django_src.mentor.models import MentorshipRequest, MentorshipTask, Mentorship, StudentMentorshipTask
 
         self.Mentorship = Mentorship
         self.MentorshipRequest = MentorshipRequest
         self.MentorshipTask = MentorshipTask
-
+        self.StudentMentorshipTask = StudentMentorshipTask
+        self.student_data = student_data
         self.mentor_data = mentor_data
 
         self.mentorship1 = Mentorship(
             name="Creación de curriculum",
+            mentor=self.mentor_data.mentor1,
         )
 
-        self.m_task1 = MentorshipTask(name="Escribir las 10 cosas que mas te gustan de tu carrra.", mentorship=self.mentorship1)
+        self.m1_task1 = MentorshipTask(name="Escribir las 10 cosas que mas te gustan de tu carrra.", mentorship=self.mentorship1)
 
-        self.m_task2 = MentorshipTask(name="Escribe los 3 lenguajes de programación que más te gustan", mentorship=self.mentorship1)
+        self.m1_task2 = MentorshipTask(name="Escribe los 3 lenguajes de programación que más te gustan", mentorship=self.mentorship1)
 
-        self.m_task3 = MentorshipTask(name="Leer libro sobre modelado de datos", mentorship=self.mentorship1)
+        self.m1_task3 = MentorshipTask(name="Leer libro sobre modelado de datos", mentorship=self.mentorship1)
 
+        self.student_request = self.MentorshipRequest(
+            student=self.student_data.student,
+            mentorship=self.mentorship1,
+            status=self.MentorshipRequest.State.ACCEPTED,
+        )
     def create(self):
         # Get the mentors from db
         self.mentor_data.get()
+        self.student_data.get()
 
-        breakpoint()
         try:
             # Save first the mentorship, the task need it
             self.mentorship1.mentor = self.mentor_data.mentor1
@@ -47,10 +55,23 @@ class MentorshipData:
             e.add_note("save the mentor_data first to database")
             raise
 
-        self.m_task1.save()
-        self.m_task2.save()
-        self.m_task3.save()
+        self.m1_task1.save()
+        self.m1_task2.save()
+        self.m1_task3.save()
 
+        # Create an accepted student request
+
+        self.student_request.mentorship=self.mentorship1
+        self.student_request.student=self.student_data.student
+        self.student_request.save()
+
+        # Create tasks for a student, since the request was accepted
+        for task in self.mentorship1.tasks.all():
+            m_task = self.StudentMentorshipTask(
+                student=self.student_data.student,
+                task=task,
+            )
+            m_task.save()
 
     def get(self):
         """
@@ -58,7 +79,7 @@ class MentorshipData:
         useful for adding related things
         """
         self.mentor_data.get()
-        self.mentorship1 = self.Mentorship.objects.get(name=self.mentorship1.name, mentor=self.mentor_data.mentor1)
+        self.mentorship1 = self.Mentorship.objects.get(name=self.mentorship1.name, mentor__user__username=self.mentorship1.mentor.user.get_username())
 
     def delete(self):
         self.get()
@@ -71,7 +92,7 @@ if __name__ == "__main__":
     setup_django(".")
     args = parse_test_data_args()
 
-    mentorship_data = MentorshipData(MentorData())
+    mentorship_data = MentorshipData(MentorData(), StudentData())
 
     if args.action == "create":
         mentorship_data.create()

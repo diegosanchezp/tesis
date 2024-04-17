@@ -5,10 +5,8 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth.decorators import login_required
 from django.urls import include, path
 from django.views import defaults as default_views
-from django.views.generic import TemplateView, RedirectView
 from django.views.static import serve
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from rest_framework.authtoken.views import obtain_auth_token
+from django_src.apps.main.views import forms_demo_view
 from django_src.apps.main.views import PrivateMediaView
 # Wagtail
 from wagtail.admin import urls as wagtailadmin_urls
@@ -75,7 +73,9 @@ if settings.DEBUG:
         ),
         path("500/", default_views.server_error),
         path("components/<str:template_name>/", ComponentsDemoView.as_view()),
+        path("forms_style_demo/", forms_demo_view),
     ]
+
     if "debug_toolbar" in settings.INSTALLED_APPS:
         import debug_toolbar
 

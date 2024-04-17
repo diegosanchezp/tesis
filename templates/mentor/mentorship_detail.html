@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% load django_vite slippers %}
+
+{% comment %}
+  mentorship_requests: django.core.paginator.Page[MentorshipRequest]
+{% endcomment %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+    {% vite_asset 'js/mentorship_detail.ts' %}
+{% endblock %}
+p
+{% block title %}
+Mentoría: {{ mentorship.name }}
+{% endblock title %}
+
+{% block body %}
+
+{% #navbar request=request %}{% /navbar %}
+
+<main class="page-x-spacing">
+    <div id="mentorship-info-student-info-row" class="flex gap-x-8">
+        {% block mentorship_info %}
+            <section id="mentorship-info" class="flex flex-col gap-x-4 mt-4 min-w-[40%]">
+                <h2 class="text-3xl mb-4">{{ mentorship.name }}</h2>
+
+                <div class="flex gap-x-2">
+                    {% url 'mentor:edit_mentorship' mentorship_pk=mentorship.pk as hx_get %}
+                        {% #button type="submit" title="Editar esta mentoría" name="action" value="get_edit_form" hx-get=hx_get hx-swap="innerHTML" hx-target="#mentorship-info" %}
+                            Editar
+                        {% /button %}
+                    <div data-modal-target="delete-modal" data-modal-toggle="delete-modal">
+                        {% #button type="button" title="Eliminar esta mentoría" variant="red" %}
+                            Eliminar
+                        {% /button %}
+                    </div>
+                </div>
+
+                <h3 class="text-2xl my-4">Tareas</h3>
+
+                <ol class="list-decimal list-inside divide-y divide-dashed">
+                    {% for task in mentorship.tasks.all %}
+                        <li class="py-2">{{ task.name }}</li>
+                    {% endfor %}
+                </ol>
+            </section>
+        {% endblock mentorship_info %}
+
+        <section id="solicitudes-estudiantiles" class="">
+            <h1 class="text-3xl my-4">Solicitudes de mentoría</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="py-3 pr-4 text-left">
+                            Estudiante
+                        </th>
+                        <th class="py-3 px-4 text-left">
+                            Estatus
+                        </th>
+                        <th class="py-3 pr-4 text-left">
+                            Acción
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mentorship_request in mentorship_requests %}
+                        {% include "mentor/mentorship/request_row.html" with mentorship_request=mentorship_request %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-left">No hay solicitudes de mentoría</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <section id="student-info">
+        <h2 class="text-2xl mt-8">Visión general de estudiantes inscritos</h2>
+        <table class="w-full border-solid border-gray-700 text-sm text-left rtl:text-right">
+            <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th class="py-3 pr-4 text-left">
+                        Nombre
+                    </th>
+                    <th class="py-3 pr-4 text-left">
+                        Estatus
+                    </th>
+                    <th class="py-3 pr-4 text-left"># Tareas completadas</th>
+                    <th class="py-3 text-left">Acción</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for student_info in students_info %}
+                    <tr>
+                        {# Nombre #}
+                        <td>{{ student_info.student__user__first_name }} {{ student_info.student__user__last_name }}</td>
+                        {# Estatus #}
+                        <td>
+                            {% if student_info.is_completed %}
+                                Terminada
+                            {% else %}
+                                En progreso
+                            {% endif %}
+                        </td>
+                        {# nro Tareas compleatadas #}
+                        <td>{{ student_info.tasks_completed }}</td>
+                        <td>
+                            {# TODO: link to student progress page #}
+                            <a href="">
+                            {% #button type="button" %}
+                                Ver progreso
+                            {% /button %}
+                            </a>
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-left">No hay estudiantes a los que les haya aprobado la mentoría</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+
+    <div id="delete-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-md max-h-full">
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <button type="button" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="delete-modal">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Cerrar</span>
+                </button>
+                <div class="p-4 md:p-5 text-center">
+                    <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                    </svg>
+                    <h3 class="mb-5 text-lg font-normal">¿ Estas seguro de que deseas <span class="font-bold">borrar</span> esta mentoría ? El progreso de todos los estudiantes inscritos se borrará</h3>
+
+                    <div class="flex gap-x-4 justify-center">
+                        {% url 'mentor:delete_mentorship' mentorship_pk=mentorship.pk as delete_url %}
+                        <form method="post" data-modal-hide="delete-modal" action="{{ delete_url }}">
+                            {% csrf_token %}
+                            {% #button variant="red" type="submit" %}
+                                Si, estoy seguro
+                            {% /button %}
+                        </form>
+
+                        <button data-modal-hide="delete-modal" type="button" class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">No, cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container of the student modal -->
+    <div id="student-info-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    </div>
+
+    </main>
+{% endblock body %}

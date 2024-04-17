@@ -1,0 +1,21 @@
+{% load slippers %}
+
+{% comment %}
+  Row of the brief detail
+  context:
+    - mentorship_request: mentor.models.MentorshipRequest
+{% endcomment %}
+<tr id="mentor_req_row-{{ mentorship_request.pk }}">
+    {% with student_user=mentorship_request.student.user %}
+    <td>{{ student_user.first_name }} {{ student_user.last_name }}</td>
+    {% endwith %}
+    <td class="px-4">{{ mentorship_request.get_readable_status }}</td>
+    <td>
+        <!-- Button for Opening Student Modal toggle -->
+        <div onclick="getStudentInfo('{% url 'mentor:student_info_modal' mentorship_request_pk=mentorship_request.pk %}')">
+            {% #button type="button" icon_left="bi bi-info-circle"  %}
+                Revisar
+            {% /button %}
+        </div>
+    </td>
+</tr>

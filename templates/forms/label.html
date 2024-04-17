@@ -1,0 +1,14 @@
+{% comment %}
+context:
+- 'field': BoundField
+- class: str, css classes to add
+{% endcomment %}
+
+{% if field.label %}
+    <label
+        for="{{ field.id_for_label }}"
+        class="{{ class }} {% if field.errors %}text-red-700{% endif %}"
+    >
+        {{ field.label }}
+    </label>
+{% endif %}

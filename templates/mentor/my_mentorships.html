@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static wagtailimages_tags slippers %}
+
+{% block title %}
+Mis mentorías
+{% endblock title %}
+
+{% block body %}
+
+{% #navbar request=request %}{% /navbar %}
+
+<main class="page-x-spacing">
+    {# fixed content #}
+
+    <h1 class="text-3xl my-4">Tus mentorías</h1>
+
+    {# Mentorship card grid #}
+    <section class="grid grid-cols-3 gap-x-4">
+        {% for mentorship in mentorships %}
+            {# Mentorship card #}
+            <div class="rounded border border-ucv-blue drop-shadow-lg bg-slate-50 p-4">
+                <p class="font-bold text-base">{{ mentorship.name }}</p>
+
+                <ul class="text-center my-4">
+                    <li>{{ mentorship.students_enrolled }} estudiantes inscritos</li>
+                    <li>{{ mentorship.num_completed }} veces completada</li>
+                </ul>
+
+                <div class="flex items-center justify-center">
+                    <a href="{% url 'mentor:mentorship_detail' mentorship_pk=mentorship.pk %}">
+                        {% #button type="button" %}
+                            Ver
+                        {% /button %}
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-span-3 flex flex-col items-center justify-center  drop-shadow-lg bg-slate-50 p-4">
+                <p class="my-4">No tienes mentorías creadas</p>
+                <a href="{% url 'mentor:create_mentorship' %}">
+                    {% #button type="button" %}
+                        Crear mentoría
+                    {% /button %}
+                </a>
+            </div>
+
+        {% endfor %}
+    </section>
+</main>
+
+{% endblock body %}

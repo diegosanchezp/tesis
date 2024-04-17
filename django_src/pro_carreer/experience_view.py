@@ -55,7 +55,7 @@ def get_page_number(request):
 
 def paginate_queryset(request, queryset: QuerySet[ProCarreerExperience]):
 
-    paginator = Paginator(object_list=queryset, per_page=1)  # Change Show 12 experiences.
+    paginator = Paginator(object_list=queryset, per_page=12)  # Change Show 12 experiences.
     page_number = get_page_number(request)
     paginated_experencies = paginator.get_page(page_number)
 
