@@ -1,5 +1,5 @@
 from django.urls.base import reverse_lazy
-from .utils import get_mentor, is_approved, validate_add_tasks
+from .utils import get_mentor, is_approved, validate_add_tasks, loggedin_and_approved
 from .forms import MentorshipForm, MentorshipTaskFormSet, MentorshipRequestActionForm, get_MentorshipTaskFormSet
 from .models import MentorshipRequest, Mentorship, TransitionError, StudentMentorshipTask, MentorshipTask
 from django_src.apps.auth.models import User
@@ -26,8 +26,8 @@ class HtmxHttpRequest(HttpRequest):
     htmx: HtmxDetails
     user: User
 
-@login_required
 @require_http_methods(["GET", "POST"])
+@loggedin_and_approved
 @is_approved
 def create_mentorship(request: HtmxHttpRequest):
     template_name = "mentor/create_mentorship.html"
@@ -113,9 +113,8 @@ def create_mentorship(request: HtmxHttpRequest):
 
         return TemplateResponse(request, template_name, context)
 
-@login_required
 @require_http_methods(["GET"])
-@is_approved
+@loggedin_and_approved
 def get_mentorship_tasks(request: HtmxHttpRequest, mentorship_pk: int):
     """
     Returns the tasks of a mentorship so it can be rendered as a modal
@@ -130,9 +129,8 @@ def get_mentorship_tasks(request: HtmxHttpRequest, mentorship_pk: int):
         "tasks": tasks,
     })
 
-@login_required
 @require_http_methods(["POST"])
-@is_approved
+@loggedin_and_approved
 def make_mentorship_request(request: HtmxHttpRequest, mentorship_pk: int):
     """
     A student makes a mentorship request to a mentor
@@ -222,8 +220,7 @@ error_message_response = message_response(HttpResponseBadRequest.status_code, "e
 success_response = message_response(HttpResponse.status_code, "success")
 
 @require_http_methods(["POST"])
-@login_required
-@is_approved
+@loggedin_and_approved
 def change_mentorship_status(request, mentorship_req_pk: int):
     """
     A student or a Mentor changes mentorship status

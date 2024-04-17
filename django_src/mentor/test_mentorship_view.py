@@ -5,7 +5,7 @@ from django.test.client import RequestFactory
 
 from .models import Mentorship, MentorshipRequest, StudentMentorshipTask
 from .forms import MentorshipForm
-from .utils import login_and_approved
+from .utils import loggedin_and_approved
 from .test_utils import TestCaseMentorData
 from django.urls.base import reverse_lazy
 
@@ -30,7 +30,7 @@ class TestUtils(TestCaseMentorData):
         """
         Test that the login_and_approved decorator works as expected
         """
-        @login_and_approved
+        @loggedin_and_approved
         def test_func(request):
             return HttpResponse("OK")
 

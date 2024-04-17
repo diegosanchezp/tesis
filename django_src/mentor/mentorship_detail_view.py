@@ -1,6 +1,6 @@
 from .models import Mentorship, StudentMentorshipTask, MentorshipRequest
-from django_src.apps.register.models import Mentor, Student
-from .utils import get_mentor, is_approved, get_page_number
+from django_src.apps.register.models import Mentor
+from .utils import get_mentor, loggedin_and_approved, is_approved, get_page_number
 
 from render_block import render_block_to_string
 
@@ -11,7 +11,6 @@ from django.template.response import TemplateResponse
 from django.db import models
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_http_methods
-from django.contrib.auth.decorators import login_required
 
 def get_detail_view_context(mentor: Mentor, mentorship: Mentorship):
 
@@ -60,9 +59,8 @@ def paginate_mentorship_request(request, queryset: QuerySet[MentorshipRequest]):
         "page_number": page_number,
     }
 
-@login_required
 @require_http_methods(["GET"])
-@is_approved
+@loggedin_and_approved
 def mentorship_detail_view(request, mentorship_pk: int):
     """
     Detail view for a mentorship
@@ -91,8 +89,7 @@ def mentorship_detail_view(request, mentorship_pk: int):
     return response
 
 @require_http_methods(["GET"])
-@login_required
-@is_approved
+@loggedin_and_approved
 def student_info_view(request, mentorship_request_pk: int):
     """
     Render brief info of a student on a modal

@@ -49,7 +49,7 @@ def is_approved(func):
 
     return inner
 
-def login_and_approved(view_func):
+def loggedin_and_approved(view_func):
     @functools.wraps(view_func)
     def inner(request, *args, **kwargs):
         return is_approved(login_required(view_func))(request, *args, **kwargs)
