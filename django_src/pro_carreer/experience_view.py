@@ -18,7 +18,7 @@ def get_distribution(pro_career: ProfessionalCarreer):
 
     experiences = pro_career.career_experiences.all()
 
-    total_experiences = experiences.count()
+    total_experiences = experiences.count() or 1
 
     distribution = experiences.aggregate(
         one_star=Count("pk", filter=Q(rating=1)) / Value(total_experiences, output_field=FloatField()) * 100,

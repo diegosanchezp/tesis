@@ -46,6 +46,8 @@ Context:
                   <div class="flex flex-col gap-y-4">
                       {% include "pro_carreer/mentor_exp.html" with mentor_experience=experience mentor=experience.mentor %}
                   </div>
+              {% empty %}
+                  <p>Ningún mentor ha registrado una experiencia profesional</p>
               {% endfor %}
           </div>
           <div id="experience-pagination" class="flex justify-center items-center">
