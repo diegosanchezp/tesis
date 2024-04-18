@@ -94,7 +94,7 @@ def view(request):
         return HttpResponseForbidden("You are not approved yet")
 
     pro_careers: QuerySet[ProfessionalCarreer] = get_queryset(request)
-    graph_data = get_graph_data()
+    graph_data = get_graph_data(request)
 
     context["pro_careers"] = pro_careers
     context["graph_data"] = graph_data
@@ -104,7 +104,7 @@ def view(request):
 
     return TemplateResponse(request, template_name, context)
 
-def get_graph_data():
+def get_graph_data(request):
     """
     Get the data for the graph
     """
@@ -208,6 +208,7 @@ def get_graph_data():
                         "description": pro_career.short_description,
                         "NodeType": "ProfessionalCareer",
                         "imgURL": imgURL,
+                        "career_url": pro_career.get_url(request),
                     },
                 })
 
@@ -244,7 +245,7 @@ def graph_view(request):
     template_name = "pro_carreer/graph.html"
     context = {}
 
-    graph_data = get_graph_data()
+    graph_data = get_graph_data(request)
     context["graph_data"] = graph_data
 
     return TemplateResponse(request, template_name, context)
