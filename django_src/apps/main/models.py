@@ -4,6 +4,9 @@ from django.utils.translation import gettext_lazy as _
 
 from modelcluster.fields import ParentalKey
 
+from wagtail import blocks
+from wagtail.fields import StreamField
+from wagtail.images.blocks import ImageChooserBlock
 from wagtail.models import (
     Page,
     Orderable
@@ -14,7 +17,7 @@ from wagtail.admin.panels import (
     MultiFieldPanel,
     InlinePanel,
 )
-from wagtail.fields import RichTextField
+
 # Create your models here.
 class HeroSection(Orderable):
     page = ParentalKey(
@@ -110,6 +113,9 @@ class BlogIndex(Page):
     subpage_types = ['BlogPage']
 
 class BlogPage(Page):
+    """
+    A Mentor's Blog
+    """
     template = "main/blog.html" # Todo
     page_description = _("Blog")
 
@@ -128,8 +134,17 @@ class BlogPage(Page):
     # only the owner
     locked = True
 
-    content = RichTextField(
-        verbose_name=_("Contenido del blog")
+
+    content = StreamField(
+        verbose_name=_("Contenido del blog"),
+        block_types=[
+            ('paragraph', blocks.RichTextBlock(features=["bold", "italic", "ol", "ul", "hr", "link", "document-link", "code", "superscript", "subscript", "strikethrough", "blockquote", "h2", "h3", "h4"])),
+            ('image', ImageChooserBlock()),
+        ],
+        block_counts={
+            'paragraph': {'min_num': 1},
+        },
+        use_json_field=True
     )
 
     content_panels = Page.content_panels + [

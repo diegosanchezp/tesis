@@ -1,0 +1,51 @@
+{% load static wagtailimages_tags slippers %}
+{% comment %}
+    required:
+    - mentorship: django_src.mentor.models.Mentorship
+    - MentorshipRequest: model class
+    - is_student: bool, if the user that is browsing the view is a student
+
+    optional:
+    if the mentorship has a request:
+    - mentorship_request
+{% endcomment %}
+
+{# Just a placeholder for the mentorship messages #}
+<div id="mentorship-{{mentorship.pk }}-message">
+
+</div>
+
+<div id="mentorship-{{mentorship.pk }}" class="flex justify-between items-baseline rounded border border-black py-4 px-4 w-full">
+    <p>
+        {{ mentorship.name }}
+    </p>
+
+    {# action button #}
+    {% if is_student %}
+        {% if mentorship_request %}
+            {% if mentorship_request.status == MentorshipRequest.State.REQUESTED %}
+
+                {# The next action for a request mentorship is to cancel it #}
+
+                <div hx-target="#mentorship-{{ mentorship.pk }}">
+                    {# this button updates the mentorship with the next action #}
+                    {# hx-target is put in the parent element because we can't use interpolation with slippers components #}
+                    {% #button type="button" name="action" value=MentorshipRequest.Events.CANCEL.value hx-post=mentorship_request.get_change_status_url hx-swap="outerHTML" %}
+                        {{ MentorshipRequest.Events.CANCEL.label }}
+                    {% /button %}
+                </div>
+            {% elif mentorship_request.status == MentorshipRequest.State.CANCELED %}
+                {# Canceled mentorships can do nothing #}
+                {% #button disabled=" " %}
+                    Cancelada
+                {% /button %}
+            {% endif %}
+        {% else %}
+            <div onclick="getTasks('{{ mentorship.get_tasks_url }}',)">
+                {% #button type="button" %}
+                    Solicitar
+                {% /button %}
+            </div>
+        {% endif %}
+    {% endif %}
+</div>

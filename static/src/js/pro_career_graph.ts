@@ -134,7 +134,7 @@ const makeTippy = (ele, nodeData) => {
 
             title.innerHTML = nodeData.name
             description.innerHTML = nodeData.description
-            detailAnchor?.setAttribute("href", `https://en.wikipedia.org/wiki/JavaScript`)
+            detailAnchor?.setAttribute("href", nodeData.career_url)
 
             if(["AcademicCareer", "CareerSpec"].includes(nodeData.NodeType)){
                 img?.remove()

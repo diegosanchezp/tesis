@@ -1,0 +1,23 @@
+{% comment %}
+    Renders a Checkbox field
+{% endcomment %}
+
+{% load widget_tweaks %}
+
+<fieldset>
+    <legend class="sr-only">
+        {{ field.label }}
+    </legend>
+
+    <div class="flex items-center mb-4">
+
+        {# <input> tag #}
+        {{ field|add_class:"w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" }}
+
+        {# <label> tag #}
+        {% include "forms/label.html" with field=field class="ms-2 text-sm font-medium text-gray-900" %}
+
+        {# help_text #}
+        {% include "forms/help_text.html" with field=field %}
+    </div>
+</fieldset>

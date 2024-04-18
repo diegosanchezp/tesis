@@ -34,15 +34,17 @@
           <aside id="mentors-list"
               class="self-start flex flex-col gap-y-4 mt-8 ml-6 2xl:w-[18%] lg:w-[20%] overflow-y-auto max-h-screen"
           >
-              <h3 class="text-lg font-medium">Mentores que ejercen esta carrera</h3>
+              {% if mentors.count > 0 %}
+                  <h3 class="text-lg font-medium">Mentores que ejercen esta carrera</h3>
+              {% endif %}
 
               {% for mentor in mentors %}
-              <a href="{{ mentor.get_absolute_url }}" class="flex items-center gap-4" title="Ver perfil">
-                      {% include "pro_carreer/mentor_avatar.html" with user=mentor.user %}
-                      <div class="font-medium dark:text-white">
-                          <div>{{mentor.user.first_name }} {{ mentor.user.last_name }}</div>
-                      </div>
-                  </a>
+                  <a href="{{ mentor.get_absolute_url }}" class="flex items-center gap-4" title="Ver perfil">
+                          {% include "pro_carreer/mentor_avatar.html" with user=mentor.user %}
+                          <div class="font-medium dark:text-white">
+                              <div>{{mentor.user.first_name }} {{ mentor.user.last_name }}</div>
+                          </div>
+                      </a>
               {% endfor %}
           </aside>
       </div>

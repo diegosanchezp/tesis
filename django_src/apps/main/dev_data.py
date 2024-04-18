@@ -4,7 +4,7 @@ import argparse
 from django_src.apps.register.test_data.mentors import (
     MentorData
 )
-
+from django_src.apps.register.test_data.students import StudentData
 from django.db.utils import IntegrityError
 from django.db import transaction
 from django.contrib.auth import get_user_model
@@ -14,7 +14,6 @@ from django.apps.registry import Apps
 from django_src.apps.register.upload_data import (
     MentorData,
     create_carreers,
-    students,
     mentors,
     reset_mentors,
 )
@@ -29,8 +28,6 @@ from shscripts.backup import (
 
 # python -m django_src.apps.main.dev_data upload
 # python -m django_src.apps.main.dev_data reset
-
-
 
 def dev_pages(apps: Apps):
     """
@@ -200,10 +197,11 @@ def reset_dev_pages(apps):
 #
 def upload_dev_data():
     carreer_list = create_carreers()
-    students(apps)
+    student_data = StudentData()
+    student_data.create()
 
-    mentor_list = mentors(apps)
     mentor_data = MentorData()
+
     pro_career_list = create_pro_carreers()
 
     mentor_data.create(
@@ -216,7 +214,8 @@ def upload_dev_data():
 
 def reset():
     reset_mentors(apps)
-    students(apps, delete=True)
+    student_data = StudentData()
+    student_data.delete()
     delete_pro_carreers()
     delete_pro_interes_themes()
 

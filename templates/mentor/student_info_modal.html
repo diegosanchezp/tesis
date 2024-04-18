@@ -1,0 +1,92 @@
+{% comment %}
+  Renders student brief info in a modal.
+  context:
+  - student: django_src.student.models.Student
+  - mentorship_request: django_src.mentorship.models.MentorshipRequest
+{% endcomment %}
+{% load slippers %}
+<div id="student-info-modal-content" class="relative p-4 w-full max-w-2xl max-h-full">
+    <!-- Modal content -->
+    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                Solicitud de mentoría
+            </h3>
+            <button id="close-btn" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                </svg>
+                <span class="sr-only">Cerrar</span>
+            </button>
+        </div>
+
+        {% block modal_body_footer %}
+        <section id="student-info-modal-body-footer">
+            <!-- Modal body -->
+            <div id="student-info-modal-body" class="flex flex-col items-center justify-center p-4 md:p-5 gap-y-2">
+                <div class="flex flex-col items-center justify-center gap-y-2">
+                    {% include "pro_carreer/mentor_avatar.html" with user=student.user border_color="white" %}
+                    {% with s_user=student.user %}
+                        <p class="mt-2">{{ s_user.first_name }} {{ s_user.last_name }}</p>
+                    {% endwith %}
+                </div>
+
+                <p>
+                    {% if student.specialization %}
+                        {{ student.specialization }}
+                    {% else %}
+                        Sin especialización
+                </p>
+                {% endif %}
+
+                {% if student.interests.count > 0 %}
+                    <h3>Intereses</h3>
+                {% else %}
+                    <h3>Sin intereses</h3>
+                {% endif %}
+
+                <ul>
+                    {% for theme in student.interests.all %}
+                        <li>{{ theme.name }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Modal footer -->
+            {% if mentorship_request.status == "REQUESTED" %}
+            <div class="flex gap-x-2 justify-center items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                {% url "mentor:change_mentorship_status" mentorship_req_pk=mentorship_request.pk as change_status_url %}
+                {% #button type="button" name="action" value=MentorshipRequest.Events.ACCEPT hx-post=change_status_url hx-swap="outerHTML" hx-target="#student-info-modal-body-footer" %}
+                    Aceptar
+                {% /button %}
+
+                {% #button type="button" variant="red" name="action" value=MentorshipRequest.Events.REJECT hx-post=change_status_url hx-swap="outerHTML" hx-target="#student-info-modal-body-footer" %}
+                    Rechazar
+                {% /button %}
+            </div>
+            {% endif %}
+
+            {% if mentorship_request.status == "REJECTED" %}
+                <div class="flex justify-center items-center py-4">
+                    <div class="flex gap-x-2 bg-red-700 text-white p-4 rounded justify-center items-center">
+                        <i class="bi bi-x-circle"></i>
+                        <p>Rechazada</p>
+                        <p>{{ mentorship_request.date|date:"d/m/Y" }}</p>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if mentorship_request.status == "ACCEPTED" %}
+                <div class="flex justify-center items-center py-4">
+                    <div class="flex gap-x-2 bg-green-600 text-white p-4 rounded justify-center items-center">
+                        <i class="bi bi-check2-circle"></i>
+                        <p>Aceptada</p>
+                        <p>{{ mentorship_request.date|date:"d/m/Y" }}</p>
+                    </div>
+                </div>
+            {% endif %}
+        </section>
+        {% endblock modal_body_footer %}
+    </div>
+</div>

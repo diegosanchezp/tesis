@@ -142,7 +142,13 @@ class TestStudentProCarreerView(TestCaseWithData):
 
     # ./manage.py test --keepdb django_src.pro_carreer.tests.TestStudentProCarreerView.test_get_graph_data
     def test_get_graph_data(self):
-        graph_data = student_pro_carreer_view.get_graph_data()
+
+        response = self.client.get(
+            path=self.url,
+        )
+
+        request = response.wsgi_request
+        graph_data = student_pro_carreer_view.get_graph_data(request)
         self.assertIn("nodes", graph_data)
         self.assertIn("edges", graph_data)
         self.assertGreaterEqual(len(graph_data["nodes"]), 0)

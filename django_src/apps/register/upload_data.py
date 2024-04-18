@@ -7,6 +7,7 @@ from shscripts.backup import (
 )
 
 from .test_data.mentors import MentorData
+from .test_data.students import StudentData
 from django_src.pro_carreer.test_data import create_pro_carreers
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -32,66 +33,7 @@ def create_student(
 
     Depends on register data migration
     """
-
-    from django_src.apps.register.models import RegisterApprovalStates
-
-    student_type = ContentType.objects.get_for_model(Student)
-
-    admin_user = User.objects.get(
-        username=settings.ADMIN_USERNAME,
-    )
-
-    student_user = User.objects.create(
-        username="diego",
-        first_name="Diego",
-        last_name="Sánchez",
-        email="diego@mail.com",
-    )
-
-    student_user.set_password(os.environ["ADMIN_PASSWORD"])
-    student_user.save()
-
-    student = Student.objects.create(
-        user=student_user,
-        carreer=computacion,
-        voucher=SimpleUploadedFile(
-            name="profile_pic.jpg",
-            content=open(str(Path(settings.MEDIA_ROOT_TEST) / "jpeg_example.jpg"), "rb").read(),
-            content_type="image/jpeg",
-        )
-    )
-
-
-    student_approval = RegisterApprovals.objects.create(
-        user=student_user,
-        user_type=student_type,
-        admin=admin_user,
-        state=RegisterApprovalStates.APPROVED,
-    )
-
-    unapproved_student_user = User.objects.create(
-        username="unapproved_student",
-        first_name="Unapproved",
-        last_name="Student",
-        email="unapproved_student@mail.com",
-    )
-
-    unapproved_student = Student.objects.create(
-        user=unapproved_student_user,
-        carreer=computacion,
-        voucher=SimpleUploadedFile(
-            name="profile_pic.jpg",
-            content=open(str(Path(settings.MEDIA_ROOT_TEST) / "jpeg_example.jpg"), "rb").read(),
-            content_type="image/jpeg",
-        )
-    )
-
-    unapproved_student_approval = RegisterApprovals.objects.create(
-        user=unapproved_student_user,
-        user_type=student_type,
-        state=RegisterApprovalStates.WAITING,
-    )
-
+    
     return (
         student_user, student, student_approval,
         unapproved_student_user, unapproved_student, unapproved_student_approval
@@ -253,24 +195,6 @@ def create_carreers():
             odontologia=odontologia,
         )
 
-def students(apps: Apps, delete=False):
-    """
-    Creates the student
-    Depends on create_carreers
-    """
-    User = get_user_model()
-    Carreer = apps.get_model(app_label="register", model_name="Carreer")
-    Student = apps.get_model(app_label="register", model_name="Student")
-    RegisterApprovals = apps.get_model(app_label="register", model_name="RegisterApprovals")
-    ContentType = apps.get_model(app_label="contenttypes", model_name="ContentType")
-
-    computacion = Carreer.objects.get(name="Computación")
-
-    if not delete:
-        create_student(User, Student, RegisterApprovals, ContentType, computacion)
-    else:
-        delete_student(User)
-
 def mentors(apps: Apps):
     """
     Create two mentors
@@ -345,14 +269,14 @@ def mentors(apps: Apps):
             owner=mentor1_user,
             title="Blog Mentor 1",
             slug="blog-mentor-1",
-            content="<p>Mentor 1 Blog Post's</p>",
+            # content="<p>Mentor 1 Blog Post's</p>",
         ))
 
         blog_index.add_child(instance=BlogPage(
             owner=mentor2_user,
             title="Blog Mentor 2",
             slug="blog-mentor-2",
-            content="<p>Mentor 2 Blog Post's</p>",
+            # content="<p>Mentor 2 Blog Post's</p>",
         ))
 
         from django_src.apps.register.models import Mentor
@@ -395,10 +319,14 @@ def upload_data():
     Put here all of the functions that create carreers
     """
     carreer_list = create_carreers()
-    students(apps)
+
+    student_data = StudentData()
+    student_data.create()
     mentors(apps)
+
     mentor_data = MentorData()
     pro_career_list = create_pro_carreers()
+
     mentor_data.create(
         computacion=carreer_list.computacion,
         full_stack_dev=pro_career_list.fullstack_dev,

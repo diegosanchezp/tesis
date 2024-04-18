@@ -1,0 +1,27 @@
+
+{% comment %}
+Renders mentorship_form
+
+Required context:
+- form: MentorshipForm
+
+{% endcomment %}
+
+{% with form=form.get_context.form fields=form.get_context.fields hidden_fields=form.get_context.hidden_fields errors=form.get_context.errors %}
+
+    {{ errors }}
+
+    {% if errors and not fields %}
+        <div>{% for field in hidden_fields %}{{ field }}{% endfor %}</div>
+    {% endif %}
+
+    {% for field, errors in fields %}
+        <div>
+            {% include "forms/render_field.html" %}
+        </div>
+    {% endfor %}
+
+    {% if not fields and not errors %}
+      {% for field in hidden_fields %}{{ field }}{% endfor %}
+    {% endif %}
+{% endwith %}

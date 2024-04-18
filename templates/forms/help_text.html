@@ -1,0 +1,11 @@
+{% comment %}
+Renders the help text of a field.
+context:
+  field: BoundField
+  class: str, substitute/override css classes
+{% endcomment %}
+{% if field.help_text %}
+    <p class="{{ class|default:"text-xs font-normal text-gray-500" }}">
+        {{ field.help_text|safe }}
+    </p>
+{% endif %}

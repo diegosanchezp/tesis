@@ -1,11 +1,22 @@
 {% load slippers %}
 
 {# define the default css class #}
-{% var class=class|default:"text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 disabled:bg-slate-300" %}
+{% var variant=variant|default:"primary" %}
+{% fragment as primary_css_class %}
+    {% include "components/button_class.html" %}
+{% endfragment %}
+
+{% if variant == "red" %}
+    {% var class=class|default:"focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900" %}
+{% else %}
+    {% var class=class|default:primary_css_class %}
+{% endif %}
+
 
 {# attrs define the html attributes that this component can support, if one is missing just add more #}
 
-<button {% attrs autofocus disabled form formaction formenctype formmethod formnovalidate formtarget popovertarget popovertargetaction name type value class id title style tabindex role lang intert x-data x-bind:disabled x-show @click x-ref hx-boost hx-get hx-post hx-on hx-push-url hx-select hx-select-oob hx-swap hx-swap-oob hx-target hx-trigger hx-vals onclick ondrag %}>
+<button {% attrs autofocus disabled form formaction formenctype formmethod formnovalidate formtarget popovertarget popovertargetaction name type value class id title style tabindex role lang intert x-data x-bind:disabled x-show @click x-ref hx-boost hx-get hx-post hx-delete hx-on hx-push-url hx-select hx-select-oob hx-swap hx-swap-oob hx-target hx-trigger hx-vals onclick ondrag  %}>
+
     {# Currently this button component only supports bootstrap icons #}
     <div class="flex gap-2">
         {% if icon_left %}

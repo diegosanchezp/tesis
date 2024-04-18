@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static wagtailimages_tags django_vite slippers %}
+{% comment %}
+  List mentorships on the profile of the mentor
+
+  Required context:
+  - mentor: django_src.apps.register.models.Mentor
+  - mentorships: Queryset[django_src.mentor.models.Mentorship]
+
+{% endcomment %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/mentor_mentorships.ts' %}
+{% endblock extrascripts %}
+
+
+{% block title %}
+Mentor {{ mentor.user.first_name }} {{ mentor.user.last_name }}
+{% endblock title %}
+
+{% block body %}
+<main class="">
+
+    {# fixed content #}
+    {% #navbar request=request %}{% /navbar %}
+    {% include "mentor/mentor_header.html" %}
+    {% #mentor_tabs user=mentor.user current_tab="mentorias" %}{% /mentor_tabs %}
+
+
+    <div class="px-20 max-w-[1920px] mx-auto justify-evenly gap-x-4">
+
+        {% if not mentorships_empty %}
+            <div class="flex justify-between">
+                <h3 class="text-bold text-lg my-4">Te puedo ofrecer ayuda de este tipo</h3>
+
+                {% if request.user.is_mentor %}
+                    <a href="{% url 'mentor:my_mentorships' %}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Ver mis mentorías</a>
+                {% endif %}
+            </div>
+        {% else %}
+            <p>Este mentor aún no ha creado mentorías.</p>
+        {% endif %}
+
+
+        <div id="mentorship-list" class="flex flex-col gap-y-2 w-3/4">
+            {% for student_request in student_requests %}
+                {% include "mentor/mentorship_card.html" with mentorship=student_request.mentorship mentorship_request=student_request MentorshipRequest=MentorshipRequest is_student=is_student%}
+            {% endfor %}
+
+            {# Render mentorships that hasn't been request by the student #}
+            {% for mentorship in mentorships %}
+                {% include "mentor/mentorship_card.html" with mentorship=mentorship MentorshipRequest=MentorshipRequest is_student=is_student %}
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <div id="default-modal"></div>
+</main>
+
+{% endblock body %}

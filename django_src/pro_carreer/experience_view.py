@@ -3,6 +3,7 @@ from django.http.response import HttpResponse
 from django.template.response import TemplateResponse
 from django.db.models import Count, Q, FloatField, Value
 from django.core.paginator import Paginator
+from django.urls.base import reverse_lazy
 from .models import ProfessionalCarreer, ProCarreerExperience
 from .forms import ProCareerExpForm
 from django.shortcuts import get_object_or_404
@@ -18,7 +19,7 @@ def get_distribution(pro_career: ProfessionalCarreer):
 
     experiences = pro_career.career_experiences.all()
 
-    total_experiences = experiences.count()
+    total_experiences = experiences.count() or 1
 
     distribution = experiences.aggregate(
         one_star=Count("pk", filter=Q(rating=1)) / Value(total_experiences, output_field=FloatField()) * 100,
@@ -55,7 +56,7 @@ def get_page_number(request):
 
 def paginate_queryset(request, queryset: QuerySet[ProCarreerExperience]):
 
-    paginator = Paginator(object_list=queryset, per_page=1)  # Change Show 12 experiences.
+    paginator = Paginator(object_list=queryset, per_page=12)  # Change Show 12 experiences.
     page_number = get_page_number(request)
     paginated_experencies = paginator.get_page(page_number)
 
@@ -214,6 +215,10 @@ def view(request, page: ProfessionalCarreer):
     context = {
         "page": page, # Wagtail page object
         "distribution": get_distribution(page),
+        "breadcrumbs": [
+            {"name": "Carreras profesionales", "href": reverse_lazy("pro_carreer:student_carreer_match")},
+            {"name": page.title },
+        ],
     }
 
     context.update(get_experiences(request, page))

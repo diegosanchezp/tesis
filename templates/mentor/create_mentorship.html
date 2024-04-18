@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load django_vite slippers %}
+
+{% comment %}
+  required context:
+  - mentorship_form: MentorshipForm
+  - mentorship_tasks_form: MentorshipTaskFormSet
+{% endcomment %}
+
+{% block title %}
+Crear mentoría
+{% endblock title %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+{% endblock %}
+
+{% block body %}
+
+{% #navbar request=request %}{% /navbar %}
+<main class="px-20">
+    {% block forms %}
+        <form
+            id="mentorship-form"
+            class="mt-4"
+            method="post"
+        >
+
+        {% csrf_token %}
+
+        {% include "mentor/forms/mentorship_form.html" with form=mentorship_form %}
+
+        {# Render the task formset #}
+        {# todo: styling #}
+
+        <h2 class="text-2xl my-4">Tareas</h2>
+
+        <div id="mentorship_tasks_form">
+            {% block tasks_formset %}
+                {{ mentorship_tasks_form.management_form }}
+                {% for form in mentorship_tasks_form %}
+                    {% with form=form.get_context.form fields=form.get_context.fields hidden_fields=form.get_context.hidden_fields errors=form.get_context.errors %}
+                        {% for field, errors in fields %}
+                            <div class="flex gap-x-4 items-end mb-2">
+                                <div class="grow">
+                                    {% include "forms/render_field.html" %}
+                                </div>
+                                {% if forloop.parentloop.last %}
+                                    <div>
+                                        {% #button type="submit" name="action" value="validate_add_tasks" icon_left="bi bi-plus" hx-post=" " hx-target="#mentorship_tasks_form" hx-swap="innerHTML" %}
+                                        Añadir otra tarea
+                                        {% /button %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% endwith %}
+                {% endfor %}
+            {% endblock tasks_formset %}
+        </div>
+
+        <div id="mentorship-form-actions" class="my-4">
+
+        {% #button type="submit" name="action" value="create" icon_left="bi bi-floppy" %}
+            Guardar
+        {% /button %}
+        </div>
+
+        </form>
+    {% endblock forms %}
+</main>
+{% endblock body %}

@@ -1,0 +1,30 @@
+{% comment %}
+style:
+    https://flowbite.com/docs/components/forms/
+based on:
+    https://github.com/django/django/blob/main/django/forms/templates/django/forms/div.html
+context:
+- https://docs.djangoproject.com/en/5.0/ref/forms/api/#django.forms.BoundField.get_context
+- sr_only: bool, if True, the label is hidden
+{% endcomment %}
+
+{% with form=form.get_context.form fields=form.get_context.fields hidden_fields=form.get_context.hidden_fields errors=form.get_context.errors %}
+
+    {{ errors }}
+
+    {% if errors and not fields %}
+        <div>{% for field in hidden_fields %}{{ field }}{% endfor %}</div>
+    {% endif %}
+
+    {% for field, errors in fields %}
+        <div id="field_{{field.name}}">
+            {% include "forms/render_field.html" %}
+        </div>
+    {% endfor %}
+
+    {% if not fields and not errors %}
+      {% for field in hidden_fields %}{{ field }}{% endfor %}
+    {% endif %}
+
+{% endwith %}
+

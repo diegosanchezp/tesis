@@ -1,0 +1,51 @@
+{% comment %}
+
+Decides how to render a field based on the type
+field: BoundField
+
+{% endcomment %}
+
+{% load widget_tweaks %}
+
+{% if field.widget_type == "checkbox" %}
+    {% include "forms/widgets/checkbox.html" %}
+{% elif field.widget_type == "radioselect" %}
+    {% include "forms/widgets/radio.html" %}
+{% elif field.widget_type == "file" %}
+    {% include "forms/widgets/file.html" %}
+{# input of type text,select,password,number,date,textarea #}
+{% else %}
+    <div
+        {% with classes=field.css_classes %}
+            {% if classes %}
+                class="{{ classes }}"
+            {% else %}
+                class=""
+            {% endif %}
+        {% endwith %}
+    >
+        {# <label> tag #}
+        {% include "forms/label.html" with field=field class="block mb-2 text-sm font-medium text-gray-900" %}
+
+        {# <input> tag #}
+        {% with WIDGET_ERROR_CLASS='border-red-500' %}
+            {% render_field field class+="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
+        {% endwith %}
+
+        {# help_text #}
+        {% include "forms/help_text.html" with field=field class="mt-2 text-sm text-gray-500" %}
+    </div>
+{% endif %}
+
+{# errors #}
+{% if field.errors %}
+    <ul class="mb-5 mt-1">
+        {% for error in field.errors %}
+            <li class="text-sm text-red-600">{{ error|escape }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if forloop.last %}
+    {% for field in hidden_fields %}{{ field }}{% endfor %}
+{% endif %}

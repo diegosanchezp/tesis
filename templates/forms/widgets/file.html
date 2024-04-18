@@ -1,0 +1,8 @@
+{# <label> tag #}
+{% include "forms/label.html" with field=field class="block mb-2 text-sm font-medium text-gray-900" %}
+
+{# <input> tag #}
+{% render_field field class+="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none" %}
+
+{# help_text #}
+{% include "forms/help_text.html" with field=field class="mt-1 text-sm text-gray-500" %}

@@ -4,13 +4,15 @@
 {% block extrastyles %}
 {% endblock extrastyles %}
 
+{% block title %}
+Mapa de carrearas profesionales
+{% endblock %}
+
 {% block extrascripts %}
     {% vite_asset 'js/pro_career_graph.ts' %}
 {% endblock extrascripts %}
 
 {% block body %}
-
-
 
 {# Navgation bar #}
 {% #navbar request=request %}{% /navbar %}

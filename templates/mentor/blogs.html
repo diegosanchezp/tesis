@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static wagtailimages_tags wagtailcore_tags %}
+{% load django_vite slippers %}
+
+{% block title %}
+Blogs mentor {{ mentor.user.first_name }} {{ mentor.user.last_name }}
+{% endblock title %}
+
+{% block body %}
+<main>
+    {# fixed content #}
+    {% #navbar request=request %}{% /navbar %}
+    {% include "mentor/mentor_header.html" %}
+    {% #mentor_tabs user=mentor.user current_tab="blogs" %}{% /mentor_tabs %}
+
+    {# Blogs section #}
+    <section class="grid grid-cols-4 gap-x-4 px-20 max-w-[1920px] mx-auto mt-8">
+        {% for blog in blogs %}
+            <article class="shadow-md rounded bg-white">
+                <a
+                    class="bg-slate-200 flex h-[200px] items-center justify-center m-4"
+                    href="{% pageurl blog %}"
+                >
+                    {% if not blog.thumbnail %}
+                        <i class="bi bi-card-image"></i>
+                    {% else %}
+                        {# https://docs.wagtail.org/en/stable/topics/images.html#adding-attributes-to-the-image-tag #}
+                        {% image blog.thumbnail max-400x200 as blog_thumbnail %}
+                        <img src="{{ blog_thumbnail.url }}"
+                             alt="{{ blog_thumbnail.alt }}" class="" />
+
+                    {% endif %}
+
+                </a>
+                {# Text info #}
+                <div class="my-2 mx-4 mb-6">
+                    <a href="{% pageurl blog %}" class="text-cyan-700 text-xl">{{ blog.title }}</a>
+                    <p class="">{{ blog.first_published_at|date:"M Y"}}</p>
+                </div>
+            </article>
+        {% empty %}
+            <p>Este mentor aún no tiene blogs.</p>
+        {% endfor %}
+    </section>
+</main>
+
+{% endblock body %}
+

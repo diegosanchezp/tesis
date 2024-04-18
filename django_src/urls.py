@@ -3,18 +3,19 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import views as auth_views
 from django.urls import include, path
+from django.urls.base import reverse_lazy
 from django.views import defaults as default_views
-from django.views.generic import TemplateView, RedirectView
 from django.views.static import serve
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from rest_framework.authtoken.views import obtain_auth_token
+from django_src.apps.main.views import forms_demo_view
 from django_src.apps.main.views import PrivateMediaView
 # Wagtail
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 from django_src.apps.main.views import ComponentsDemoView, color_demo_view
+from django_src.mentor.urls import urlpatterns as mentor_urls
 
 urlpatterns = [
 
@@ -24,6 +25,8 @@ urlpatterns = [
     #path('accounts/', include('allauth.urls')),
     path('register/', include('django_src.apps.register.urls', namespace="register")),
     path('pro_carrer/', include('django_src.pro_carreer.urls', namespace="pro_carreers")),
+    path('mentor/', include('django_src.mentor.urls', namespace="mentor")),
+    path('logout/', auth_views.LogoutView.as_view(next_page=reverse_lazy("wagtailadmin_home")), name='logout'),
 ]
 
 if settings.DEBUG:
@@ -73,7 +76,9 @@ if settings.DEBUG:
         ),
         path("500/", default_views.server_error),
         path("components/<str:template_name>/", ComponentsDemoView.as_view()),
+        path("forms_style_demo/", forms_demo_view),
     ]
+
     if "debug_toolbar" in settings.INSTALLED_APPS:
         import debug_toolbar
 

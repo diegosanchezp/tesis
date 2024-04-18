@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static wagtailimages_tags %}
+{% load django_vite slippers %}
+
+
+{% block title %}
+Mentor {{ mentor.user.first_name }} {{ mentor.user.last_name }}
+{% endblock title %}
+
+{% block body %}
+<main class="">
+    {# fixed content #}
+    {% #navbar request=request %}{% /navbar %}
+    {% include "mentor/mentor_header.html" %}
+    {% #mentor_tabs user=mentor.user %}{% /mentor_tabs %}
+
+    <div class="flex px-20 max-w-[1920px] mx-auto justify-evenly gap-x-4">
+        {# timeline experience #}
+        
+        <section id="timeline" class="flex flex-col w-3/4 gap-x-4">
+        {% for experience in experiences %}
+            <div class="flex flex-col w-3/4 gap-x-4">
+                {# timeline item #}
+                <div class="flex gap-x-4">
+                    <div class="relative flex flex-col">
+                        {# Ball #}
+                        <div class="flex items-center justify-center w-12 h-12 border border-blue-600 rounded-full shrink-0">
+                            <p>{{ forloop.revcounter }}</p>
+                        </div>
+                        {# Vertical line #}
+                        <div class="w-12 bottom-0 flex flex-col flex-1">
+                            <!-- line has a minimum height of 50px -->
+                            
+                            <div class="bg-black {% if not forloop.last %} min-h-[90px] {% else %} min-h-[50px] {% endif %}w-px ml-6 self-start flex-1"></div>
+                            
+                        </div>
+                    </div>
+                    <div class="flex gap-x-4 items-baseline">
+                        <div class="flex flex-col">
+                            {# Company #}
+                            <div class="flex gap-x-4 items-center mb-4">
+                                <p class="font-bold">{{ experience.name }}</p>
+                                <p class="bg-black text-white px-2 py-1 rounded">@{{experience.company}}</p>
+                            </div>
+                            {# Time #}
+                            <p class="mb-4">
+                                {{ experience.init_year.year }} -
+                                {% if experience.end_year %}
+                                    {{ experience.end_year.year }}
+                                {% else %}
+                                    presente
+                                {% endif %}
+                            </p>
+                            {# About #}
+                            <p>{{ experience.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </section>
+
+
+        <div class="w-1/4">
+            <p id="number-of-completed-mentorships" class="shadow-md text-center align-middle py-4 rounded">
+                10 mentorías completadas
+            </p>
+        </div>
+    </div>
+
+</main>
+
+{% endblock body %}
