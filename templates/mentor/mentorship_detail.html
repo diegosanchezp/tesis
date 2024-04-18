@@ -19,6 +19,10 @@ Mentoría: {{ mentorship.name }}
 {% #navbar request=request %}{% /navbar %}
 
 <main class="page-x-spacing">
+    <div class="mt-4">
+        {% include "components/breadcrumbs.html" with breadcrumbs=breadcrumbs %}
+    </div>
+
     <div id="mentorship-info-student-info-row" class="flex gap-x-8">
         {% block mentorship_info %}
             <section id="mentorship-info" class="flex flex-col gap-x-4 mt-4 min-w-[40%]">

@@ -1,3 +1,4 @@
+from django.urls.base import reverse_lazy
 from .models import Mentorship, StudentMentorshipTask, MentorshipRequest
 from django_src.apps.register.models import Mentor
 from .utils import get_mentor, loggedin_and_approved, is_approved, get_page_number
@@ -73,6 +74,12 @@ def mentorship_detail_view(request, mentorship_pk: int):
     action = request.GET.get("action")
 
     context = get_detail_view_context(mentor, mentorship)
+    context.update(
+        breadcrumbs=[
+            {"name": "Mis mentorías", "href": reverse_lazy("mentor:my_mentorships")},
+            {"name": mentorship.name },
+        ]
+    )
 
     if request.htmx and action == "render_mentorship_info":
         form_html = render_mentorship_info(mentor, mentorship)
