@@ -33,7 +33,35 @@
         </li>
         {# Profile section #}
         <li>
-            {% include "pro_carreer/mentor_avatar.html" with user=request.user border_color="white" %}
+            {% include "pro_carreer/mentor_avatar.html" with user=request.user border_color="white" with_dropdown="True" %}
         </li>
     </ul>
 </nav>
+
+<!-- Dropdown menu -->
+<div id="userDropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
+    <div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+      <p class="mb-px">{{ request.user.first_name }} {{ request.user.last_name }}</p>
+      <p class="font-medium truncate">{{ request.user.email }}</p>
+    </div>
+
+    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="avatarButton">
+        {% if request.user.is_superuser %}
+        <li>
+            <a href="{% url 'wagtailadmin_home' %}" class="block px-4 py-2 hover:bg-gray-100">
+                CMS
+            </a>
+        </li>
+        {% endif %}
+        {% if request.user.is_mentor %}
+        <li>
+            <a href="{% url 'mentor:profile' username=request.user.get_username %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                Mi perfil
+            </a>
+        </li>
+        {% endif %}
+        </ul>
+    <div class="py-1">
+      <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200">Cerrar sesión</a>
+    </div>
+</div>

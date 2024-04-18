@@ -1,9 +1,15 @@
 {% comment %}
   optional context
   border_color: string, default black
+  with_dropdown: boolean, default false, if true, the dropdown will be shown
 {% endcomment %}
+
 {% if user.profile_pic %}
-    <div class="w-12 h-12">
+    <div class="w-12 h-12"
+         {% if with_dropdown %}
+             data-dropdown-toggle="userDropdown" data-dropdown-placement="bottom-start"
+         {% endif %}
+    >
         <img
             class="rounded-full"
             src="{{user.profile_pic.url}}"
@@ -11,7 +17,12 @@
             >
     </div>
 {% else %}
-<div class="flex items-center justify-center w-12 h-12 rounded-full border-2 border-solid border-{{border_color|default:"black"}}">
+<div
+    class="flex items-center justify-center w-12 h-12 rounded-full border-2 border-solid border-{{border_color|default:"black"}}"
+     {% if with_dropdown %}
+         data-dropdown-toggle="userDropdown" data-dropdown-placement="bottom-start"
+     {% endif %}
+    >
       <i class="bi bi-person-fill text-3xl"></i>
   </div>
 {% endif %}

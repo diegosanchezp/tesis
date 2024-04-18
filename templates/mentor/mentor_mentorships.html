@@ -30,7 +30,13 @@ Mentor {{ mentor.user.first_name }} {{ mentor.user.last_name }}
     <div class="px-20 max-w-[1920px] mx-auto justify-evenly gap-x-4">
 
         {% if not mentorships_empty %}
-            <h3 class="text-bold text-lg my-4">Te puedo ofrecer ayuda de este tipo</h3>
+            <div class="flex justify-between">
+                <h3 class="text-bold text-lg my-4">Te puedo ofrecer ayuda de este tipo</h3>
+
+                {% if request.user.is_mentor %}
+                    <a href="{% url 'mentor:my_mentorships' %}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Ver mis mentorías</a>
+                {% endif %}
+            </div>
         {% else %}
             <p>Este mentor aún no ha creado mentorías.</p>
         {% endif %}

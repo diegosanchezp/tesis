@@ -56,6 +56,10 @@
       {% vite_hmr_client %}
     {% endblock %}
 
+    {% block flowbitescript %}
+        {% vite_asset 'js/flowbite.ts' %}
+    {% endblock %}
+
     {% block extrascripts %}{% endblock %}
 
   </head>
