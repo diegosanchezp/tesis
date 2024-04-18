@@ -1,5 +1,6 @@
 from django.db import models
 from django.http.response import HttpResponseBadRequest
+from django.urls.base import reverse_lazy
 
 
 from django.utils.translation import gettext_lazy as _
@@ -93,6 +94,10 @@ class ProfessionalCarreer(Page):
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         context["mentors"] = Mentor.objects.filter(my_career_experiences__pro_carreer=self)
+        context["breadcrumbs"] = [
+            {"name": "Carreras profesionales", "href": reverse_lazy("pro_carreer:student_carreer_match")},
+            {"name": self.title },
+        ]
         return context
 
     def serve(self, request):

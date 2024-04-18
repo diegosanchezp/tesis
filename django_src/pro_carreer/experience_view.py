@@ -3,6 +3,7 @@ from django.http.response import HttpResponse
 from django.template.response import TemplateResponse
 from django.db.models import Count, Q, FloatField, Value
 from django.core.paginator import Paginator
+from django.urls.base import reverse_lazy
 from .models import ProfessionalCarreer, ProCarreerExperience
 from .forms import ProCareerExpForm
 from django.shortcuts import get_object_or_404
@@ -214,6 +215,10 @@ def view(request, page: ProfessionalCarreer):
     context = {
         "page": page, # Wagtail page object
         "distribution": get_distribution(page),
+        "breadcrumbs": [
+            {"name": "Carreras profesionales", "href": reverse_lazy("pro_carreer:student_carreer_match")},
+            {"name": page.title },
+        ],
     }
 
     context.update(get_experiences(request, page))
