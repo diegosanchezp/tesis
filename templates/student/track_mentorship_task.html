@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load django_vite slippers %}
+
+
+{% comment %}
+  student
+  todo_tasks:
+{% endcomment %}
+
+{% block title %}
+    Progreso de tareas
+{% endblock title %}
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+    {% vite_asset 'js/track_mentorship_task.ts' %}
+{% endblock %}
+
+{% block body %}
+
+{% #navbar request=request %}{% /navbar %}
+
+<main class="page-x-spacing">
+    <section class="flex justify-center gap-x-16">
+
+        <div id="todo-tasks" class="dropzone flex flex-col gap-y-4 px-2 py-4 border-2 rounded border-slate-500">
+            {% for m_task in todo_tasks %}
+                <div id="task-{{ m_task.pk }}" draggable="true" class="draggable-task p-2 border rounded border-black">
+                    {{ m_task.task.name }}
+                </div>
+            {% endfor %}
+        </div>
+        <div id="inprogress-tasks" class="dropzone min-w-full flex flex-col gap-y-4 px-2 py-4 border-solid border-2 rounded border-slate-500">
+            {% for m_task in inprogress_tasks %}
+                <div id="task-{{ m_task.pk }}" draggable="true" class="draggable-task p-2 border rounded border-black">
+                    {{ m_task.task.name }}
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+{% endblock %}
+

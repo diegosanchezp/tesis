@@ -4,6 +4,19 @@ from django.utils.translation import gettext_lazy as _
 
 from django.urls.base import reverse_lazy
 
+def transition(machine: dict, status: models.TextChoices, event: models.TextChoices):
+
+    try:
+        next_state = machine[status][event]
+        status = next_state
+    except KeyError:
+        raise TransitionError(
+            (
+                f"Error: no transition defined for state: {status}"
+                f"with event: {event}"
+            )
+        ) from KeyError
+
 class TransitionError(Exception):
     pass
 
@@ -79,6 +92,14 @@ class StudentMentorshipTask(models.Model):
     Task assigned to the student
     """
 
+    class Events(models.TextChoices):
+        # Student is making progress in task
+        PROGRESS = "PROGRESS", _("Progresar")
+
+        COMPLETE = "COMPLETE", _("Completar")
+        # Student puts task on TODO state
+        PAUSE = "PAUSE", _("Pausar")
+
     class State(models.TextChoices):
         """
         State of mentorship task
@@ -87,6 +108,20 @@ class StudentMentorshipTask(models.Model):
         TODO = "TODO", _("Por hacer")
         IN_PROGRESS = "IN_PROGRESS", _("En progreso")
         COMPLETED = "COMPLETED", _("Completada")
+
+    machine = {
+        State.TODO: {
+            Events.PROGRESS: State.IN_PROGRESS,
+        },
+        State.IN_PROGRESS: {
+            Events.PAUSE: State.TODO,
+            Events.COMPLETE: State.COMPLETED,
+        },
+        State.COMPLETED: {
+            Events.PAUSE: State.TODO,
+            Events.PROGRESS: State.IN_PROGRESS,
+        },
+    }
 
     student = models.ForeignKey(
         to="register.Student",
@@ -109,8 +144,12 @@ class StudentMentorshipTask(models.Model):
 
     class Meta:
         unique_together = [["student", "task"]]
+
     def __str__(self) -> str:
         return f"{self.student} {self.task.name}"
+
+    def transition(self, event: Events) -> None:
+        transition(self.machine, status=self.state, event=event)
 
 class MentorshipRequest(models.Model):
     """
