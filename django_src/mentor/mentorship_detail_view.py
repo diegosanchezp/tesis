@@ -20,6 +20,7 @@ def get_detail_view_context(mentor: Mentor, mentorship: Mentorship):
     students_info = StudentMentorshipTask.objects.filter(
         task__mentorship=mentorship
     ).values(
+        "student__pk",
         "student__user__first_name",
         "student__user__last_name",
     ).annotate(

@@ -15,7 +15,6 @@ from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 from django_src.apps.main.views import ComponentsDemoView, color_demo_view
-from django_src.mentor.urls import urlpatterns as mentor_urls
 
 urlpatterns = [
 
@@ -26,6 +25,7 @@ urlpatterns = [
     path('register/', include('django_src.apps.register.urls', namespace="register")),
     path('pro_carrer/', include('django_src.pro_carreer.urls', namespace="pro_carreers")),
     path('mentor/', include('django_src.mentor.urls', namespace="mentor")),
+    path('student/', include('django_src.student.urls', namespace="student")),
     path('logout/', auth_views.LogoutView.as_view(next_page=reverse_lazy("wagtailadmin_home")), name='logout'),
 ]
 

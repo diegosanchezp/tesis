@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load django_vite slippers %}
+
+
+{% comment %}
+  student
+  todo_tasks:
+{% endcomment %}
+
+{% block title %}
+    Progreso de tareas
+{% endblock title %}
+{% block extrascripts %}
+    {# admins or mentors can't do drag_&_drops on the tasks only read them #}
+    {% if is_student %}
+        {% vite_asset 'js/track_mentorship_task.ts' %}
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+
+{% #navbar request=request %}{% /navbar %}
+
+<main class="page-x-spacing">
+    <h1 class="text-4xl my-6">Estatus de mentoría del aprendíz {{ student.user.first_name }} {{ student.user.last_name }}</h1>
+    <section id="kanban-board" class="grid grid-cols-3 justify-center mt-4 gap-x-8">
+
+        {% include "student/track_kanban_column.html" with id="todo-tasks" title="Por hacer" mentorship_tasks=todo_tasks action=Events.PAUSE %}
+
+        {% include "student/track_kanban_column.html" with id="inprogress-tasks" title="En Progreso" mentorship_tasks=inprogress_tasks action=Events.PROGRESS %}
+
+        {% include "student/track_kanban_column.html" with id="completed-tasks" title="Terminado" mentorship_tasks=completed_tasks action=Events.COMPLETE %}
+
+    </section>
+</main>
+{% endblock %}
+

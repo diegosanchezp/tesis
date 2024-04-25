@@ -5,6 +5,7 @@ module.exports = {
     "./templates/**/*.html",
     // Include Flowbite
     "./node_modules/flowbite/**/*.js",
+    "./static/src/js/**/*.ts",
   ],
   theme: {
     extend: {

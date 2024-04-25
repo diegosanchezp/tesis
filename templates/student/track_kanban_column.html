@@ -1,0 +1,48 @@
+{% comment %}
+Renders a column of the kanban board
+Required context:
+- id: str, the id of the column
+- title: str, the title of the column
+- mentorship_tasks: list[django_src.mentor.models.StudentMentorshipTask], list of tasks that are in the column
+- action: StudentMentorshipTask.Events, the action that this column will perform when a task is dropped into it
+{% endcomment %}
+
+<div id="{{ id }}"
+    class="dropzone w-full flex flex-col gap-y-4 px-2 py-4 border-solid border-2 rounded border-slate-500"
+    data-dropzone-action="{{ action }}"
+    data-task-num="{{ mentorship_tasks.count }}">
+
+    {# Title of the column #}
+    <div class="mt-1 mb-2">
+        <h2 class="text-lg font-bold">{{ title }}</h2>
+        <p>
+            {% with task_count=mentorship_tasks.count %}
+                <span id="{{ id }}-task-num">
+                    {{ task_count }}
+                </span>
+                <span id="{{ id }}-task-text">
+                    {% if task_count == 0 or task_count >= 2 %}
+                        tareas
+                    {% else %}
+                        tarea
+                    {% endif %}
+
+                </span>
+            {% endwith %}
+        </p>
+    </div>
+
+    {# List of tasks #}
+    <div id="task-group-{{ id }}" class="flex flex-col gap-y-4">
+        {% for m_task in mentorship_tasks %}
+            <div id="task-{{ m_task.pk }}"
+                draggable="true"
+                class="draggable-task p-2 border rounded border-black"
+                data-task-pk="{{ m_task.pk }}"
+                data-dropzone-id="{{ id }}"
+            >
+                {{ m_task.task.name }}
+            </div>
+        {% endfor %}
+    </div>
+</div>

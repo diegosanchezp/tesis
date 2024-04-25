@@ -8,9 +8,10 @@ from .edit_mentorship_view import edit_mentorship_view, delete_task, delete_ment
 
 app_name="mentor"
 urlpatterns = [
+    path("my_mentorships/", my_mentorships, name="my_mentorships"),
     path('<str:username>/', mentor_profile_view.view, name='profile'),
-    path('<str:username>/blogs', blogs_view.view, name='blogs'),
-    path('<str:username>/mentorias',list_mentorships, name='mentorias'),
+    path('<str:username>/blogs/', blogs_view.view, name='blogs'),
+    path('<str:username>/mentorias/',list_mentorships, name='mentorias'),
     path("mentorship/<int:mentorship_pk>", mentorship_detail_view, name="mentorship_detail"),
     path("mentorship/create", create_mentorship, name="create_mentorship"),
     path("mentorship/edit/<int:mentorship_pk>", edit_mentorship_view, name="edit_mentorship"),
@@ -20,5 +21,4 @@ urlpatterns = [
     path("mentorship/request/<int:mentorship_pk>",make_mentorship_request, name="request_mentorship"),
     path("mentorship/request/tasks/<int:mentorship_pk>",get_mentorship_tasks, name="get_tasks"),
     path("mentorship/request/change_status/<int:mentorship_req_pk>", change_mentorship_status, name="change_mentorship_status"),
-    path("my_mentorships", my_mentorships, name="my_mentorships"),
 ]

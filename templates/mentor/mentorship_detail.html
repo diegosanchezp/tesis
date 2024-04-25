@@ -112,7 +112,7 @@ Mentoría: {{ mentorship.name }}
                         <td>{{ student_info.tasks_completed }}</td>
                         <td>
                             {# TODO: link to student progress page #}
-                            <a href="">
+                            <a href="{% url 'student:track_mentorship_task' mentorship_pk=mentorship.pk student_pk=student_info.student__pk %}">
                             {% #button type="button" %}
                                 Ver progreso
                             {% /button %}
