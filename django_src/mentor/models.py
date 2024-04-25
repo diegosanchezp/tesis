@@ -8,7 +8,7 @@ def transition(machine: dict, status: models.TextChoices, event: models.TextChoi
 
     try:
         next_state = machine[status][event]
-        status = next_state
+        return next_state
     except KeyError:
         raise TransitionError(
             (
@@ -149,7 +149,10 @@ class StudentMentorshipTask(models.Model):
         return f"{self.student} {self.task.name}"
 
     def transition(self, event: Events) -> None:
-        transition(self.machine, status=self.state, event=event)
+        """
+        Transition to the next state given an event and the current state
+        """
+        self.state = transition(self.machine, status=self.state, event=event)
 
 class MentorshipRequest(models.Model):
     """

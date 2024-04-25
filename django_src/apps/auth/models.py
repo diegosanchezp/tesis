@@ -11,11 +11,13 @@ class User(AbstractUser):
         blank=False,
     )
 
+    @property
     def is_mentor(self):
         mentor_queryset = Mentor.objects.filter(user=self)
         is_mentor = mentor_queryset.exists()
         return is_mentor
 
+    @property
     def is_student(self):
         student_queryset = Student.objects.filter(user=self)
         is_student = student_queryset.exists()
