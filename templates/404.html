@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% comment %}
+404 generic template, see https://docs.djangoproject.com/en/stable/ref/views/#the-404-page-not-found-view
+{% endcomment %}
+
+{% load slippers %}
+
+{% block title %}
+    404 - No encontrado
+{% endblock title %}
+
+{% block body %}
+{% #navbar request=request %}{% /navbar %}
+<main class="page-x-spacing flex flex-col justify-center items-center mt-8">
+    <h1 class="text-3xl">404 - No encontrado</h1>
+    <p class="mt-8">Upps, la página que estabas tratando de encontrar no existe.</p>
+    <p class="mt-4"><span class="font-bold">Razón</span>: {{ exception }}</p>
+</main>
+{% endblock body %}
