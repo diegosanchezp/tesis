@@ -29,7 +29,7 @@ sudo pacman -S docker-buildx
 Build the production image for Django
 
 ``` bash
-docker build -f docker/production/Dockerfile --tag "$DOCKER_IMAGE" .
+docker build --progress plain -f docker/production/Dockerfile --tag "$DOCKER_IMAGE" .
 ```
 
 Render all config files that use jinja2

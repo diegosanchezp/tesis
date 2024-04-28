@@ -1,4 +1,8 @@
 node_modules
+aws
+docs
+envs/production/
+.gitmodules
 .git
 .lvenv/
 .venv/
