@@ -11,6 +11,7 @@ Note: you might want to put the private environment variables of `envs/private.e
 Set the required environment variables for the docker host
 
 ```bash
+# https://docs.docker.com/compose/environment-variables/envvars/#compose_file
 export COMPOSE_FILE=docker/production/docker-compose.yml:docker/production/docker.localprod.yml
 export DOCKER_IMAGE=ghcr.io/diegosanchezp/django_egresados:latest
 export DOCKER_BUILDKIT=1
