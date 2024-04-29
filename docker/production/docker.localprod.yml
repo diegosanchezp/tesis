@@ -1,6 +1,13 @@
 # this files overrides extends docker-compose.yml
 # see docs/testing_prod_locally_procedure.md
 services:
+  django:
+    volumes:
+      # If any of the python source files are changed,
+      # the production image will not need to be rebuilt
+      - type: bind
+        source: ../../django_src
+        target: /app/django_src
   nginx:
     volumes:
       #Use this for local https testing

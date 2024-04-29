@@ -11,6 +11,7 @@ Note: you might want to put the private environment variables of `envs/private.e
 Set the required environment variables for the docker host
 
 ```bash
+# https://docs.docker.com/compose/environment-variables/envvars/#compose_file
 export COMPOSE_FILE=docker/production/docker-compose.yml:docker/production/docker.localprod.yml
 export DOCKER_IMAGE=ghcr.io/diegosanchezp/django_egresados:latest
 export DOCKER_BUILDKIT=1
@@ -28,7 +29,7 @@ sudo pacman -S docker-buildx
 Build the production image for Django
 
 ``` bash
-docker build -f docker/production/Dockerfile --tag "$DOCKER_IMAGE" .
+docker build --progress plain -f docker/production/Dockerfile --tag "$DOCKER_IMAGE" .
 ```
 
 Render all config files that use jinja2
