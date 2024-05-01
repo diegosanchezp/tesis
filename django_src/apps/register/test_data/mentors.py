@@ -20,7 +20,6 @@ class MentorData:
 
         from django_src.apps.register.models import Mentor, RegisterApprovalStates
         from django_src.mentor.models import Mentorship, MentorshipTask
-        from django_src.apps.main.models import BlogPage
         from django_src.pro_carreer.models import ProCarreerExperience
         from django.contrib.contenttypes.models import ContentType
 

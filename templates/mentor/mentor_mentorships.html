@@ -44,12 +44,12 @@ Mentor {{ mentor.user.first_name }} {{ mentor.user.last_name }}
 
         <div id="mentorship-list" class="flex flex-col gap-y-2 w-3/4">
             {% for student_request in student_requests %}
-                {% include "mentor/mentorship_card.html" with mentorship=student_request.mentorship mentorship_request=student_request MentorshipRequest=MentorshipRequest is_student=is_student%}
+                {% include "mentor/mentorship_card.html" with mentorship=student_request.mentorship mentorship_request=student_request MentorshipRequest=MentorshipRequest is_student=is_student is_admin=is_admin %}
             {% endfor %}
 
             {# Render mentorships that hasn't been request by the student #}
             {% for mentorship in mentorships %}
-                {% include "mentor/mentorship_card.html" with mentorship=mentorship MentorshipRequest=MentorshipRequest is_student=is_student %}
+                {% include "mentor/mentorship_card.html" with mentorship=mentorship MentorshipRequest=MentorshipRequest is_student=is_student is_admin=is_admin %}
             {% endfor %}
         </div>
 

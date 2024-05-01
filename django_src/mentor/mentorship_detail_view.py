@@ -70,10 +70,22 @@ def mentorship_detail_view(request, mentorship_pk: int):
 
     template_name = 'mentor/mentorship_detail.html'
 
-    mentor = get_mentor(request.user.username, prefetch_related="mentorships")
-    mentorship = get_object_or_404(mentor.mentorships.prefetch_related("tasks"), pk=mentorship_pk)
-    action = request.GET.get("action")
+    mentorship = get_object_or_404(Mentorship.objects.prefetch_related("tasks"), pk=mentorship_pk)
+    is_admin = request.user.is_superuser
+    is_mentor = request.user.is_mentor
+    mentorship_mentor = mentorship.mentor
 
+    if is_mentor:
+        mentor = get_mentor(request.user.username, prefetch_related="mentorships")
+        if mentorship_mentor != mentor:
+            return HttpResponseBadRequest("No autorizado para ver la mentoría")
+    elif is_admin:
+        mentor = mentorship_mentor
+    else:
+        return HttpResponseBadRequest("No autorizado para ver la mentoría")
+
+
+    action = request.GET.get("action")
     context = get_detail_view_context(mentor, mentorship)
     context.update(
         breadcrumbs=[

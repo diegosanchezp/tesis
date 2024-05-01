@@ -1,3 +1,7 @@
+"""
+Functions for Uploading or Deleting all of the testing data
+"""
+
 from dataclasses import dataclass
 from pathlib import Path
 import argparse
@@ -5,6 +9,8 @@ from django_src.apps.register.test_data.mentors import (
     MentorData
 )
 from django_src.apps.register.test_data.students import StudentData
+from django_src.mentor.test_data import MentorshipData
+from django_src.mentor.test_blog_data import MentorBlogData
 from django.db.utils import IntegrityError
 from django.db import transaction
 from django.contrib.auth import get_user_model
@@ -14,13 +20,10 @@ from django.apps.registry import Apps
 from django_src.apps.register.upload_data import (
     MentorData,
     create_carreers,
-    mentors,
-    reset_mentors,
 )
 from django_src.pro_carreer.test_data import (
     create_pro_carreers, delete_pro_carreers,
     create_pro_interes_themes, delete_pro_interes_themes,
-
 )
 from shscripts.backup import (
     setup_django
@@ -195,28 +198,38 @@ def reset_dev_pages(apps):
 # Data dependency
 # -> Right hand function depends on the created data of the left hand function
 #
+
+
 def upload_dev_data():
+
     carreer_list = create_carreers()
+
     student_data = StudentData()
-    student_data.create()
-
     mentor_data = MentorData()
+    mentor_blog_data = MentorBlogData(mentor_data)
+    mentorship_data = MentorshipData(mentor_data, student_data)
 
+    student_data.create()
     pro_career_list = create_pro_carreers()
-
     mentor_data.create(
         computacion=carreer_list.computacion,
         full_stack_dev=pro_career_list.fullstack_dev,
     )
-
+    mentorship_data.create()
+    mentor_blog_data.create()
     dev_pages(apps)
     create_pro_interes_themes()
 
 def reset():
-    reset_mentors(apps)
     student_data = StudentData()
+    mentorship_data = MentorshipData(MentorData(), StudentData())
+    mentor_data = MentorData()
+
     student_data.delete()
     delete_pro_carreers()
+    mentor_data.delete()
+    mentorship_data.delete()
+    reset_dev_pages(apps)
     delete_pro_interes_themes()
 
     # The bad thing about deleting the images is that it deletes them from the file system
