@@ -1,7 +1,6 @@
 {% comment %}
   required context:
   - request
-  - is_student
 
 {% endcomment %}
 {% load slippers %}
@@ -14,10 +13,10 @@
                 class="text-white"
                 href="
                 {# if logged in user is student #}
-                {% if request.user.student %}
+                {% if request.user.is_student %}
                     {% url "pro_carreer:student_carreer_match" %}
                 {# if logged in user is mentor #}
-                {% elif request.user.mentor %}
+                {% elif request.user.is_mentor %}
                     {# todo #}
                     {# {% url "" %} #}
                 {% endif %}">
@@ -62,6 +61,9 @@
         {% endif %}
         </ul>
     <div class="py-1">
-      <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200">Cerrar sesión</a>
+        <form method="post" action="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200">
+            {% csrf_token %}
+            <button type="submit">Cerrar sesión</button>
+        </form>
     </div>
 </div>
