@@ -7,8 +7,8 @@ nginx/nginx.conf
 # Fixtures generated when running resetdb command
 fixtures/tmp/
 
-# Private environment variables
-envs/.private.env
+# ZSH
+.zsh_history
 
 # Vite, JS
 static/dist
@@ -16,6 +16,8 @@ static/dist
 .lvenv
 media
 
+# Private environment variables
+envs/.private.env
 envs/production/host
 envs/production/django
 envs/production/postgres
