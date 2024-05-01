@@ -19,7 +19,7 @@
 
 {% block body %}
 
-{% #navbar request=request %}{% /navbar %}
+{% include "components/navbar.html" %}
 
 <main class="page-x-spacing">
     <h1 class="text-4xl my-6">Estatus de mentoría del aprendíz {{ student.user.first_name }} {{ student.user.last_name }}</h1>

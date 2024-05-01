@@ -13,7 +13,7 @@ Context:
 
 {% block body %}
 
-{% #navbar request=request %}{% /navbar %}
+{% include "components/navbar.html" %}
 
 
 {% if is_mentor and not mentor_experience %}

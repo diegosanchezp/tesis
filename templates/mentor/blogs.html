@@ -9,7 +9,7 @@ Blogs mentor {{ mentor.user.first_name }} {{ mentor.user.last_name }}
 {% block body %}
 <main>
     {# fixed content #}
-    {% #navbar request=request %}{% /navbar %}
+    {% include "components/navbar.html" %}
     {% include "mentor/mentor_header.html" %}
     {% #mentor_tabs user=mentor.user current_tab="blogs" %}{% /mentor_tabs %}
 
