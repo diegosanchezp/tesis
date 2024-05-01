@@ -26,6 +26,7 @@ def list_mentorships(request, username):
     # Figure out if the user that is visiting the view is of type mentor or student
     student_queryset = Student.objects.filter(user=request.user)
     is_student = student_queryset.exists()
+    is_admin = request.user.is_superuser
 
     student_requests = None
     not_request_mentorships = mentorships
@@ -48,6 +49,7 @@ def list_mentorships(request, username):
         "mentor": mentor,
         "mentorships": not_request_mentorships.order_by("name"),
         "is_student": is_student,
+        "is_admin": is_admin,
         "student_requests": student_requests,
         "mentorships_empty": not mentorships.exists(),
         "MentorshipRequest": MentorshipRequest,

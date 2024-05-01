@@ -15,7 +15,7 @@
 
 </div>
 
-<div id="mentorship-{{mentorship.pk }}" class="flex justify-between items-baseline rounded border border-black py-4 px-4 w-full">
+<div id="mentorship-{{ mentorship.pk }}" class="flex justify-between items-baseline rounded border border-black py-4 px-4 w-full">
     <p>
         {{ mentorship.name }}
     </p>
@@ -47,5 +47,12 @@
                 {% /button %}
             </div>
         {% endif %}
+    {% endif %}
+    {% if is_admin %}
+        <a href="{% url 'mentor:mentorship_detail' mentorship_pk=mentorship.pk %}" >
+            {% #button type="button" %}
+                Ver detalle
+            {% /button %}
+        </a>
     {% endif %}
 </div>
