@@ -66,5 +66,5 @@ runserver(){
 alias logs='docker-compose logs --no-log-prefix -f django'
 
 # Python related
-alias pyterm="dockerpy bash"
+alias pyterm="dockerpy zsh"
 alias djshell="managepy shell"

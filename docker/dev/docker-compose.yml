@@ -18,6 +18,9 @@ services:
       - type: bind
         source: ../..
         target: /app
+      - type: bind
+        source: ./.zshrc
+        target: /.zshrc
     user: "${UID}:${GID}"
     env_file:
       - ../../envs/dev/django
