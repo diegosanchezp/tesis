@@ -85,7 +85,7 @@ def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
         content_type=page_content_type,
         locale=root_page.locale,
         # Tree beard low level data
-        path="000100020001",
+        path=f"{home_page_path}0001",
         depth=3,
         numchild=0,
     )

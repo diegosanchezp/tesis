@@ -10,12 +10,15 @@ from django.utils.translation import gettext_lazy as _
 
 pro_carreer_index_path = "0003"
 
+home_page_path = "00010002"
+
 def pro_carreer_index(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
 
     # get_user_model doesn't works in data migrations because it sets required_ready to False
     User = apps.get_model(settings.AUTH_USER_MODEL)
 
     Page = apps.get_model("wagtailcore", model_name="Page")
+    HomePage = apps.get_model("main", model_name="HomePage")
     ProCarreerIndex = apps.get_model("pro_carreer", model_name="ProCarreerIndex")
     ContentType = apps.get_model("contenttypes.ContentType")
 
@@ -24,6 +27,10 @@ def pro_carreer_index(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
 
     # Root page is created by wagtail's data migrations
     root_page = Page.objects.get(slug='root')
+
+    # Home page is created on 0003_wagtail_setup
+    home_page = HomePage.objects.get(path=home_page_path)
+
 
     page_content_type = ContentType.objects.get_for_model(ProCarreerIndex)
 
@@ -36,11 +43,11 @@ def pro_carreer_index(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
         slug="profesiones",
         url_path="/profesiones/",
         # Tree beard low level data
-        depth=2,
+        depth=3,
         numchild=0,
         # How do I know it is the third child ? See variable home_page_path on file
         # on django_src/apps/main/migrations/0003_wagtail_setup.py
-        path=root_page.path + "0003",
+        path=home_page_path + "0002",
     )
 
 def remove_pro_carreer_index(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):

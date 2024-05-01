@@ -17,11 +17,13 @@ class MentorshipData:
 
     def __init__(self, mentor_data: MentorData, student_data: StudentData):
         from django_src.mentor.models import MentorshipRequest, MentorshipTask, Mentorship, StudentMentorshipTask
-
+        from django_src.apps.main.models import BlogPage, BlogIndex
         self.Mentorship = Mentorship
         self.MentorshipRequest = MentorshipRequest
         self.MentorshipTask = MentorshipTask
         self.StudentMentorshipTask = StudentMentorshipTask
+        self.BlogPage = BlogPage
+        self.BlogIndex = BlogIndex
         self.student_data = student_data
         self.mentor_data = mentor_data
 
@@ -41,6 +43,7 @@ class MentorshipData:
             mentorship=self.mentorship1,
             status=self.MentorshipRequest.State.ACCEPTED,
         )
+
     def create(self):
         # Get the mentors from db
         self.mentor_data.get()
