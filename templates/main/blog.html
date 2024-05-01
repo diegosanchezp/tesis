@@ -24,13 +24,23 @@
 
             <h1 class="text-6xl">{{ page.title }}</h1>
             <div class="flex gap-x-4 mt-4">
-                <p><span class="font-semibold">Publicado el</span>: {{ page.first_published_at|date:"j" }} de {{ page.first_published_at|date:"F Y" }}</p>
-                <p><span class="font-semibold">Última edición:</span> {{ page.first_published_at|date:"j" }} de {{ page.last_published_at|date:"F Y" }}</p>
+                {% if page.first_published_at %}
+                    <p>
+                        <span class="font-semibold">Publicado el</span>
+                            : {{ page.first_published_at|date:"j" }} de {{ page.first_published_at|date:"F Y" }}
+                    </p>
+                {% endif %}
+                {% if page.first_published_at %}
+                    <p>
+                        <span class="font-semibold">Última edición:</span>
+                            {{ page.first_published_at|date:"j" }} de {{ page.last_published_at|date:"F Y" }}
+                    </p>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <div id="blog-container" class="mx-20 max-w-[1920px] mx-auto">
+    <div id="blog-container" class="page-x-spacing mx-20 max-w-[1920px] mx-auto">
         <article id="blog-content" class="prose lg:prose-xl mt-8 max-w-none mx-auto w-full">
             {# Render streamfield content #}
             {% for block in page.content %}
