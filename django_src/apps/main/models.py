@@ -7,10 +7,7 @@ from modelcluster.fields import ParentalKey
 from wagtail import blocks
 from wagtail.fields import StreamField
 from wagtail.images.blocks import ImageChooserBlock
-from wagtail.models import (
-    Page,
-    Orderable
-)
+from wagtail.models import Page, Orderable
 
 from wagtail.admin.panels import (
     FieldPanel,
@@ -18,12 +15,13 @@ from wagtail.admin.panels import (
     InlinePanel,
 )
 
+
 # Create your models here.
 class HeroSection(Orderable):
     page = ParentalKey(
         "HomePage",
         on_delete=models.CASCADE,
-        related_name='hero_sections',
+        related_name="hero_sections",
         verbose_name="",
     )
 
@@ -47,16 +45,18 @@ class HeroSection(Orderable):
     )
 
     panels = [
-        FieldPanel('image'),
-        FieldPanel('title'),
-        FieldPanel('description'),
+        FieldPanel("image"),
+        FieldPanel("title"),
+        FieldPanel("description"),
     ]
+
 
 class HomePage(Page):
     """
     The HomePage or Promotional page
     """
-    template = 'main/home_page.html'
+
+    template = "main/home_page.html"
 
     page_description = _("Esta es la página principal de este sitio.")
 
@@ -72,8 +72,7 @@ class HomePage(Page):
 
     # --- Hero section header --- #
     header_text = models.CharField(
-        max_length=255,
-        verbose_name=_("Texto introductorio de la página promocional")
+        max_length=255, verbose_name=_("Texto introductorio de la página promocional")
     )
 
     header_cta = models.CharField(
@@ -94,15 +93,16 @@ class HomePage(Page):
             ],
         ),
         InlinePanel(
-            relation_name='hero_sections',
+            relation_name="hero_sections",
             label=_("Factor promocional"),
             min_num=2,
-            heading=_("Factores promocionales")
+            heading=_("Factores promocionales"),
         ),
     ]
 
     # Block the creation of child pages
-    subpage_types = ['BlogIndex', 'pro_carreer.ProCarreerIndex', ]
+    subpage_types = ["BlogIndex", "pro_carreer.ProCarreerIndex", "NewsIndex"]
+
 
 class BlogIndex(Page):
     """
@@ -110,13 +110,15 @@ class BlogIndex(Page):
     """
 
     # no label specified in subpage_types, because BlogPage is in the same app
-    subpage_types = ['BlogPage']
+    subpage_types = ["BlogPage"]
+
 
 class BlogPage(Page):
     """
     A Mentor's Blog
     """
-    template = "main/blog.html" # Todo
+
+    template = "main/blog.html"
     page_description = _("Blog")
 
     # Optional image
@@ -134,23 +136,203 @@ class BlogPage(Page):
     # only the owner
     locked = True
 
-
     content = StreamField(
         verbose_name=_("Contenido del blog"),
         block_types=[
-            ('paragraph', blocks.RichTextBlock(features=["bold", "italic", "ol", "ul", "hr", "link", "document-link", "code", "superscript", "subscript", "strikethrough", "blockquote", "h2", "h3", "h4"])),
-            ('image', ImageChooserBlock()),
+            (
+                "paragraph",
+                blocks.RichTextBlock(
+                    features=[
+                        "bold",
+                        "italic",
+                        "ol",
+                        "ul",
+                        "hr",
+                        "link",
+                        "document-link",
+                        "code",
+                        "superscript",
+                        "subscript",
+                        "strikethrough",
+                        "blockquote",
+                        "h2",
+                        "h3",
+                        "h4",
+                    ]
+                ),
+            ),
+            ("image", ImageChooserBlock()),
         ],
         block_counts={
-            'paragraph': {'min_num': 1},
+            "paragraph": {"min_num": 1},
         },
-        use_json_field=True
+        use_json_field=True,
     )
 
     content_panels = Page.content_panels + [
         FieldPanel("thumbnail"),
-        FieldPanel("content")
+        FieldPanel("content"),
     ]
+
+    # Block the creation of child pages
+    subpage_types = []
+
+
+class NewsIndex(Page):
+    """
+    Acts like a folder list all Pages of type News
+    """
+
+    # Only allow NewsPage as child pages
+    subpage_types = ["NewsPage"]
+
+
+class NewsPage(Page):
+    """
+    News that will appear to Admins
+    """
+
+    template = "main/news.html"  # todo
+
+    page_description = _("Noticia")
+
+    description = models.CharField(
+        max_length=255,
+        verbose_name=_("Descripción breve"),
+        help_text=_("Escribe una descripción corta de sobre la noticia"),
+    )
+
+    thumbnail = models.ForeignKey(
+        "wagtailimages.Image",
+        verbose_name=_("Imagen de la noticia"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text=_("Imagen pequeña (thumbnail) de la noticia"),
+    )
+
+    content = StreamField(
+        verbose_name=_("Contenido de la noticia"),
+        block_types=[
+            (
+                "paragraph",
+                blocks.RichTextBlock(
+                    features=[
+                        "bold",
+                        "italic",
+                        "ol",
+                        "ul",
+                        "hr",
+                        "link",
+                        "document-link",
+                        "code",
+                        "superscript",
+                        "subscript",
+                        "strikethrough",
+                        "blockquote",
+                        "h2",
+                        "h3",
+                        "h4",
+                    ]
+                ),
+            ),
+            ("image", ImageChooserBlock()),
+        ],
+        block_counts={
+            "paragraph": {"min_num": 1},
+        },
+    )
+
+    # Editor panels configuration
+    content_panels = Page.content_panels + [
+        FieldPanel(field_name="thumbnail"),
+        FieldPanel(field_name="description"),
+        FieldPanel(field_name="content"),
+    ]
+
+    # News pages can be created only under the NewsIndex page
+    parent_page_types = ["NewsIndex"]
+
+    # Block the creation of child pages
+    subpage_types = []
+
+
+class EventsIndex(Page):
+    """
+    Acts like a folder list all Pages of type Event
+    """
+
+    # Only allow Events as child pages
+    subpage_types = ["EventPage"]
+
+
+class EventPage(Page):
+    """
+    News that will appear to Admins
+    """
+
+    template = "main/event_page.html"  # todo
+
+    page_description = _("Evento")
+
+    description = models.CharField(
+        max_length=255,
+        verbose_name=_("Descripción breve"),
+        help_text=_("Escribe una descripción corta de sobre el evento"),
+    )
+
+    thumbnail = models.ForeignKey(
+        "wagtailimages.Image",
+        verbose_name=_("Imagen del evento"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text=_("Imagen pequeña (thumbnail) de la noticia"),
+    )
+
+    content = StreamField(
+        verbose_name=_("Contenido del evento"),
+        block_types=[
+            (
+                "paragraph",
+                blocks.RichTextBlock(
+                    features=[
+                        "bold",
+                        "italic",
+                        "ol",
+                        "ul",
+                        "hr",
+                        "link",
+                        "document-link",
+                        "code",
+                        "superscript",
+                        "subscript",
+                        "strikethrough",
+                        "blockquote",
+                        "h2",
+                        "h3",
+                        "h4",
+                    ]
+                ),
+            ),
+            ("image", ImageChooserBlock()),
+        ],
+        block_counts={
+            "paragraph": {"min_num": 1},
+        },
+    )
+
+    # Editor panels configuration
+    content_panels = Page.content_panels + [
+        FieldPanel(field_name="thumbnail"),
+        FieldPanel(field_name="description"),
+        FieldPanel(field_name="content"),
+    ]
+
+    # News pages can be created only under the EventsIndex page
+    parent_page_types = ["EventsIndex"]
 
     # Block the creation of child pages
     subpage_types = []
