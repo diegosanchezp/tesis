@@ -31,6 +31,7 @@ ipython = "*"
 pip = "*"
 install = "*"
 django-stubs = {version = "*", extras = ["compatible-mypy"]}
+black = ">=24.4.2"
 
 [requires]
 python_version = "3.11.4"
