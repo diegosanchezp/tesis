@@ -15,7 +15,7 @@ from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 from django_src.apps.main.views import ComponentsDemoView, color_demo_view
-
+from django_src.apps.main.urls import urlpatterns as main_urls
 urlpatterns = [
 
     #path('i18n/', include('django.conf.urls.i18n')),
@@ -28,7 +28,7 @@ urlpatterns = [
     path('student/', include('django_src.student.urls', namespace="student")),
     path('logout/', auth_views.LogoutView.as_view(next_page=reverse_lazy("wagtailadmin_home")), name='logout'),
 ]
-
+urlpatterns += main_urls
 if settings.DEBUG:
 
     # Simulate NGINX authenticated request

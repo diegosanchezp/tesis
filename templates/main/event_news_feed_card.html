@@ -1,0 +1,27 @@
+{% comment %}
+<NewsCard>
+Required context:
+  - pages: django.core.paginator.Page[django_src.apps.main.models.Event or django_src.apps.main.models.News]
+{% endcomment %}
+{% load wagtailimages_tags %}
+
+<ul>
+    {% for page in pages %}
+        {# <NewsCard> #}
+        <li class="flex gap-x-4 rounded bg-slate-100 my-4 p-4">
+            <div class="{% if not page.thumbnail %}bg-slate-200{% endif %} flex h-[100px] rounded w-[100px] items-center justify-center p-4">
+                {% if page.thumbnail %}
+                    <img src="{% image page.thumbnail width-100 %}">
+                {% else %}
+                    <i class="bi bi-card-image"></i>
+                {% endif %}
+            </div>
+            <div class="py-4">
+                <p class="font-bold mb-2">{{ page.title }}</p>
+                <p>{{ page.description }}</p>
+            </div>
+        </li>
+        {# </NewsCard> #}
+    {% endfor %}
+    <li id="{{ id }}-last"></li>
+</ul>
