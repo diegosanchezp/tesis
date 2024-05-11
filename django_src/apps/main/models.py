@@ -13,6 +13,7 @@ from wagtail.admin.panels import (
     FieldPanel,
     MultiFieldPanel,
     InlinePanel,
+    FieldRowPanel,
 )
 
 
@@ -279,17 +280,35 @@ class EventPage(Page):
     description = models.CharField(
         max_length=255,
         verbose_name=_("Descripción breve"),
-        help_text=_("Escribe una descripción corta de sobre el evento"),
+        help_text=_("Descripción corta de sobre el evento"),
+    )
+
+    start_date = models.DateTimeField(
+        verbose_name=_("Fecha de inicio"),
+    )
+
+    end_date = models.DateField(
+        verbose_name=_("Fecha de finalización"),
+        null=True,
+        blank=True,
+    )
+    # where the event takes place
+    place = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_("Lugar del evento"),
+        help_text=_("El lugar donde se llevará a cabo el evento"),
     )
 
     thumbnail = models.ForeignKey(
         "wagtailimages.Image",
-        verbose_name=_("Imagen del evento"),
+        verbose_name=_("Imagen principal del evento"),
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
         related_name="+",
-        help_text=_("Imagen pequeña (thumbnail) de la noticia"),
+        help_text=_("Imagen pequeña (thumbnail) del evento"),
     )
 
     content = StreamField(
@@ -327,6 +346,13 @@ class EventPage(Page):
     # Editor panels configuration
     content_panels = Page.content_panels + [
         FieldPanel(field_name="thumbnail"),
+        FieldRowPanel(
+            heading=_("Fechas"),
+            children=[
+                FieldPanel(field_name="start_date"),
+                FieldPanel(field_name="end_date"),
+            ],
+        ),
         FieldPanel(field_name="description"),
         FieldPanel(field_name="content"),
     ]

@@ -6,6 +6,9 @@
   .page-x-spacing {
     @apply px-20;
   }
+  .wagtail-page-max-size {
+    @apply mx-20 max-w-[1920px] mx-auto
+  }
 }
 
 /* https://alpinejs.dev/directives/cloak */

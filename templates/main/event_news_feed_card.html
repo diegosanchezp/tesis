@@ -3,21 +3,23 @@
 Required context:
   - pages: django.core.paginator.Page[django_src.apps.main.models.Event or django_src.apps.main.models.News]
 {% endcomment %}
-{% load wagtailimages_tags %}
+{% load wagtailimages_tags wagtailcore_tags %}
 
 <ul>
     {% for page in pages %}
         {# <NewsCard> #}
         <li class="flex gap-x-4 rounded bg-slate-100 my-4 p-4">
-            <div class="{% if not page.thumbnail %}bg-slate-200{% endif %} flex h-[100px] rounded w-[100px] items-center justify-center p-4">
-                {% if page.thumbnail %}
-                    <img src="{% image page.thumbnail width-100 %}">
-                {% else %}
-                    <i class="bi bi-card-image"></i>
-                {% endif %}
-            </div>
+            <a href="{% pageurl page %}">
+                <div class="{% if not page.thumbnail %}bg-slate-200{% endif %} flex h-[100px] rounded w-[100px] items-center justify-center p-4">
+                    {% if page.thumbnail %}
+                        {% image page.thumbnail fill-100x100 %}
+                    {% else %}
+                        <i class="bi bi-card-image"></i>
+                    {% endif %}
+                </div>
+            </a>
             <div class="py-4">
-                <p class="font-bold mb-2">{{ page.title }}</p>
+                <a href="{% pageurl page %}" class="font-bold mb-2">{{ page.title }}</a>
                 <p>{{ page.description }}</p>
             </div>
         </li>
