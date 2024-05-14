@@ -5,10 +5,11 @@ Functions for Uploading or Deleting all of the testing data
 from dataclasses import dataclass
 from pathlib import Path
 import argparse
-from django_src.apps.register.test_data.mentors import (
-    MentorData
-)
+from django_src.apps.register.test_data.mentors import MentorData
+
 from django_src.apps.register.test_data.students import StudentData
+from django_src.apps.main.test_data.news import NewsData
+from django_src.apps.main.test_data.events import EventsData
 from django_src.mentor.test_data import MentorshipData
 from django_src.mentor.test_blog_data import MentorBlogData
 from django.db.utils import IntegrityError
@@ -22,15 +23,16 @@ from django_src.apps.register.upload_data import (
     create_carreers,
 )
 from django_src.pro_carreer.test_data import (
-    create_pro_carreers, delete_pro_carreers,
-    create_pro_interes_themes, delete_pro_interes_themes,
+    create_pro_carreers,
+    delete_pro_carreers,
+    create_pro_interes_themes,
+    delete_pro_interes_themes,
 )
-from shscripts.backup import (
-    setup_django
-)
+from shscripts.backup import setup_django
 
 # python -m django_src.apps.main.dev_data upload
 # python -m django_src.apps.main.dev_data reset
+
 
 def dev_pages(apps: Apps):
     """
@@ -53,31 +55,31 @@ def dev_pages(apps: Apps):
     admin = User.objects.get(username=settings.ADMIN_USERNAME)
 
     with transaction.atomic():
-        img_phone_mockup, created=Image.objects.get_or_create(
+        img_phone_mockup, created = Image.objects.get_or_create(
             title="phone-mockup",
             file="original_images/phone-mockup_wP3cGMj.png",
             uploaded_by_user=admin,
         )
 
-        img_logo_egresados, created=Image.objects.get_or_create(
+        img_logo_egresados, created = Image.objects.get_or_create(
             title="Logo egresados",
             file="original_images/logo_egresados_ucv.jpg",
             uploaded_by_user=admin,
         )
 
-        img_impulsar_carrera, created=Image.objects.get_or_create(
+        img_impulsar_carrera, created = Image.objects.get_or_create(
             title="Impulsar carrera",
             file="original_images/impulsar_carrera.png",
             uploaded_by_user=admin,
         )
 
-        img_event, created =Image.objects.get_or_create(
+        img_event, created = Image.objects.get_or_create(
             title="Event",
             file="original_images/event.png",
             uploaded_by_user=admin,
         )
 
-        colaboration_img, created=Image.objects.get_or_create(
+        colaboration_img, created = Image.objects.get_or_create(
             title="colaboration",
             file="original_images/colaboration.webp",
             uploaded_by_user=admin,
@@ -92,15 +94,14 @@ def dev_pages(apps: Apps):
         # Update home page
         home_page = HomePage.objects.get(slug="root_home")
 
-        home_page.header_image=img_logo_egresados
-        home_page.owner=admin
-        home_page.title="Home"
+        home_page.header_image = img_logo_egresados
+        home_page.owner = admin
+        home_page.title = "Home"
         home_page.live = True
         # apperently locking the page blocks the view live button, thus can't generate an url
         # home_page.locked = True # Don't let other users edit this page
-        home_page.header_text="La Asociación de Egresados y Amigos de la UCV, te invitan a registrarte en la nueva plataforma de mentorías."
-        home_page.header_cta="Registrarme"
-
+        home_page.header_text = "La Asociación de Egresados y Amigos de la UCV, te invitan a registrarte en la nueva plataforma de mentorías."
+        home_page.header_cta = "Registrarme"
 
         # Add hero sections to home page
         home_page.hero_sections = [
@@ -142,13 +143,12 @@ def dev_pages(apps: Apps):
 
         home_page.save()
 
-
         # Modify the default provided by Wagtail
         try:
             site = Site.objects.get(is_default_site=True, hostname="localhost", port=80)
             site.hostname = "127.0.0.1"
-            site.port=8000
-            site.root_page=home_page
+            site.port = 8000
+            site.root_page = home_page
             site.save()
         except Site.DoesNotExist:
             # Don't bother updating the site because it is already updated
@@ -156,6 +156,7 @@ def dev_pages(apps: Apps):
         except IntegrityError:
             # Delete the wagtail provided site beacuse it is already updated
             pass
+
 
 def reset_dev_pages(apps):
 
@@ -171,29 +172,30 @@ def reset_dev_pages(apps):
             uploaded_by_user=admin,
         ).delete()
 
-        img_logo_egresados=Image.objects.get(
+        img_logo_egresados = Image.objects.get(
             title="Logo egresados",
             file="original_images/logo_egresados_ucv.jpg",
             uploaded_by_user=admin,
         ).delete()
 
-        img_impulsar_carrera=Image.objects.get(
+        img_impulsar_carrera = Image.objects.get(
             title="Impulsar carrera",
             file="original_images/impulsar_carrera.png",
             uploaded_by_user=admin,
         ).delete()
 
-        img_event =Image.objects.get(
+        img_event = Image.objects.get(
             title="Event",
             file="original_images/event.png",
             uploaded_by_user=admin,
         ).delete()
 
-        colaboration_img, created=Image.objects.get(
+        colaboration_img, created = Image.objects.get(
             title="colaboration",
             file="original_images/colaboration.webp",
             uploaded_by_user=admin,
         ).delete()
+
 
 # Data dependency
 # -> Right hand function depends on the created data of the left hand function
@@ -220,10 +222,18 @@ def upload_dev_data():
     dev_pages(apps)
     create_pro_interes_themes()
 
+    news_data = NewsData()
+    events_data = EventsData()
+    news_data.create()
+    events_data.create()
+
+
 def reset():
     student_data = StudentData()
     mentorship_data = MentorshipData(MentorData(), StudentData())
     mentor_data = MentorData()
+    news_data = NewsData()
+    events_data = EventsData()
 
     student_data.delete()
     delete_pro_carreers()
@@ -231,18 +241,19 @@ def reset():
     mentorship_data.delete()
     reset_dev_pages(apps)
     delete_pro_interes_themes()
+    news_data.delete()
+    events_data.delete()
 
     # The bad thing about deleting the images is that it deletes them from the file system
     # reset_dev_pages(apps)
+
 
 # python -m django_src.apps.main.dev_data upload
 def main():
     BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
     # Beging parser setup
-    parser = argparse.ArgumentParser(
-        description="Upload data for development tasks"
-    )
+    parser = argparse.ArgumentParser(description="Upload data for development tasks")
 
     parser.add_argument(
         "action",
@@ -258,6 +269,7 @@ def main():
         upload_dev_data()
     elif args.action == "reset":
         reset()
+
 
 if __name__ == "__main__":
     main()

@@ -68,3 +68,18 @@ alias logs='docker-compose logs --no-log-prefix -f django'
 # Python related
 alias pyterm="dockerpy zsh"
 alias djshell="managepy shell"
+
+pygrep(){
+  grep --exclude-dir=.git --exclude-dir=node_modules \
+    --exclude-dir=.venv --exclude-dir=.lvenv \
+    --exclude-dir=.pipcache --exclude-dir=mkcert "$@"
+}
+
+blackfmt(){
+  dockerpy black --target-version py311 "$@"
+}
+
+fmtfiles(){
+  # Format python files that are going to be commited
+  dockerpy 'git diff --name-only --cached | grep "\.py$" | xargs black --target-version py311 --verbose'
+}

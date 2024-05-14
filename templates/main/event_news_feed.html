@@ -1,0 +1,46 @@
+{% comment %}
+  Renders a paginated feed for news or events
+
+  Required context:
+  - pages: django.core.paginator.Page[django_src.apps.main.models.Event or django_src.apps.main.models.News]
+  - paginator: django.core.paginator.Paginator
+  - title: str
+  - load_more_url: str, get more pages url
+  - id: str
+  - page_index: parent page, list all "pages"
+  - top_margin_title: bool
+{% endcomment %}
+{% load wagtailcore_tags wagtailimages_tags slippers %}
+
+<section id="{{ id }}">
+    <h2 class="text-2xl text-right font-bold {% if top_margin_title %}my-4{% else %}mb-4{% endif %}">
+        <a href="{% pageurl page_index %}">{{ title }}</a>
+    </h2>
+    {# ul #}
+    {% include "main/event_news_feed_card.html" with pages=pages %}
+    {# /ul #}
+
+    {# load more button #}
+    {% block load_more_btn %}
+        <div id="{{ id }}-load_more_btn" class="flex items-center justify-center my-4">
+            {% comment %}
+                Load at max 2 pages
+                If there is more than two pages, show the "Ver todo" button, which links to
+                a view which lists of all the news or events
+            {% endcomment %}
+            {% if pages.has_next and pages.number < 2 %}
+                <form hx-target="#{{ id }}-last" hx-swap="beforebegin" hx-get="{{ load_more_url }}?page={{ pages.next_page_number }}" >
+                    {% #button type="submit" title="Cargar más" name="action" value="load_more" %}
+                        Cargar más
+                    {% /button %}
+                </form>
+            {% else %}
+                <a href="{% pageurl page_index %}">
+                    {% #button icon_right="bi bi-arrow-right" type="submit" title="Ver todo" name="action" value="load_more" %}
+                        Ver todo
+                    {% /button %}
+                </a>
+            {% endif %}
+        </div>
+    {% endblock load_more_btn %}
+</section>

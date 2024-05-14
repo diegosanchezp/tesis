@@ -5,9 +5,10 @@ from .mentorship_view import create_mentorship, make_mentorship_request, change_
 from .mentorship_detail_view import mentorship_detail_view, student_info_view
 from .mentorship_list_view import list_mentorships, my_mentorships
 from .edit_mentorship_view import edit_mentorship_view, delete_task, delete_mentorship
-
+from .landing_view import landing_view
 app_name="mentor"
 urlpatterns = [
+    path("landing/", landing_view, name="landing"),
     path("my_mentorships/", my_mentorships, name="my_mentorships"),
     path('<str:username>/', mentor_profile_view.view, name='profile'),
     path('<str:username>/blogs/', blogs_view.view, name='blogs'),

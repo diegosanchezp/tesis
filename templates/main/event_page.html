@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load wagtailimages_tags wagtailcore_tags %}
+
+{% block body %}
+
+{% include "components/navbar.html" %}
+<main class="page-x-spacing">
+    {# Breadcrumb #}
+    <div class="mt-4">
+        {% include "components/breadcrumbs.html" with breadcrumbs=breadcrumbs %}
+    </div>
+    <div id="event-content" class="wagtail-page-max-size mt-8">
+        <header class="border-b-2 pb-4">
+            <h1 class="text-6xl mb-4">{{ page.title }}</h1>
+            {# publishing date and event details #}
+            <div class="flex justify-between gap-x-4">
+                <div id="date-thumbnail" class="flex flex-col grow">
+                    {# publishing date #}
+                    <div id="publish-date" class="flex gap-x-2 text-slate-500">
+                        <i class="bi bi-clock-fill"></i>
+                        <div class="flex grow justify-between">
+                            <span class="mr-8">
+                                Publicado el: {{ page.first_published_at|date:"d F Y" }}
+                            </span>
+                            {% if page.last_published_at %}
+                            <span>
+                                 Última edición: {{ page.last_published_at|date:"d F Y" }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {# thumbnail #}
+                    {% if page.thumbnail %}
+                        <div class="flex items-center justify-center w-full">
+                            {# 1920px is the max width that the content of this page can be, see class wagtail-page-max-size #}
+                            {% image page.thumbnail max-1920x600 %}
+                        </div>
+                    {% endif %}
+                </div>
+                {# event details #}
+                <div id="event-details" class="p-4 shadow-lg shadow-ucv-yellow border rounded h-fit">
+                    <h4 class="text-2xl text-bold mb-2">Detalles del evento</h4>
+                    <div class="flex flex-col gap-y-2">
+                        {% with icon_class="text-ucv-blue" info_class="flex gap-x-2" %}
+                            <div id="event-date-range" class="{{ info_class }}" title="Fecha">
+                                <i class="{{ icon_class }} bi bi-calendar"></i>
+                                <span>
+                                    {{ page.start_date|date:"d F Y" }}
+                                </span>
+                                {% if page.end_date %}
+                                    <span>
+                                        - {{ page.end_date|date:"d F Y"}}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <div id="event-date-time" class="{{ info_class }}" title="Hora">
+                                <i class="{{ icon_class }} bi bi-stopwatch"></i>
+                                <span>
+                                    {{ page.start_date|date:"h:i A" }}
+                                </span>
+                            </div>
+
+
+                            <div id="event-location" class="{{ info_class }}" title="Ubicación">
+                                <i class="{{ icon_class }} bi bi-geo-alt-fill"></i>
+                                <span>{{ page.place }}</span>
+                            </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+
+        <article class="prose lg:prose-xl mt-8 max-w-none mx-auto w-full">
+            {# Render streamfield content #}
+            {% for block in page.content %}
+                {% if block.block_type == 'image' %}
+                    <div class="not-prose flex items-center justify-center w-full">
+                        {# {% img block.value %} #}
+                        {% include_block block %}
+                    </div>
+                {% else %}
+                    {% include_block block %}
+                {% endif %}
+            {% endfor %}
+        </article>
+    </div>
+</main>
+{% endblock body %}

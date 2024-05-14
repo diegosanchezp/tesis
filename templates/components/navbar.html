@@ -17,8 +17,7 @@
                     {% url "pro_carreer:student_carreer_match" %}
                 {# if logged in user is mentor #}
                 {% elif request.user.is_mentor %}
-                    {# todo #}
-                    {# {% url "" %} #}
+                    {% url "mentor:landing" %}
                 {% endif %}">
                 Home
             </a>

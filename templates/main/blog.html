@@ -26,8 +26,8 @@
             <div class="flex gap-x-4 mt-4">
                 {% if page.first_published_at %}
                     <p>
-                        <span class="font-semibold">Publicado el</span>
-                            : {{ page.first_published_at|date:"j" }} de {{ page.first_published_at|date:"F Y" }}
+                        <span class="font-semibold">Publicado el: </span>
+                            {{ page.first_published_at|date:"j" }} de {{ page.first_published_at|date:"F Y" }}
                     </p>
                 {% endif %}
                 {% if page.first_published_at %}

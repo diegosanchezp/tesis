@@ -1,29 +1,31 @@
 from django.db import models
-
+from django.http.response import HttpResponse
 from django.utils.translation import gettext_lazy as _
+from django.urls.base import reverse_lazy
 
+from render_block import render_block_to_string
 from modelcluster.fields import ParentalKey
 
 from wagtail import blocks
 from wagtail.fields import StreamField
 from wagtail.images.blocks import ImageChooserBlock
-from wagtail.models import (
-    Page,
-    Orderable
-)
-
+from wagtail.models import Page, Orderable
 from wagtail.admin.panels import (
     FieldPanel,
     MultiFieldPanel,
     InlinePanel,
+    FieldRowPanel,
 )
+
+from django_src.apps.register.approvals_view import get_page_number
+
 
 # Create your models here.
 class HeroSection(Orderable):
     page = ParentalKey(
         "HomePage",
         on_delete=models.CASCADE,
-        related_name='hero_sections',
+        related_name="hero_sections",
         verbose_name="",
     )
 
@@ -47,16 +49,18 @@ class HeroSection(Orderable):
     )
 
     panels = [
-        FieldPanel('image'),
-        FieldPanel('title'),
-        FieldPanel('description'),
+        FieldPanel("image"),
+        FieldPanel("title"),
+        FieldPanel("description"),
     ]
+
 
 class HomePage(Page):
     """
     The HomePage or Promotional page
     """
-    template = 'main/home_page.html'
+
+    template = "main/home_page.html"
 
     page_description = _("Esta es la página principal de este sitio.")
 
@@ -72,8 +76,7 @@ class HomePage(Page):
 
     # --- Hero section header --- #
     header_text = models.CharField(
-        max_length=255,
-        verbose_name=_("Texto introductorio de la página promocional")
+        max_length=255, verbose_name=_("Texto introductorio de la página promocional")
     )
 
     header_cta = models.CharField(
@@ -94,15 +97,16 @@ class HomePage(Page):
             ],
         ),
         InlinePanel(
-            relation_name='hero_sections',
+            relation_name="hero_sections",
             label=_("Factor promocional"),
             min_num=2,
-            heading=_("Factores promocionales")
+            heading=_("Factores promocionales"),
         ),
     ]
 
     # Block the creation of child pages
-    subpage_types = ['BlogIndex', 'pro_carreer.ProCarreerIndex', ]
+    subpage_types = ["BlogIndex", "pro_carreer.ProCarreerIndex", "NewsIndex"]
+
 
 class BlogIndex(Page):
     """
@@ -110,13 +114,15 @@ class BlogIndex(Page):
     """
 
     # no label specified in subpage_types, because BlogPage is in the same app
-    subpage_types = ['BlogPage']
+    subpage_types = ["BlogPage"]
+
 
 class BlogPage(Page):
     """
     A Mentor's Blog
     """
-    template = "main/blog.html" # Todo
+
+    template = "main/blog.html"
     page_description = _("Blog")
 
     # Optional image
@@ -134,23 +140,279 @@ class BlogPage(Page):
     # only the owner
     locked = True
 
-
     content = StreamField(
         verbose_name=_("Contenido del blog"),
         block_types=[
-            ('paragraph', blocks.RichTextBlock(features=["bold", "italic", "ol", "ul", "hr", "link", "document-link", "code", "superscript", "subscript", "strikethrough", "blockquote", "h2", "h3", "h4"])),
-            ('image', ImageChooserBlock()),
+            (
+                "paragraph",
+                blocks.RichTextBlock(
+                    features=[
+                        "bold",
+                        "italic",
+                        "ol",
+                        "ul",
+                        "hr",
+                        "link",
+                        "document-link",
+                        "code",
+                        "superscript",
+                        "subscript",
+                        "strikethrough",
+                        "blockquote",
+                        "h2",
+                        "h3",
+                        "h4",
+                    ]
+                ),
+            ),
+            ("image", ImageChooserBlock()),
         ],
         block_counts={
-            'paragraph': {'min_num': 1},
+            "paragraph": {"min_num": 1},
         },
-        use_json_field=True
+        use_json_field=True,
     )
 
     content_panels = Page.content_panels + [
         FieldPanel("thumbnail"),
-        FieldPanel("content")
+        FieldPanel("content"),
     ]
 
     # Block the creation of child pages
     subpage_types = []
+
+
+class NewsIndex(Page):
+    """
+    Acts like a folder list all Pages of type News
+    """
+
+    # Only allow NewsPage as child pages
+    subpage_types = ["NewsPage"]
+
+
+class NewsPage(Page):
+    """
+    News that will appear to Admins
+    """
+
+    template = "main/news.html"  # todo
+
+    page_description = _("Noticia")
+
+    description = models.CharField(
+        max_length=255,
+        verbose_name=_("Descripción breve"),
+        help_text=_("Escribe una descripción corta de sobre la noticia"),
+    )
+
+    thumbnail = models.ForeignKey(
+        "wagtailimages.Image",
+        verbose_name=_("Imagen de la noticia"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text=_("Imagen pequeña (thumbnail) de la noticia"),
+    )
+
+    content = StreamField(
+        verbose_name=_("Contenido de la noticia"),
+        block_types=[
+            (
+                "paragraph",
+                blocks.RichTextBlock(
+                    features=[
+                        "bold",
+                        "italic",
+                        "ol",
+                        "ul",
+                        "hr",
+                        "link",
+                        "document-link",
+                        "code",
+                        "superscript",
+                        "subscript",
+                        "strikethrough",
+                        "blockquote",
+                        "h2",
+                        "h3",
+                        "h4",
+                    ]
+                ),
+            ),
+            ("image", ImageChooserBlock()),
+        ],
+        block_counts={
+            "paragraph": {"min_num": 1},
+        },
+    )
+
+    # Editor panels configuration
+    content_panels = Page.content_panels + [
+        FieldPanel(field_name="thumbnail"),
+        FieldPanel(field_name="description"),
+        FieldPanel(field_name="content"),
+    ]
+
+    # News pages can be created only under the NewsIndex page
+    parent_page_types = ["NewsIndex"]
+
+    # Block the creation of child pages
+    subpage_types = []
+
+
+class EventPage(Page):
+    """
+    News that will appear to Admins
+    """
+
+    template = "main/event_page.html"
+
+    page_description = _("Evento")
+
+    description = models.CharField(
+        max_length=255,
+        verbose_name=_("Descripción breve"),
+        help_text=_("Descripción corta de sobre el evento"),
+    )
+
+    start_date = models.DateTimeField(
+        verbose_name=_("Fecha de inicio"),
+    )
+
+    end_date = models.DateField(
+        verbose_name=_("Fecha de finalización"),
+        null=True,
+        blank=True,
+    )
+    # where the event takes place
+    place = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_("Lugar del evento"),
+        help_text=_("El lugar donde se llevará a cabo el evento"),
+    )
+
+    thumbnail = models.ForeignKey(
+        "wagtailimages.Image",
+        verbose_name=_("Imagen principal del evento"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text=_("Imagen pequeña (thumbnail) del evento"),
+    )
+
+    content = StreamField(
+        verbose_name=_("Contenido del evento"),
+        block_types=[
+            (
+                "paragraph",
+                blocks.RichTextBlock(
+                    features=[
+                        "bold",
+                        "italic",
+                        "ol",
+                        "ul",
+                        "hr",
+                        "link",
+                        "document-link",
+                        "code",
+                        "superscript",
+                        "subscript",
+                        "strikethrough",
+                        "blockquote",
+                        "h2",
+                        "h3",
+                        "h4",
+                    ]
+                ),
+            ),
+            ("image", ImageChooserBlock()),
+        ],
+        block_counts={
+            "paragraph": {"min_num": 1},
+        },
+    )
+
+    # Editor panels configuration
+    content_panels = Page.content_panels + [
+        FieldPanel(field_name="thumbnail"),
+        FieldRowPanel(
+            heading=_("Fechas"),
+            children=[
+                FieldPanel(field_name="start_date"),
+                FieldPanel(field_name="end_date"),
+            ],
+        ),
+        FieldPanel(field_name="description"),
+        FieldPanel(field_name="content"),
+    ]
+
+    # News pages can be created only under the EventsIndex page
+    parent_page_types = ["EventsIndex"]
+
+    # Block the creation of child pages
+    subpage_types = []
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        parent = self.get_parent()
+        context["breadcrumbs"] = [
+            {"name": "Eventos", "href": parent.get_url(request=request)},
+            {"name": self.title},
+        ]
+        return context
+
+
+class EventsIndex(Page):
+    """
+    In the CMS Acts like a folder list all Pages of type Event
+    For other types of users It renders as a list of events
+    """
+
+    template = "main/events/event_list.html"
+    # Only allow Events as child pages
+    subpage_types = ["EventPage"]
+
+    def __init__(self, *args, **kwargs):
+        # importing here to avoid circular imports, because get_wagtailpage_paginated uses the models defined on this file
+        from django_src.apps.main.news_event_views import get_wagtailpage_paginated
+
+        super().__init__(*args, **kwargs)
+        self.get_paginated_events = get_wagtailpage_paginated(
+            PageModel=EventPage, per_page=1
+        )
+
+    def serve(self, request):
+        # Add suppor for pagination to this index page
+        response = super().serve(request)
+        if request.htmx and request.GET:
+            context = self.get_context(request)
+            html = render_block_to_string(
+                block_name="cards",
+                template_name="main/events/event_list.html",
+                context=context,
+            )
+            return HttpResponse(html)
+
+        return response
+
+    def get_context(self, request, *args, **kwargs):
+
+        page_number = get_page_number(request)
+        context = super().get_context(request, *args, **kwargs)
+        context["breadcrumbs"] = [
+            {"name": "Eventos"},
+        ]
+
+        # Add extra variables and return the updated context
+        events = EventPage.objects.child_of(self).live().order_by("-last_published_at")
+        context.update(
+            self.get_paginated_events(
+                page_obj_name="events", page_number=page_number, queryset=events
+            )
+        )
+        return context

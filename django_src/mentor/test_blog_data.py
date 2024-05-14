@@ -1,11 +1,9 @@
 from pathlib import Path
-from django.core.exceptions import ValidationError
 from wagtail.rich_text import RichText
 from django_src.apps.register.test_data.mentors import MentorData
 from django_src.test_utils import parse_test_data_args
-from shscripts.backup import setup_django, setup
-from treebeard.exceptions import NodeAlreadySaved
-import logging
+from shscripts.backup import setup
+
 
 class MentorBlogData:
     """
@@ -17,6 +15,7 @@ class MentorBlogData:
 
     def __init__(self, mentor_data: MentorData):
         from django_src.apps.main.models import BlogPage, BlogIndex
+
         self.BlogPage = BlogPage
         self.BlogIndex = BlogIndex
 
@@ -35,16 +34,16 @@ class MentorBlogData:
                 (
                     "paragraph",
                     RichText(
-                        '<h2>Mi primer blog</h2>'
-                        '<p>Aquí escribiré muchas cosas, tales como</p>'
-                        '<ul>'
-                            '<li>Cosa 1</li>'
-                            '<li><s>Cosa 2</s></li>'
-                        '</ul>'
-                    )
+                        "<h2>Mi primer blog</h2>"
+                        "<p>Aquí escribiré muchas cosas, tales como</p>"
+                        "<ul>"
+                        "<li>Cosa 1</li>"
+                        "<li><s>Cosa 2</s></li>"
+                        "</ul>"
+                    ),
                 ),
-                ("paragraph", RichText('<blockquote>Parrafo Nuevo</blockquote>'))
-            ]
+                ("paragraph", RichText("<blockquote>Parrafo Nuevo</blockquote>")),
+            ],
         )
 
     def create(self):
@@ -58,6 +57,7 @@ class MentorBlogData:
     def delete(self):
         self.get()
         self.blog_mentor1.delete()
+
 
 # python -m django_src.mentor.test_blog_data --action create
 # python -m django_src.mentor.test_blog_data --action delete

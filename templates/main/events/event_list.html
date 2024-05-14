@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load django_vite slippers %}
+
+{% comment %}
+  List all of the events.
+{% endcomment %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+{% endblock %}
+
+{% block body %}
+
+{% include "components/navbar.html" %}
+
+<main class="page-x-spacing">
+    <section>
+        <div class="mt-4">
+            {% include "components/breadcrumbs.html" with breadcrumbs=breadcrumbs %}
+        </div>
+        <ul id="event-list" class="grid grid-cols-4 gap-x-6">
+            {% block cards %}
+                {% for event in events %}
+                    <li>
+                        {% include "main/events/card.html" with event=event %}
+                    </li>
+                {% endfor %}
+
+                {% if events.has_next %}
+                    <div id="load-more-btn" class="col-span-4 justify-self-center" hx-get="?page={{ events.next_page_number }}" hx-trigger="click" hx-target="#load-more-btn" hx-swap="outerHTML">
+                        {% #button icon_left="bi bi-plus text-white" name="action" action="paginate" %}Cargar más{% /button %}
+                    </div>
+                {% endif %}
+            {% endblock cards %}
+        </ul>
+    </section>
+</main>
+{% endblock %}

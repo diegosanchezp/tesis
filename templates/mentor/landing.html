@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static wagtailimages_tags django_vite slippers %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+    {% vite_asset 'js/mentor_landing.ts' %}
+{% endblock %}
+
+{% block title %}
+Página principal - Mentor
+{% endblock title %}
+
+{% block body %}
+
+<main>
+    {% include "components/navbar.html" %}
+    <div class="grid grid-cols-2 page-x-spacing gap-x-8 mt-4">
+        <section id="mentorship-info">
+            <p>TODO</p>
+        </section>
+        <section id="feeds">
+            {% url 'events_feed' as events_feed_url %}
+            {% include "main/event_news_feed.html" with id=EVENT_SECTION pages=events page_index=events_index title="Próximos eventos" load_more_url=events_feed_url page_number=events_page_number page_obj=events_paginator %}
+
+            {% url 'news_feed' as news_feed_url %}
+            {% include "main/event_news_feed.html" with id=NEWS_SECTION top_margin_title="True" pages=news title="Noticias" page_index=news_index load_more_url=news_feed_url page_number=news_page_number page_obj=news_paginator %}
+        </section>
+    </div>
+</main>
+{% endblock body %}
