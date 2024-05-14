@@ -1,0 +1,52 @@
+{% load wagtailimages_tags wagtailcore_tags %}
+
+{% comment %}
+  Renders a card with some of the event's information.
+{% endcomment %}
+
+<div class="flex flex-col gap-x-4 rounded bg-slate-100 my-4 p-4">
+    {# event thumbnail #}
+    <a class="flex justify-center" href="{% pageurl event %}">
+        <div class="flex rounded w-[350px] h-[200px] items-center justify-center p-4">
+            {% if event.thumbnail %}
+                {% image event.thumbnail fill-350x200 %}
+            {% else %}
+                <i class="bi bi-card-image"></i>
+            {% endif %}
+        </div>
+    </a>
+    {# title and description #}
+    <div class="py-4">
+        <a href="{% pageurl event %}" class="text-lg hover:underline hover:underline-offset-2 font-bold mb-2">{{ event.title }}</a>
+        <p title="{{ event.description }}">{{ event.description|truncatechars:"100" }}</p>
+    </div>
+
+    {# event metadata details #}
+    <div class="flex flex-col gap-y-2">
+        {% with icon_class="text-ucv-blue" info_class="flex gap-x-2" %}
+        <div id="event-date-range" class="{{ info_class }}" title="Fecha">
+            <i class="{{ icon_class }} bi bi-calendar"></i>
+            <span>
+                {{ event.start_date|date:"d F Y" }}
+            </span>
+            {% if event.end_date %}
+            <span>
+                - {{ event.end_date|date:"d F Y"}}
+            </span>
+            {% endif %}
+        </div>
+        <div id="event-date-time" class="{{ info_class }}" title="Hora">
+            <i class="{{ icon_class }} bi bi-stopwatch"></i>
+            <span>
+                {{ event.start_date|date:"h:i A" }}
+            </span>
+        </div>
+
+
+        <div id="event-location" class="{{ info_class }}" title="Ubicación">
+            <i class="{{ icon_class }} bi bi-geo-alt-fill"></i>
+            <span>{{ event.place }}</span>
+        </div>
+        {% endwith %}
+    </div>
+</div>

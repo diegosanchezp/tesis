@@ -5,6 +5,10 @@
 
 {% include "components/navbar.html" %}
 <main class="page-x-spacing">
+    {# Breadcrumb #}
+    <div class="mt-4">
+        {% include "components/breadcrumbs.html" with breadcrumbs=breadcrumbs %}
+    </div>
     <div id="event-content" class="wagtail-page-max-size mt-8">
         <header class="border-b-2 pb-4">
             <h1 class="text-6xl mb-4">{{ page.title }}</h1>

@@ -20,10 +20,10 @@ Página principal - Mentor
         </section>
         <section id="feeds">
             {% url 'events_feed' as events_feed_url %}
-            {% include "main/event_news_feed.html" with id=EVENT_SECTION pages=events title="Próximos eventos" load_more_url=events_feed_url page_number=events_page_number page_obj=events_paginator %}
+            {% include "main/event_news_feed.html" with id=EVENT_SECTION pages=events page_index=events_index title="Próximos eventos" load_more_url=events_feed_url page_number=events_page_number page_obj=events_paginator %}
 
             {% url 'news_feed' as news_feed_url %}
-            {% include "main/event_news_feed.html" with id=NEWS_SECTION top_margin_title="True" pages=news title="Noticias" load_more_url=news_feed_url page_number=news_page_number page_obj=news_paginator %}
+            {% include "main/event_news_feed.html" with id=NEWS_SECTION top_margin_title="True" pages=news title="Noticias" page_index=news_index load_more_url=news_feed_url page_number=news_page_number page_obj=news_paginator %}
         </section>
     </div>
 </main>

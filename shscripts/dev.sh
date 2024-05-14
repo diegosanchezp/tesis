@@ -78,3 +78,8 @@ pygrep(){
 blackfmt(){
   dockerpy black --target-version py311 "$@"
 }
+
+fmtfiles(){
+  # Format python files that are going to be commited
+  dockerpy 'git diff --name-only --cached | grep "\.py$" | xargs black --target-version py311 --verbose'
+}

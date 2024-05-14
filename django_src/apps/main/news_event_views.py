@@ -11,13 +11,14 @@ from django_src.apps.register.approvals_view import get_page_number
 from django_src.mentor.utils import loggedin_and_approved
 
 
-def get_wagtailpage_paginated(PageModel: Page):
+def get_wagtailpage_paginated(PageModel: Page, per_page: int = 6):
     """
     Get paginated queryset of wagtail pages
     """
 
     def get_page(
         page_number: int = 1,
+        queryset=None,
         page_obj_name: str = "page_obj",
         page_number_name: str = "page_number",
         paginator_name: str = "paginator",
@@ -28,16 +29,14 @@ def get_wagtailpage_paginated(PageModel: Page):
         - page_number_name: name of the page number in the context
         """
 
-        queryset = PageModel.objects.all().order_by("-last_published_at")
+        if queryset is None:
+            queryset = PageModel.objects.all().order_by("-last_published_at")
 
         paginator = Paginator(
-            object_list=queryset, per_page=6
+            object_list=queryset, per_page=per_page
         )  # Show 6 approvals per page.
 
         page_obj = paginator.get_page(page_number)
-        print("page_obj.number", page_obj.number)
-        print("page_obj.has_next", page_obj.has_next())
-
 
         return {
             page_obj_name: page_obj,
@@ -69,7 +68,7 @@ def evt_news_factory(section_id: str):
         response = TemplateResponse(request, template, context)
         trigger_client_event(
             response=response,
-            name="jsSwap", # hx-swap
+            name="jsSwap",  # hx-swap
             params={
                 "target_element_id": f"{section_id}-load_more_btn",
                 "position": "outerHTML",

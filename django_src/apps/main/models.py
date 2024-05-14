@@ -1,20 +1,23 @@
 from django.db import models
-
+from django.http.response import HttpResponse
 from django.utils.translation import gettext_lazy as _
+from django.urls.base import reverse_lazy
 
+from render_block import render_block_to_string
 from modelcluster.fields import ParentalKey
 
 from wagtail import blocks
 from wagtail.fields import StreamField
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.models import Page, Orderable
-
 from wagtail.admin.panels import (
     FieldPanel,
     MultiFieldPanel,
     InlinePanel,
     FieldRowPanel,
 )
+
+from django_src.apps.register.approvals_view import get_page_number
 
 
 # Create your models here.
@@ -259,21 +262,12 @@ class NewsPage(Page):
     subpage_types = []
 
 
-class EventsIndex(Page):
-    """
-    Acts like a folder list all Pages of type Event
-    """
-
-    # Only allow Events as child pages
-    subpage_types = ["EventPage"]
-
-
 class EventPage(Page):
     """
     News that will appear to Admins
     """
 
-    template = "main/event_page.html"  # todo
+    template = "main/event_page.html"
 
     page_description = _("Evento")
 
@@ -362,3 +356,63 @@ class EventPage(Page):
 
     # Block the creation of child pages
     subpage_types = []
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        parent = self.get_parent()
+        context["breadcrumbs"] = [
+            {"name": "Eventos", "href": parent.get_url(request=request)},
+            {"name": self.title},
+        ]
+        return context
+
+
+class EventsIndex(Page):
+    """
+    In the CMS Acts like a folder list all Pages of type Event
+    For other types of users It renders as a list of events
+    """
+
+    template = "main/events/event_list.html"
+    # Only allow Events as child pages
+    subpage_types = ["EventPage"]
+
+    def __init__(self, *args, **kwargs):
+        # importing here to avoid circular imports, because get_wagtailpage_paginated uses the models defined on this file
+        from django_src.apps.main.news_event_views import get_wagtailpage_paginated
+
+        super().__init__(*args, **kwargs)
+        self.get_paginated_events = get_wagtailpage_paginated(
+            PageModel=EventPage, per_page=1
+        )
+
+    def serve(self, request):
+        # Add suppor for pagination to this index page
+        response = super().serve(request)
+        if request.htmx and request.GET:
+            context = self.get_context(request)
+            html = render_block_to_string(
+                block_name="cards",
+                template_name="main/events/event_list.html",
+                context=context,
+            )
+            return HttpResponse(html)
+
+        return response
+
+    def get_context(self, request, *args, **kwargs):
+
+        page_number = get_page_number(request)
+        context = super().get_context(request, *args, **kwargs)
+        context["breadcrumbs"] = [
+            {"name": "Eventos"},
+        ]
+
+        # Add extra variables and return the updated context
+        events = EventPage.objects.child_of(self).live().order_by("-last_published_at")
+        context.update(
+            self.get_paginated_events(
+                page_obj_name="events", page_number=page_number, queryset=events
+            )
+        )
+        return context
