@@ -1,7 +1,9 @@
 import os
 from datetime import date, timedelta
-
+from pathlib import Path
 import argparse
+
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 from django.conf import settings
@@ -48,10 +50,21 @@ class MentorData:
 
         self.mentor1 = Mentor(
             user=self.mentor1_user,
+            voucher=SimpleUploadedFile(
+                name="profile_pic.jpg",
+                content=open(str(Path(settings.MEDIA_ROOT_TEST) / "jpeg_example.jpg"), "rb").read(),
+                content_type="image/jpeg",
+            )
+
         )
 
         self.mentor2 = Mentor(
             user=self.mentor2_user,
+            voucher=SimpleUploadedFile(
+                name="profile_pic.jpg",
+                content=open(str(Path(settings.MEDIA_ROOT_TEST) / "jpeg_example.jpg"), "rb").read(),
+                content_type="image/jpeg",
+            )
         )
 
 

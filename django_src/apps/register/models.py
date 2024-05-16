@@ -101,6 +101,12 @@ class RegisterApprovals(models.Model):
         return voucher
 
     @property
+    def voucher_exists(self):
+        if self.voucher:
+            return self.voucher.storage.exists(self.voucher.name)
+        return False
+
+    @property
     def voucher_file_type(self):
         if self.voucher:
             return get_file_type(self.voucher)
