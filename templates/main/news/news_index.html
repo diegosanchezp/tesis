@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load django_vite slippers wagtailimages_tags wagtailcore_tags %}
+
+{% comment %}
+  Renders a list of paginated news articles.
+{% endcomment %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+{% endblock %}
+
+{% block body %}
+
+{% include "components/navbar.html" %}
+
+<main class="page-x-spacing">
+    {# Breadcrumbs #}
+    <div class="mt-4">
+        {% include "components/breadcrumbs.html" with breadcrumbs=breadcrumbs %}
+    </div>
+    
+    {# News list #}
+    <ul id="news-list" class="grid grid-cols-4 gap-x-6">
+        {% block news_cards %}
+            {% for news_article in news %}
+                <li>
+                    <article class="flex flex-col gap-x-4 h-[432px] rounded bg-slate-100 my-4 p-4">
+                        {# news article thumbnail #}
+                        <a class="flex justify-center" href="{% pageurl news_article %}">
+                            <div class="flex rounded w-[350px] h-[200px] items-center justify-center p-4">
+                                {% if news_article.thumbnail %}
+                                    {% image news_article.thumbnail fill-350x200 %}
+                                {% else %}
+                                    <i class="bi bi-card-image"></i>
+                                {% endif %}
+                            </div>
+                        </a>
+                        {# title  #}
+                        <div class="my-2">
+                            <a href="{% pageurl news_article %}" class="text-lg hover:underline hover:underline-offset-2 font-bold mb-2">{{ news_article.title }}</a>
+                        </div>
+
+                        {# date #}
+                        <div class="flex gap-x-2 text-slate-500 my-2">
+                            <i class="bi bi-clock-fill"></i>
+                            {{ news_article.last_published_at|date:"d F Y" }}
+                        </div>
+                        {# description #}
+                        <div class="my-2">
+                            <p title="{{ news_article.description }}">{{ news_article.description|truncatechars:"100" }}</p>
+                        </div>
+
+                    </article>
+                </div>
+                </li>
+            {% endfor %}
+            {% if news.has_next %}
+                <div id="load-more-btn" class="col-span-4 justify-self-center" hx-get="?page={{ news.next_page_number }}" hx-trigger="click" hx-target="#load-more-btn" hx-swap="outerHTML">
+                    {% #button icon_left="bi bi-plus text-white" name="action" action="paginate" %}Cargar más{% /button %}
+                </div>
+            {% endif %}
+        {% endblock news_cards %}
+    </ul>
+{% endblock body %}
