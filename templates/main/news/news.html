@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load wagtailimages_tags wagtailcore_tags %}
+
+{% comment %}
+  News Detail view
+{% endcomment %}
+
+
+{% block body %}
+
+{% include "components/navbar.html" %}
+<main class="page-x-spacing">
+    {# Breadcrumb #}
+    <div class="mt-4">
+        {% include "components/breadcrumbs.html" with breadcrumbs=breadcrumbs %}
+    </div>
+
+    <div id="news-content" class="wagtail-page-max-size mt-8">
+
+        <header class="border-b-2 pb-4">
+            <h1 class="text-6xl mb-4">{{ page.title }}</h1>
+            {# Author #}
+            <p class="text-xl mb-4">
+                <span>Por</span>
+                <span>{{ page.owner.first_name }}</span>
+                <span>{{ page.owner.last_name }}</span>
+            </p>
+
+            {# publishing date #}
+            <div id="publish-date" class="flex gap-x-2 text-slate-500">
+                <i class="bi bi-clock-fill"></i>
+                <div class="flex">
+                    <span class="mr-2">
+                        Publicado el: {{ page.first_published_at|date:"d F Y" }},
+                    </span>
+                    {% if page.last_published_at %}
+                    <span>
+                         Última edición: {{ page.last_published_at|date:"d F Y" }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+
+        {# thumbnail #}
+        {% if page.thumbnail %}
+            <div class="flex items-center justify-center w-full my-6">
+                {# 1920px is the max width that the content of this page can be, see class wagtail-page-max-size #}
+                {% image page.thumbnail max-1920x600 %}
+            </div>
+        {% endif %}
+
+        <article class="prose lg:prose-xl mt-8 max-w-none mx-auto w-full">
+            {# Render streamfield content #}
+            {% for block in page.content %}
+                {% if block.block_type == 'image' %}
+                    <div class="not-prose flex items-center justify-center w-full">
+                        {# {% img block.value %} #}
+                        {% include_block block %}
+                    </div>
+                {% else %}
+                    {% include_block block %}
+                {% endif %}
+            {% endfor %}
+        </article>
+    </div>
+</main>
+{% endblock body %}

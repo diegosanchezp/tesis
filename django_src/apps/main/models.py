@@ -1,8 +1,7 @@
 from django.db import models
 from django.http.response import HttpResponse
 from django.utils.translation import gettext_lazy as _
-from django.urls.base import reverse_lazy
-
+from django.template.defaultfilters import truncatechars
 from render_block import render_block_to_string
 from modelcluster.fields import ParentalKey
 
@@ -19,7 +18,7 @@ from wagtail.admin.panels import (
 
 from django_src.apps.register.approvals_view import get_page_number
 
-
+MAX_TITLE_LENGHT = 100
 # Create your models here.
 class HeroSection(Orderable):
     page = ParentalKey(
@@ -186,17 +185,56 @@ class NewsIndex(Page):
     """
     Acts like a folder list all Pages of type News
     """
+    template = "main/news/news_index.html"
 
     # Only allow NewsPage as child pages
     subpage_types = ["NewsPage"]
 
+    def __init__(self, *args, **kwargs):
+        # importing here to avoid circular imports, because get_wagtailpage_paginated uses the models defined on this file
+        from django_src.apps.main.news_event_views import get_wagtailpage_paginated
+
+        super().__init__(*args, **kwargs)
+        self.get_paginated_events = get_wagtailpage_paginated(
+            PageModel=NewsPage, per_page=20,
+        )
+
+    def serve(self, request):
+        # Add suppor for pagination to this index page
+        response = super().serve(request)
+        if request.htmx and request.GET:
+            context = self.get_context(request)
+            html = render_block_to_string(
+                block_name="news_cards",
+                template_name=self.template,
+                context=context,
+            )
+            return HttpResponse(html)
+
+        return response
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        page_number = get_page_number(request)
+
+        # Add extra variables and return the updated context
+        news = NewsPage.objects.child_of(self).live().order_by("-last_published_at")
+        context["breadcrumbs"] = [
+            {"name": "Noticias"},
+        ]
+        context.update(
+            self.get_paginated_events(
+                page_obj_name="news", page_number=page_number, queryset=news
+            )
+        )
+        return context
 
 class NewsPage(Page):
     """
     News that will appear to Admins
     """
 
-    template = "main/news.html"  # todo
+    template = "main/news/news.html"
 
     page_description = _("Noticia")
 
@@ -261,6 +299,18 @@ class NewsPage(Page):
     # Block the creation of child pages
     subpage_types = []
 
+    class Meta:
+        # https://docs.wagtail.org/en/stable/topics/pages.html#friendly-model-names
+        verbose_name = _("Noticia")
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        parent = self.get_parent()
+        context["breadcrumbs"] = [
+            {"name": "Noticias", "href": parent.get_url(request=request)},
+            {"name": truncatechars(self.title, MAX_TITLE_LENGHT)},
+        ]
+        return context
 
 class EventPage(Page):
     """
@@ -357,12 +407,15 @@ class EventPage(Page):
     # Block the creation of child pages
     subpage_types = []
 
+    class Meta:
+        verbose_name = _("Evento")
+
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         parent = self.get_parent()
         context["breadcrumbs"] = [
             {"name": "Eventos", "href": parent.get_url(request=request)},
-            {"name": self.title},
+            {"name": truncatechars(self.title, MAX_TITLE_LENGHT)},
         ]
         return context
 
@@ -383,11 +436,11 @@ class EventsIndex(Page):
 
         super().__init__(*args, **kwargs)
         self.get_paginated_events = get_wagtailpage_paginated(
-            PageModel=EventPage, per_page=1
+            PageModel=EventPage, per_page=20
         )
 
     def serve(self, request):
-        # Add suppor for pagination to this index page
+        # Add support for pagination to this index page
         response = super().serve(request)
         if request.htmx and request.GET:
             context = self.get_context(request)
