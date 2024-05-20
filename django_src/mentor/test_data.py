@@ -44,6 +44,13 @@ class MentorshipData:
             status=self.MentorshipRequest.State.ACCEPTED,
         )
 
+        self.student_request2 = self.MentorshipRequest(
+            student=self.student_data.unapproved_student,
+            mentorship=self.mentorship1,
+            status=self.MentorshipRequest.State.REQUESTED,
+        )
+
+
     def create(self):
         # Get the mentors from db
         self.mentor_data.get()
@@ -67,6 +74,11 @@ class MentorshipData:
         self.student_request.mentorship=self.mentorship1
         self.student_request.student=self.student_data.student
         self.student_request.save()
+
+        self.student_request2.mentorship=self.mentorship1
+        self.student_request2.student=self.student_data.unapproved_student
+        self.student_request2.save()
+
 
         # Create tasks for a student, since the request was accepted
         for task in self.mentorship1.tasks.all():

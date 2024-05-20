@@ -16,7 +16,63 @@ Página principal - Mentor
     {% include "components/navbar.html" %}
     <div class="grid grid-cols-2 page-x-spacing gap-x-8 mt-4">
         <section id="mentorship-info">
-            <p>TODO</p>
+            <h2 class="text-2xl font-bold mb-4">Solicitudes de mentoría</h2>
+            {# table container #}
+            {% block mentorship_req_table %}
+            <div class="border rounded-lg border-slate-400" id="table_form">
+                {# table filters #}
+                <form id="table_filters" class="flex gap-x-4 pt-4 pr-4 justify-end" hx-get="" hx-trigger="submit" hx-swap="outerHTML" hx-target="#table_form">
+                    {% include "forms/render_field.html" with field=filter_form.student_name %}
+                    {% include "forms/render_field.html" with field=filter_form.state %}
+                    <div class="self-end">
+                        {% #button type="submit" icon_left="bi bi-search" title="Filtrar y buscar" name="action" value="filter_mentorship_request" %}
+                        {% /button %}
+                    </div>
+                </form>
+                    <table id="mentorship_req_table" class="w-full">
+                        <thead>
+                            <tr>
+                                <th class="pt-6 pl-6 text-left">
+                                    Mentoría
+                                </th>
+                                <th class="pt-6 px-4 text-left">
+                                    Estudiante
+                                </th>
+                                <th class="pt-6 px-2 text-left">
+                                    Estatus
+                                </th>
+                                <th class="pt-6 pl-2 text-center">
+                                    Acción
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mentorship_request in mentorship_requests %}
+                                {% with student_user=mentorship_request.student.user %}
+                                    <tr>
+                                        <td class="pl-6 text-left">{{ mentorship_request.mentorship.name }}</td>
+                                        <td class="px-4 text-left">{{ student_user.first_name }} {{ student_user.last_name }}</td>
+                                        <td class="px-2 text-left">{{ mentorship_request.get_readable_status }}</td>
+                                        <td class="pl-2 pt-2 pb-2 flex justify-center">
+                                            {% #button type="button" icon_left="bi bi-info-circle"  %}
+                                                Revisar
+                                            {% /button %}
+                                        </td>
+                                    </tr>
+                                {% endwith %}
+                            {% empty %}
+                                <tr>
+                                    <td colspan="3" class="py-2 pl-6 text-center">No hay solicitudes de mentoría que mostrar</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div id="pagination_container" class="flex justify-center" {# hx-get="" hx-trigger="click" hx-swap="outerHTML" hx-target="mentorship_req_table" #}>
+                        {% include "components/pagination.html" with page_obj=mentorship_requests search_query_params="action=filter_mentorship_request&"%}
+                    </div>
+            </div>
+            {% endblock mentorship_req_table %}
+
         </section>
         <section id="feeds">
             {% url 'events_feed' as events_feed_url %}

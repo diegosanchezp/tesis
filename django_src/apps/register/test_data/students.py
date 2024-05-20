@@ -123,14 +123,13 @@ class StudentData:
             user=self.student_user,
             user_type=self.student_type,
             admin=self.admin_user,
-            state=self.RegisterApprovalStates.APPROVED,
         )
 
         self.unapproved_student = self.Student.objects.get(user=self.unapproved_student_user)
         self.unapproved_student_approval = self.RegisterApprovals.objects.get(
             user=self.unapproved_student_user,
             user_type=self.student_type,
-            state=self.RegisterApprovalStates.WAITING,
+            admin=self.admin_user,
         )
 
     def delete(self):
