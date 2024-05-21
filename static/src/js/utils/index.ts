@@ -20,3 +20,14 @@ export function getCSRFToken(){
     const csrftoken = getCookie('csrftoken')
     return csrftoken
 }
+
+/**
+ * Converts a FormData object to a query string
+ */
+export function formDataToQueryParam(formData: FormData): string {
+    const params = new URLSearchParams();
+    for (const pair of formData.entries()) {
+        params.append(pair[0], pair[1]);
+    }
+    return params.toString();
+}

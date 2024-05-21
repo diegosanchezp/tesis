@@ -1,0 +1,55 @@
+{% load slippers %}
+
+{% comment %}
+Table that displays the mentorship requests with filters and pagination
+context:
+- mentorship_requests: django.core.paginator.Page[QuerySet[MentorshipRequest]]
+- filter_form: forms.MentorshipRequestFilterForm
+- with_mentorship_name: Bool, if True, the mentorship name is displayed in the table
+
+{% endcomment %}
+
+{# table filters #}
+<form id="table_filters" class="flex gap-x-4 pt-4 pr-4 justify-end" hx-get="" hx-trigger="submit" hx-swap="outerHTML" hx-target="#table_form">
+    {% include "forms/render_field.html" with field=filter_form.student_name %}
+    {% include "forms/render_field.html" with field=filter_form.state %}
+    <div class="self-end">
+        {% #button type="submit" icon_left="bi bi-search" title="Filtrar y buscar" name="action" value="filter_mentorship_request" %}
+        {% /button %}
+    </div>
+</form>
+{# table #}
+<table id="mentorship_req_table" class="w-full">
+    <thead>
+        <tr>
+            {% if with_mentorship_name %}
+            <th class="pt-6 pl-6 text-left">
+                Mentoría
+            </th>
+            {% endif %}
+
+            <th class="pt-6 px-4 text-left">
+                Estudiante
+            </th>
+            <th class="pt-6 px-2 text-left">
+                Estatus
+            </th>
+            <th class="pt-6 pl-2 text-center">
+                Acción
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for mentorship_request in mentorship_requests %}
+            {% include "mentor/mentorship/request_row.html" with mentorship_request=mentorship_request %}
+        {% empty %}
+            <tr>
+                <td colspan="3" class="py-2 pl-6 text-center">No hay solicitudes de mentoría que mostrar</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{# pagination #}
+<div id="pagination_container" class="flex justify-center" {# hx-get="" hx-trigger="click" hx-swap="outerHTML" hx-target="mentorship_req_table" #}>
+    {% include "components/pagination.html" with page_obj=mentorship_requests search_query_params="action=filter_mentorship_request&"%}
+</div>
