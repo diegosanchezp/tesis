@@ -1,12 +1,15 @@
+from django.http.response import HttpResponseForbidden
 from django.urls.base import reverse_lazy
+from django_htmx.http import trigger_client_event
 from .models import Mentorship, StudentMentorshipTask, MentorshipRequest
+from .utils import get_mentor, loggedin_and_approved
+from .forms import MentorshipReqFilterForm
+from .landing_view import paginate_mentorship_request, get_filter_mentorship_requests, FILTER_MENTORSHIP_REQUEST, render_mentorship_req_table
 from django_src.apps.register.models import Mentor
-from .utils import get_mentor, loggedin_and_approved, is_approved, get_page_number
+from django_src.utils import get_page_number
 
 from render_block import render_block_to_string
 
-from django.db.models.query import QuerySet
-from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.template.response import TemplateResponse
 from django.db import models
@@ -51,16 +54,6 @@ def render_mentorship_info(mentor: Mentor, mentorship: Mentorship):
     context = get_detail_view_context(mentor, mentorship)
     return render_block_to_string(template_name, "mentorship_info", context)
 
-def paginate_mentorship_request(request, queryset: QuerySet[MentorshipRequest]):
-    paginator = Paginator(object_list=queryset, per_page=1)  # Change to Show 10 mentorship requests.
-    page_number = get_page_number(request)
-    paginated_m_requests = paginator.get_page(page_number)
-
-    return {
-        "mentorship_requests": paginated_m_requests,
-        "page_number": page_number,
-    }
-
 @require_http_methods(["GET"])
 @loggedin_and_approved
 def mentorship_detail_view(request, mentorship_pk: int):
@@ -86,6 +79,7 @@ def mentorship_detail_view(request, mentorship_pk: int):
 
 
     action = request.GET.get("action")
+    page_number = get_page_number(request)
     context = get_detail_view_context(mentor, mentorship)
     context.update(
         breadcrumbs=[
@@ -94,15 +88,33 @@ def mentorship_detail_view(request, mentorship_pk: int):
         ]
     )
 
-    if request.htmx and action == "render_mentorship_info":
-        form_html = render_mentorship_info(mentor, mentorship)
-        return HttpResponse(form_html)
+    # Mentorship request filters
+    filter_form = MentorshipReqFilterForm(data=request.GET)
+    filter_form.is_valid()
+    context["filter_form"] = filter_form
 
+    student_name = filter_form.cleaned_data["student_name"]
+    state = filter_form.cleaned_data["state"]
+    mentorship_requests = get_filter_mentorship_requests(mentor, student_name, state)
+    mentorship_requests = mentorship_requests.filter(mentorship=mentorship)
+
+    # Add the paginated mentorship requests to the context
     context.update(
         paginate_mentorship_request(
-            request, mentorship.mentorship_requests.order_by("-date")
+            mentorship_requests,
+            page_number=page_number,
         )
     )
+
+    if request.htmx:
+        if action == "render_mentorship_info":
+            form_html = render_mentorship_info(mentor, mentorship)
+            return HttpResponse(form_html)
+        if action == FILTER_MENTORSHIP_REQUEST:
+            return render_mentorship_req_table(template_name, context)
+        else:
+            HttpResponseForbidden("Invalid action")
+
 
     response = TemplateResponse(request, template_name, context)
 

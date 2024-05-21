@@ -1,4 +1,4 @@
-from django.urls.base import reverse_lazy
+from django.urls.base import reverse, reverse_lazy
 from .utils import get_mentor, is_approved, validate_add_tasks, loggedin_and_approved
 from .forms import MentorshipForm, MentorshipTaskFormSet, MentorshipRequestActionForm, get_MentorshipTaskFormSet
 from .models import MentorshipRequest, Mentorship, TransitionError, StudentMentorshipTask, MentorshipTask
@@ -301,13 +301,16 @@ def change_mentorship_status(request, mentorship_req_pk: int):
         # Also, update the mentorship request row table
         trigger_client_event(
             response=success_message_response,
-            name="update_mentorship_req_row",
+            name="jsSwap", # hx-swap
             params={
-                "row_id": f"mentor_req_row-{mentorship_req.pk}",
-                "row_html": render_to_string(
+                "target_element_id": f"mentor_req_row-{mentorship_req.pk}",
+                "position": "outerHTML",
+                "text_html": render_to_string(
                     request=request,
                     context={
                         "mentorship_request": mentorship_req,
+                        # If the request came from the mentorship landing page, show the mentorship name in the table
+                        "with_mentorship_name": reverse("mentor:landing") in request.META.get("HTTP_REFERER"),
                     },
                     template_name="mentor/mentorship/request_row.html"
                 )

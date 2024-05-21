@@ -1,15 +1,16 @@
+from django.db.models.query import QuerySet
 from django.http.response import HttpResponse, HttpResponseForbidden
 from django.views.decorators.http import require_http_methods
 from django.core.paginator import Paginator
 from django.db import models
 from django.template.response import TemplateResponse
 
-from django_src.apps.register.models import Mentor
 
 from .utils import get_mentor, loggedin_and_approved
 from .models import MentorshipRequest
 from .forms import MentorshipReqFilterForm
 
+from django_src.apps.register.models import Mentor
 from django_src.apps.main.models import EventsIndex, NewsIndex
 from django_src.apps.register.approvals_view import get_page_number
 from django_src.apps.main.news_event_views import (
@@ -21,6 +22,9 @@ from django_src.apps.main.news_event_views import (
 
 from render_block import render_block_to_string
 from django_htmx.http import trigger_client_event
+
+# Action to filter mentorship requests
+FILTER_MENTORSHIP_REQUEST = "filter_mentorship_request"
 
 def filter_mentorship_request(queryset):
     """
@@ -46,7 +50,7 @@ def filter_mentorship_request(queryset):
 
 def get_filter_mentorship_requests(
     mentor: Mentor, student_name: str | None = None, state: str | None = None
-):
+) -> QuerySet[MentorshipRequest]:
     """
     Gets the MentorshipRequests queryset of a mentor and filter it by student name or state
     """
@@ -95,14 +99,29 @@ def paginate_mentorship_request(mentorship_requests, page_number: int):
 
     # Paginate the queryset
     paginator = Paginator(
-        object_list=mentorship_requests, per_page=1
-    )  # Change to Show 10 mentorship requests.
+        object_list=mentorship_requests, per_page=12
+    )  # Change to Show 12 mentorship requests.
     paginated_m_requests = paginator.get_page(page_number)
 
     return {
         "mentorship_requests": paginated_m_requests,
     }
 
+def render_mentorship_req_table(template_name: str, context: dict):
+    """
+    Returns an http response with the mentorship request table rendered
+    See template mentor/mentorship_req_table.html, for the needed context
+    """
+
+    html = render_block_to_string(template_name=template_name, block_name="mentorship_req_table", context=context)
+    response = HttpResponse(html)
+    # Tell the client to re-attach htmx pagination handler
+    trigger_client_event(
+        response=response,
+        name="reAttachPagination",
+        after="swap", # very important
+    )
+    return response
 
 @require_http_methods(["GET"])
 @loggedin_and_approved
@@ -142,16 +161,8 @@ def landing_view(request):
 
     if request.htmx:
         action = request.GET.get("action")
-        if action == "filter_mentorship_request":
-            html = render_block_to_string(template_name=template, block_name="mentorship_req_table", context=context)
-            response = HttpResponse(html)
-            # Tell the client to re-attach htmx pagination handler
-            trigger_client_event(
-                response=response,
-                name="reAttachPagination",
-                after="swap", # very important
-            )
-            return response
+        if action == FILTER_MENTORSHIP_REQUEST:
+            return render_mentorship_req_table(template, context)
         else:
             HttpResponseForbidden("Invalid action")
 
