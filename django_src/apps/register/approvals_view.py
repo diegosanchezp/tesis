@@ -5,6 +5,8 @@ from django.http import HttpResponse, QueryDict
 from django.template.response import TemplateResponse
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 
 from .forms import ApprovalsFilterForm
 from .models import RegisterApprovals, RegisterApprovalEvents, RegisterApprovalStates, approval_state_machine
@@ -179,10 +181,15 @@ def approve_reject_users(request):
     context.update(paginate_queryset(request, approvals))
     return context
 
+
+@login_required
 def approvals_view(request):
     """
     The main view
     """
+
+    if not request.user.is_superuser:
+        raise PermissionDenied
 
     template_name = "register/approvals.html"
 
