@@ -5,9 +5,10 @@
 {% endcomment %}
 {% load slippers %}
 
-<nav class="flex px-2 py-2 bg-ucv-blue items-baseline justify-between items-center">
-    <i class="bi bi-list text-white text-3xl self-center"></i>
-    <ul id="navbar-text-links" class="ml-2 w-full">
+<nav class="flex px-2 py-2 bg-ucv-blue justify-between items-center">
+    <i class="bi bi-list text-white text-3xl self-center mr-6"></i>
+    <ul id="navbar-text-links" class="ml-2 w-full flex gap-x-6">
+        {# Home Link #}
         <li>
             <a
                 class="text-white"
@@ -22,10 +23,16 @@
                 Home
             </a>
         </li>
+        {# Other mentor links #}
+        {# Maybe we want this for the student user also ? #}
+        {% if request.user.is_mentor %}
+            <li>
+                <a class="text-white" href="">Carreras profesionales</a>
+            </li>
+        {% endif %}
     </ul>
 
     <ul class="flex text-white items-center">
-        <li class="">Dashboard</li>
         <li class="px-4">
             <div class="bg-white h-[20px] w-[1px]"></div>
         </li>
@@ -43,6 +50,7 @@
       <p class="font-medium truncate">{{ request.user.email }}</p>
     </div>
 
+    {# Avatar links #}
     <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="avatarButton">
         {% if request.user.is_superuser %}
         <li>
