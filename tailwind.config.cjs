@@ -10,7 +10,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        "ucv-yellow": "#FFF9DD",
+        "ucv-yellow": {
+          DEFAULT: "#FFF9DD",
+          dark: "#FFB703",
+        },
         "ucv-blue": "#006090",
       },
     },
