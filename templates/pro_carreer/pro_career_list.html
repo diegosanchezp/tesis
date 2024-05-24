@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load slippers wagtailimages_tags wagtailcore_tags %}
+{% comment %}
+Renders a paginated list of Professional Careers
+
+Required context:
+- pro_careers: Page[django_src.pro_career.models.ProfessionalCarreer]
+
+{% endcomment %}
+
+{% block title %}
+Carreras Profesionales
+{% endblock title %}
+
+{% block body %}
+{% include "components/navbar.html" %}
+
+{% with is_mentor=request.user.is_mentor %}
+<main class="page-x-spacing ">
+    <div class="mt-4">
+        {% include "components/breadcrumbs.html" %}
+    </div>
+
+    <h1 class="text-2xl font-bold my-4">Carreras profesionales</h1>
+    {% if is_mentor %}
+        <div class="flex gap-x-4 mb-4">
+            <i class="bi bi-info-circle-fill text-ucv-yellow-dark"></i>
+            <p>¡Escoge abajo una carrera y añade tu expericiencias profesional!</p>
+        </div>
+    {% endif %}
+
+    <div class="grid grid-cols-3 gap-x-8 mt-4">
+        {% for profession in pro_careers %}
+            {% include "pro_carreer/pro_career_card.html" %}
+        {% empty %}
+            <p class="text-center col-span-3">No hay carreras profesionales</p>
+        {% endfor %}
+    </div>
+    <div class="flex justify-center">
+        {% include "components/pagination.html" with page_obj=pro_careers %}
+    </div>
+</main>
+{% endwith %}
+{% endblock body %}
+
+

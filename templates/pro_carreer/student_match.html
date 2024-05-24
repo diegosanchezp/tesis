@@ -1,14 +1,15 @@
 {% extends "base.html" %}
-{% load static wagtailimages_tags %}
+{% load django_vite slippers wagtailimages_tags wagtailcore_tags %}
 
-{% load django_vite slippers %}
+{% block title %}
+Home Estudiante
+{% endblock title %}
 
 {% block body %}
 
 {# bg-slate-100 #}
 {# bg-[#FFF9DD] #}
 <main class="bg-[#FFF9DD] min-h-screen">
-
     {% include "components/navbar.html" %}
     <section class="px-6 mt-2 mb-4">
 
@@ -21,21 +22,7 @@
         {# Blogs section #}
         <section class="grid grid-cols-3 gap-x-4">
             {% for profession in pro_careers %}
-                <article class="shadow-md rounded bg-white">
-                    <a
-                        class="bg-slate-200 flex h-[200px] items-center justify-center m-4"
-                        href=""
-                    >
-                        <i class="bi bi-card-image"></i>
-                        {# Todo image #}
-                        {#<img>#}
-                    </a>
-                    {# Text info #}
-                    <div class="my-2 mx-4 mb-6">
-                        <a href="" class="text-cyan-700 text-xl">{{ profession.title }}</a>
-                        <p class="">{{ profession.short_description}}</p>
-                    </div>
-                </article>
+                {% include "pro_carreer/pro_career_card.html" %}
             {% empty %}
                 <div class="shadow-md rounded bg-white p-4">
                     <p>No hay carreras profesionales relacionadas que se ajusten a tus intereses.</p>

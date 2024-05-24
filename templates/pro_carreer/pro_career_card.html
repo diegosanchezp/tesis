@@ -1,0 +1,32 @@
+{% load slippers wagtailimages_tags wagtailcore_tags %}
+{% comment %}
+required context:
+- profession: django_src.pro_career.models.Profession
+- is_mentor: bool
+{% endcomment %}
+<article class="shadow-md rounded bg-white">
+    <a
+        class="bg-slate-200 flex h-[200px] items-center justify-center m-4"
+        href="{% pageurl profession %}"
+    >
+        <i class="bi bi-card-image"></i>
+        {# Todo image #}
+        {#<img>#}
+    </a>
+    {# Text info #}
+    <div class="my-2 mx-4 mb-6">
+        <a href="{% pageurl profession %}" class="text-cyan-700 text-xl hover:underline">{{ profession.title }}</a>
+        <p class="">{{ profession.short_description }}</p>
+    </div>
+    {# Mentor CTA #}
+    {% if is_mentor %}
+        <div class="flex justify-center" title="Añadir experiencia a la carrera profesional {{ profession.title }}">
+            <a href="{% pageurl profession %}?tab=experiencias" class="mx-4 my-6 shadow-ucv-yellow" >
+                {% #button icon_right="bi bi-arrow-right" size="small" variant="yellow-ucv" %}
+                    Añadir experiencia
+                {% /button %}
+            </a>
+        </div>
+    {% endif %}
+</article>
+

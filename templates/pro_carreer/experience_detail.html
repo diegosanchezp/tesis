@@ -19,7 +19,7 @@ Context:
 {% if is_mentor and not mentor_experience %}
     <div id="advertisement-add-exp" class="flex gap-x-2 bg-slate-100 justify-center py-4 items-center">
         <p>Si ejerciste esta carrera ¡ Añade tu experiencia profesional !</p>
-        {% #button id="add-exp-btn" icon_right="bi bi-arrow-right text-white" type="button" name="action" value="render_empty_exp_form" hx-get=page.add_query_string hx-target="#edit-or-add-experience" hx-swap="outerHTML"  %}
+        {% #button id="add-exp-btn" icon_right="bi bi-arrow-right text-white" type="button" name="action" variant="yellow-ucv" value="render_empty_exp_form" hx-get=page.add_query_string hx-target="#edit-or-add-experience" hx-swap="outerHTML"  %}
             Añadir
         {% /button %}
     </div>

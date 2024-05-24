@@ -1,6 +1,7 @@
 from django.db import models
+from django.db.models.query import QuerySet
 from django.http.response import HttpResponseBadRequest
-from django.urls.base import reverse_lazy
+from django.core.paginator import Paginator
 
 
 from django.utils.translation import gettext_lazy as _
@@ -22,17 +23,50 @@ from wagtail.admin.panels import (
     FieldPanel,
 )
 from django_src.apps.register.models import Mentor
+from django_src.apps.register.approvals_view import get_page_number
 
 EXP_TAB = "experiencias"
 class ProCarreerIndex(Page):
     """
     A page to list and group all the Professional Carreer pages
     """
+    template = "pro_carreer/pro_career_list.html"
 
     page_description = _("Lista de carreras profesional")
     # no app label specified in subpage_types, because ProfessionalCarreer is in the same app
     # only professional carreers can be added as a subpage
     subpage_types = ['ProfessionalCarreer']
+
+    def serve(self, request):
+        # Add suppor for pagination to this index page
+        response = super().serve(request)
+        return response
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+
+        # Get the professional carreers
+        pro_careers = ProfessionalCarreer.objects.child_of(self).live().order_by("-last_published_at")
+
+        # Paginate the professional carreers
+        page_number = get_page_number(request)
+        context["pro_careers"] = self.paginate(pro_careers=pro_careers, page_number=page_number)
+
+        # Setup breadcrumbs
+        context["breadcrumbs"] = [
+            {"name": "Carreras profesionales"},
+        ]
+
+        return context
+
+    def paginate(self, pro_careers, page_number: int):
+        """
+        Paginate the professional carreers
+        """
+        paginator = Paginator(object_list=pro_careers, per_page=18)
+        pro_careers = paginator.page(number=page_number)
+
+        return pro_careers
 
 # Create your models here.
 class ProfessionalCarreer(Page):
@@ -95,7 +129,7 @@ class ProfessionalCarreer(Page):
         context = super().get_context(request, *args, **kwargs)
         context["mentors"] = Mentor.objects.filter(my_career_experiences__pro_carreer=self)
         context["breadcrumbs"] = [
-            {"name": "Carreras profesionales", "href": reverse_lazy("pro_carreer:student_carreer_match")},
+            {"name": "Carreras profesionales", "href": self.get_parent().get_url()},
             {"name": self.title },
         ]
         return context
@@ -135,7 +169,7 @@ class ProfessionalCarreer(Page):
                     if "action" in request.GET:
                         if request.htmx:
                             action = request.GET["action"]
-                            if  action == "render_exp_form":
+                            if action == "render_exp_form":
                                 return experience_view.render_exp_form(
                                     request=request,
                                     pk_pro_career_exp=int(request.GET["pk"]),
