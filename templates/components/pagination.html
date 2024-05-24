@@ -1,7 +1,7 @@
 {% comment %}
-  url: Optional[str]
   search_query_params: Optional[str]
 {% endcomment %}
+
 {% if page_obj.paginator.num_pages > 1 %}
     <ul class="inline-flex -space-x-px text-sm my-4">
         {% if page_obj.has_previous %}
