@@ -7,7 +7,7 @@ from .models import Mentorship, MentorshipRequest, StudentMentorshipTask
 from .forms import MentorshipForm
 from .utils import loggedin_and_approved
 from .test_utils import TestCaseMentorData
-from django.urls.base import reverse_lazy
+from django.urls.base import reverse, reverse_lazy
 
 # ./manage.py test --keepdb django_src.mentor.test_mentorship_view.TestUtils
 class TestUtils(TestCaseMentorData):
@@ -162,7 +162,7 @@ class TestRequestMentorshipView(TestCaseMentorData):
 
         self.assertEqual(response.status_code, 200)
         try:
-            mentorship_req = MentorshipRequest.objects.get(mentorship=self.mentorship)
+            mentorship_req = MentorshipRequest.objects.get(mentorship=self.mentorship, student=self.student)
         except MentorshipRequest.DoesNotExist:
             self.fail(msg="Mentorship request not created")
 
@@ -234,11 +234,14 @@ class TestChangeMentorshipStatusView(TestCaseMentorData):
             username=self.mentor1.user, password=environ["ADMIN_PASSWORD"],
         ))
 
+        # Delete the already created student tasks
+        self.student.mentorship_tasks.filter(task__mentorship=self.mentorship1).delete()
         response = self.client.post(
             path=reverse_lazy("mentor:change_mentorship_status", kwargs={"mentorship_req_pk": self.mentorship_request.pk}),
             data={
                 "action": MentorshipRequest.Events.ACCEPT,
-            }
+            },
+            headers={"HTTP_REFERER": reverse("mentor:landing")},
         )
 
         self.assertEqual(response.status_code, 200, response.content.decode())

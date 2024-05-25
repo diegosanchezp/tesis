@@ -40,7 +40,7 @@ class NewsData:
                     RichText(
                         # fmt: off
                         """
-                        <p>La Asociación ha logrado recaudar. Entre los proyectos de Investigación y Desarrollo en los que se invertiran los fondos estan:</p>
+                        <p>La Asociación ha logrado recaudar $5000 dólares americanos. Entre los proyectos de Investigación y Desarrollo en los que se invertiran los fondos estan:</p>
                         <ul>
                             <li>LLM</li>
                         </ul>

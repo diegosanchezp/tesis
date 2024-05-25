@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from .test_data import create_pro_carreers, create_pro_interes_themes
+from .test_data import ProCarreerData, create_pro_interes_themes
 from .experience_view import get_distribution
 
 from django.contrib.contenttypes.models import ContentType
@@ -42,7 +42,8 @@ class ModelTests(TestCaseWithData):
 
         # Create some professional carreers
 
-        pro_careers = create_pro_carreers()
+        pro_careers = ProCarreerData()
+        pro_careers.create()
 
         cls.fullstack_dev = pro_careers.fullstack_dev
         cls.frontend_dev = pro_careers.frontend_dev

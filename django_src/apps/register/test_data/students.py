@@ -81,6 +81,7 @@ class StudentData:
             user=self.unapproved_student_user,
             user_type=self.student_type,
             state=RegisterApprovalStates.WAITING,
+            admin=self.admin_user,
         )
 
     def save_student_user(self, student_user):

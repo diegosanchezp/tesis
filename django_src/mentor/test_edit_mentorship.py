@@ -11,9 +11,8 @@ class TestEditMentorshipView(TestCaseMentorData):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        mentorship_data = MentorshipData(cls.mentor_data)
+        mentorship_data = MentorshipData(cls.mentor_data, cls.student_data)
 
-        mentorship_data.create()
         mentorship_data.get()
 
         cls.mentorship1 = mentorship_data.mentorship1

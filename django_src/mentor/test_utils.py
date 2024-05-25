@@ -1,7 +1,6 @@
 from django_src.apps.register.test_utils import TestCaseWithData
 from django_src.apps.register.test_data.mentors import MentorData
-
-from django_src.pro_carreer.test_data import create_pro_carreers
+from django_src.pro_carreer.test_data import ProCarreerData
 from .test_data import MentorshipData
 
 class TestCaseMentorData(TestCaseWithData):
@@ -9,7 +8,8 @@ class TestCaseMentorData(TestCaseWithData):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        pro_carreers = create_pro_carreers()
+        pro_carreers = ProCarreerData()
+        pro_carreers.create()
 
         cls.frontend_dev = pro_carreers.frontend_dev
         cls.fullstack_dev = pro_carreers.fullstack_dev

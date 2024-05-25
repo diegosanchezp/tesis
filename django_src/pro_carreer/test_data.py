@@ -1,55 +1,14 @@
 from dataclasses import dataclass
 from django.db.models import Q
+from wagtail.rich_text import RichText
 
-def create_pro_carreers():
-    """
-    Django App registry must have been loaded before calling this function
-    """
+from pathlib import Path
 
-    # Importing here will suck for performance but it's the only way to have type hints
-    # and avoid the app registry not loaded error
-    # see https://copyprogramming.com/howto/should-i-import-inside-a-function-python
-    # section "Import at module level or at function level?"
-
-    from .models import ProCarreerIndex, ProfessionalCarreer
-
-    @dataclass
-    class ModelList:
-        """
-        Just a list of models instances to be created
-        """
-        pro_career_index: ProCarreerIndex
-        frontend_dev: ProfessionalCarreer
-        fullstack_dev: ProfessionalCarreer
-
-    # m_ stands for model class
-
-    pro_career_index = ProCarreerIndex.objects.get(slug="profesiones")
-
-    frontend_dev = pro_career_index.add_child(
-        instance=ProfessionalCarreer(
-            title="Frontend Developer",
-            short_description="Makes WEB GUI stuff",
-        )
-    )
-
-    fullstack_dev  = pro_career_index.add_child(
-        instance=ProfessionalCarreer(
-            title="Full stack Developer",
-            short_description="Makes WEB GUIs & codes backend services",
-        )
-    )
-
-    model_list = ModelList(
-        pro_career_index=pro_career_index,
-        frontend_dev=frontend_dev,
-        fullstack_dev=fullstack_dev,
-    )
-
-    return model_list
+from django_src.test_utils import parse_test_data_args
+from shscripts.backup import setup
+# from django_src.settings.wagtail_pages import pro_carreer_index_path
 
 def delete_pro_carreers():
-
     from .models import ProfessionalCarreer
 
     frontend_dev = ProfessionalCarreer.objects.get(title="Frontend Developer")
@@ -147,3 +106,98 @@ def delete_pro_interes_themes():
     html_theme.pro_carreers_match.filter(del_query).delete()
     css_theme.pro_carreers_match.filter(del_query).delete()
 
+class ProCarreerData:
+    """
+    Life cyle (the order you should call the methods)
+    1. create
+    2. get
+    3. delete
+    """
+
+    def __init__(self):
+        # Importing here will suck for performance but it's the only way to have type hints
+        # and avoid the app registry not loaded error
+        # see https://copyprogramming.com/howto/should-i-import-inside-a-function-python
+        # section "Import at module level or at function level?"
+
+        from .models import ProCarreerIndex, ProfessionalCarreer
+
+
+        self.ProCarreerIndex = ProCarreerIndex
+        self.ProfessionalCarreer = ProfessionalCarreer
+
+        # Create by migration 0002_setup_professions
+        self.pro_career_index = self.ProCarreerIndex.objects.get(slug="profesiones")
+
+        self.frontend_dev = ProfessionalCarreer(
+            title="Frontend Developer",
+            short_description="Makes WEB GUI stuff",
+            slug="frontend-developer",
+            content=[
+                (
+                    "paragraph",
+                    RichText(
+                        # fmt: off
+                        """
+                        <p>
+                        Un desarrollador web frontend es un profesional especializado en la creación y diseño de la parte visual y la interacción de un sitio web. Sus responsabilidades incluyen la escritura de código en lenguajes como HTML, CSS y JavaScript para desarrollar la interfaz de usuario y la experiencia del usuario en un sitio web. Además, los desarrolladores frontend suelen colaborar estrechamente con diseñadores web y desarrolladores backend para garantizar la funcionalidad y la estética del sitio. Es fundamental que un desarrollador web frontend esté al tanto de las últimas tendencias y tecnologías en el campo para crear sitios web atractivos, receptivos y funcionales
+                        </p>
+                        """
+                        # fmt: on
+                    )
+                )
+            ]
+        )
+
+        self.fullstack_dev  = ProfessionalCarreer(
+            title="Full stack Developer",
+            short_description="Makes WEB GUIs & codes backend services",
+            slug="full-stack-developer",
+            content=[
+                (
+                    "paragraph",
+                    RichText(
+                        # fmt: off
+                        """
+                        <p>Un desarrollador full stack es un profesional que tiene conocimientos y habilidades en ambos lados del desarrollo web: frontend y backend. Sus principales responsabilidades incluyen:</p>
+                        <h2>Desarrollo Frontend</h2>
+                        <ul>
+                            <li>Escribir código HTML, CSS y JavaScript para crear la interfaz de usuario y la experiencia del usuario.</li>
+                        <li>Implementar diseños receptivos y accesibles.</li><li>Integrar APIs y servicios backend en la aplicación frontend.</li>
+                        </ul>
+                        <h2>Desarrollo Backend</h2>
+                            <ul><li >Diseñar y desarrollar APIs y servicios backend utilizando lenguajes como Python, Ruby, Java, PHP, etc.</li>
+                            <li >Implementar lógica de negocio y reglas de validación.</li><li>Interactuar con bases de datos para almacenar y recuperar datos.</li>
+                        </ul>
+                        """
+                        # fmt: on
+                    )
+                )
+            ]
+        )
+
+    def create(self):
+        self.fullstack_dev = self.pro_career_index.add_child(instance=self.fullstack_dev)
+        self.frontend_dev = self.pro_career_index.add_child(instance=self.frontend_dev)
+
+    def get(self):
+        self.frontend_dev = self.ProfessionalCarreer.objects.get(slug=self.frontend_dev.slug)
+        self.fullstack_dev = self.ProfessionalCarreer.objects.get(slug=self.fullstack_dev.slug)
+
+    def delete(self):
+        self.get()
+        self.fullstack_dev.delete()
+        self.frontend_dev.delete()
+
+# python -m django_src.pro_carreer.test_data --action create
+# python -m django_src.pro_carreer.test_data --action delete
+
+if __name__ == "__main__":
+    setup(Path("."))
+    args = parse_test_data_args()
+    pro_carreer_data = ProCarreerData()
+
+    if args.action == "create":
+        pro_carreer_data.create()
+    elif args.action == "delete":
+        pro_carreer_data.delete()
