@@ -8,6 +8,7 @@ from django.urls import include, path
 from django.urls.base import reverse_lazy
 from django.views import defaults as default_views
 from django.views.static import serve
+from django.conf.urls.i18n import i18n_patterns
 from django_src.apps.main.views import forms_demo_view
 from django_src.apps.main.views import PrivateMediaView
 # Wagtail
@@ -16,7 +17,7 @@ from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 from django_src.apps.main.views import ComponentsDemoView, color_demo_view
 from django_src.apps.main.urls import urlpatterns as main_urls
-urlpatterns = [
+urlpatterns = i18n_patterns(
 
     #path('i18n/', include('django.conf.urls.i18n')),
     # Django Admin, use {% url 'admin:index' %}
@@ -27,7 +28,8 @@ urlpatterns = [
     path('mentor/', include('django_src.mentor.urls', namespace="mentor")),
     path('student/', include('django_src.student.urls', namespace="student")),
     path('logout/', auth_views.LogoutView.as_view(next_page=reverse_lazy("wagtailadmin_home")), name='logout'),
-]
+    prefix_default_language=False,
+)
 urlpatterns += main_urls
 if settings.DEBUG:
 
@@ -84,7 +86,7 @@ if settings.DEBUG:
 
         urlpatterns = [path("__debug__/", include(debug_toolbar.urls))] + urlpatterns
 
-urlpatterns += [
+urlpatterns += i18n_patterns(
 
     # Wagtail
     path('cms/', include(wagtailadmin_urls)),
@@ -95,4 +97,5 @@ urlpatterns += [
     # Landing page Wagtail
     # Placing at the end ensures that it doesn’t override more specific URL patterns.
     path('', include(wagtail_urls)),
-]
+    prefix_default_language=False,
+)
