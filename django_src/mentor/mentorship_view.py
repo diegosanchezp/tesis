@@ -310,7 +310,7 @@ def change_mentorship_status(request, mentorship_req_pk: int):
                     context={
                         "mentorship_request": mentorship_req,
                         # If the request came from the mentorship landing page, show the mentorship name in the table
-                        "with_mentorship_name": reverse("mentor:landing") in request.META.get("HTTP_REFERER"),
+                        "with_mentorship_name": reverse("mentor:landing") in request.META.get("HTTP_REFERER", ""),
                     },
                     template_name="mentor/mentorship/request_row.html"
                 )

@@ -23,8 +23,7 @@ from django_src.apps.register.upload_data import (
     create_carreers,
 )
 from django_src.pro_carreer.test_data import (
-    create_pro_carreers,
-    delete_pro_carreers,
+    ProCarreerData,
     create_pro_interes_themes,
     delete_pro_interes_themes,
 )
@@ -212,7 +211,8 @@ def upload_dev_data():
     mentorship_data = MentorshipData(mentor_data, student_data)
 
     student_data.create()
-    pro_career_list = create_pro_carreers()
+    pro_career_list = ProCarreerData()
+    pro_career_list.create()
     mentor_data.create(
         computacion=carreer_list.computacion,
         full_stack_dev=pro_career_list.fullstack_dev,

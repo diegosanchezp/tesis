@@ -95,6 +95,11 @@ class MentorshipData:
         """
         self.mentor_data.get()
         self.mentorship1 = self.Mentorship.objects.get(name=self.mentorship1.name, mentor__user__username=self.mentorship1.mentor.user.get_username())
+        self.m1_task1 = self.MentorshipTask.objects.get(name=self.m1_task1.name, mentorship=self.mentorship1)
+        self.m1_task2 = self.MentorshipTask.objects.get(name=self.m1_task2.name, mentorship=self.mentorship1)
+        self.m1_task3 = self.MentorshipTask.objects.get(name=self.m1_task3.name, mentorship=self.mentorship1)
+        self.student_request = self.MentorshipRequest.objects.get(student=self.student_data.student, mentorship=self.mentorship1)
+        self.student_request2 = self.MentorshipRequest.objects.get(student=self.student_data.unapproved_student, mentorship=self.mentorship1)
 
     def delete(self):
         self.get()

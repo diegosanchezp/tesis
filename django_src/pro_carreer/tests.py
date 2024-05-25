@@ -23,7 +23,7 @@ from django_src.apps.register.models import (
 from django_src.pro_carreer import student_pro_carreer_view
 
 from .test_data import (
-    create_pro_carreers, create_pro_interes_themes
+    ProCarreerData, create_pro_interes_themes
 )
 from .forms import ThemeSpecRelateForm, RelateActions, DeleteThemeSpecRelateForm
 
@@ -59,7 +59,8 @@ class TestStudentProCarreerView(TestCaseWithData):
         cls.computacion.carrerspecialization_set.add(
             cls.ati
         )
-        pro_carreers = create_pro_carreers()
+        pro_carreers = ProCarreerData()
+        pro_carreers.create()
 
         cls.frontend_dev = pro_carreers.frontend_dev
         cls.fullstack_dev = pro_carreers.fullstack_dev
@@ -186,7 +187,8 @@ class TestSpecThemeMatchView(TestCaseWithData):
     def setUpTestData(cls):
         super().setUpTestData()
 
-        pro_carreers = create_pro_carreers()
+        pro_carreers = ProCarreerData()
+        pro_carreers.create()
 
         cls.frontend_dev = pro_carreers.frontend_dev
         cls.fullstack_dev = pro_carreers.fullstack_dev

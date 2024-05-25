@@ -52,7 +52,7 @@ def is_approved(func):
 def loggedin_and_approved(view_func):
     @functools.wraps(view_func)
     def inner(request, *args, **kwargs):
-        return is_approved(login_required(view_func))(request, *args, **kwargs)
+        return login_required(is_approved(view_func))(request, *args, **kwargs)
     return inner
 
 def get_mentor(username: str, prefetch_related: str|None = None):

@@ -6,20 +6,22 @@ from django.template.loader import render_to_string
 from os import environ
 
 from .test_data import (
-    create_pro_carreers
+    ProCarreerData
 )
 
 from .forms import ProCareerExpForm
 from . import experience_view
 from django_src.apps.register.test_data.mentors import MentorData
 
+# ./manage.py test --keepdb django_src.pro_carreer.test_experience_view.TestExperienceView
 class TestExperienceView(TestCaseWithData):
 
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
 
-        pro_carreers = create_pro_carreers()
+        pro_carreers = ProCarreerData()
+        pro_carreers.create()
 
         cls.frontend_dev = pro_carreers.frontend_dev
         cls.fullstack_dev = pro_carreers.fullstack_dev

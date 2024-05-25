@@ -108,7 +108,7 @@ def initial_data(apps: Apps, schema_editor: BaseDatabaseSchemaEditor):
     add_page_permission = Permission.objects.get(codename="add_page")
 
     group_permission = GroupPagePermission.objects.create(
-        group=mentor_group, page=blog_index, permission_type="add",
+        group=mentor_group, page=blog_index,
         permission=add_page_permission,
     )
 

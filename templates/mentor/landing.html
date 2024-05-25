@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static wagtailimages_tags django_vite slippers %}
+{% load wagtailimages_tags django_vite slippers pro_careers%}
 
 {% block extrascripts %}
     {% vite_asset 'js/htmx.ts' %}
@@ -22,7 +22,7 @@ Página principal - Mentor
      >
         <div class="grow flex gap-x-4 justify-center items-center">
             <p>¡Añade tu experiencia personal en las carreras profesionales que haz ejercido!</p>
-            <a href="">
+            <a href="{% pro_carrer_index_link %}">
                 {% #button icon_right="bi bi-arrow-right"%}
                     Añadir
                 {% /button %}
@@ -49,7 +49,7 @@ Página principal - Mentor
                 <h2 class="text-2xl font-bold mb-4">Otros enlaces</h2>
                 <ul class="">
                     <li>
-                        <a href="">Añadir experiencia a carrera profesional</a>
+                        <a href="{% pro_carrer_index_link %}" class="hover:underline decoration-4 underline-offset-8 decoration-ucv-yellow-dark">Añadir experiencia a carrera profesional</a>
                     </li>
                 </ul>
             </section>

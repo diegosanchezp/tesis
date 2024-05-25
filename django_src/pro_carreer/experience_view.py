@@ -7,6 +7,7 @@ from django.urls.base import reverse_lazy
 from .models import ProfessionalCarreer, ProCarreerExperience
 from .forms import ProCareerExpForm
 from django.shortcuts import get_object_or_404
+from django_src.mentor.utils import loggedin_and_approved
 
 from django_src.apps.register.models import Mentor
 from django_htmx.http import trigger_client_event
@@ -71,7 +72,7 @@ def get_experiences(request, page):
     # If the view is being visited by a mentor user
     mentor_experience = None
     mentor_exp_exists = False
-    is_mentor = Mentor.objects.filter(user=request.user).exists()
+    is_mentor = request.user.is_mentor
 
     if is_mentor:
         mentor_experience = experiences.filter(mentor__user=request.user)
@@ -203,6 +204,7 @@ def delete_exp(request, pk_pro_career_exp: int):
 
     return HttpResponse(status=200)
 
+@loggedin_and_approved
 def view(request, page: ProfessionalCarreer):
     """
     Experience view for a professional career
@@ -212,11 +214,16 @@ def view(request, page: ProfessionalCarreer):
 
     # Todo prefetch_related career_experiences and paginate
 
+    href = None
+    if request.user.is_student:
+        href = reverse_lazy("pro_carreer:student_carreer_match")
+    else:
+        href = page.get_parent().get_url()
     context = {
         "page": page, # Wagtail page object
         "distribution": get_distribution(page),
         "breadcrumbs": [
-            {"name": "Carreras profesionales", "href": reverse_lazy("pro_carreer:student_carreer_match")},
+            {"name": "Carreras profesionales", "href": href},
             {"name": page.title },
         ],
     }

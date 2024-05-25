@@ -6,15 +6,12 @@ from shscripts.backup import (
 
 from .test_data.mentors import MentorData
 from .test_data.students import StudentData
-from django_src.pro_carreer.test_data import create_pro_carreers
 
 from django.apps import apps
-from django.apps.registry import Apps
-from django.contrib.auth import get_user_model
 from django.db import transaction
 
 from dataclasses import dataclass
-
+from django_src.pro_carreer.test_data import ProCarreerData
 
 app_label = "register"
 # python -m django_src.apps.register.upload_data
@@ -175,8 +172,9 @@ def upload_data():
     student_data = StudentData()
     student_data.create()
 
+    pro_career_list = ProCarreerData()
+    pro_career_list.create()
     mentor_data = MentorData()
-    pro_career_list = create_pro_carreers()
 
     mentor_data.create(
         computacion=carreer_list.computacion,

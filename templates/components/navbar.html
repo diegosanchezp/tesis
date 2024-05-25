@@ -3,7 +3,7 @@
   - request
 
 {% endcomment %}
-{% load slippers %}
+{% load slippers wagtailcore_tags pro_careers %}
 
 <nav class="flex px-2 py-2 bg-ucv-blue justify-between items-center">
     <i class="bi bi-list text-white text-3xl self-center mr-6"></i>
@@ -27,7 +27,7 @@
         {# Maybe we want this for the student user also ? #}
         {% if request.user.is_mentor %}
             <li>
-                <a class="text-white" href="">Carreras profesionales</a>
+                <a class="text-white" href="{% pro_carrer_index_link %}">Carreras profesionales</a>
             </li>
         {% endif %}
     </ul>
