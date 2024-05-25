@@ -1,7 +1,7 @@
 from pathlib import Path
 import os
 import environ
-
+from django.utils.translation import gettext_lazy as _
 from django.core.management.utils import get_random_secret_key
 
 # Set env var defaults for the builds
@@ -73,8 +73,9 @@ INSTALLED_APPS = [
     'wagtail.images',
     'wagtail.search',
     'wagtail.admin',
+    # https://docs.wagtail.org/en/stable/advanced_topics/i18n.html#enabling-the-locale-management-ui-optional
+    'wagtail.locales',
     'wagtail',
-
     'modelcluster',
     'taggit',
     # wagtail storages
@@ -96,6 +97,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Translation
+    "django.middleware.locale.LocaleMiddleware",
     # wagtail
     'wagtail.contrib.redirects.middleware.RedirectMiddleware',
     # django-htmx
@@ -158,16 +161,23 @@ AUTHENTICATION_BACKENDS = [
 
 ADMIN_USERNAME=env("ADMIN_USERNAME")
 
-# Internationalization
+# Enable internationalization in both Django and Wagtail
 # https://docs.djangoproject.com/en/stable/topics/i18n/
-
-LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
+WAGTAIL_I18N_ENABLED = True
+USE_L10N = True
+LANGUAGE_CODE = "es" # set default language as venezuelan spanish
 USE_TZ = True
+# Add supported languages (including English for potential fallback):
+WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
+    ('es', 'Español'),
+    ('en', 'English'),
+]
+# where message files will reside:
+LOCALE_PATHS = [
+    BASE_DIR / 'locale/',
+]
 
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
@@ -203,21 +213,6 @@ STATICFILES_DIRS = [
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")  # noqa F405
 # URL to fetch the saved user uploaded files
 MEDIA_URL = "/media/"
-
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [str(BASE_DIR / "templates")],
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
-]
 
 REST_FRAMEWORK = {
     # YOUR SETTINGS
