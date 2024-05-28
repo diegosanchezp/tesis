@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 
 from shscripts.backup import setup
+from django_src.settings.wagtail_pages import EMPRESAS_GROUP_NAME
 from django_src.test_utils import parse_test_data_args
 
 
@@ -18,10 +19,13 @@ class BusinessData:
 
     def __init__(self):
         from django_src.business.models import Business
+        from django.contrib.auth.models import Group
 
         self.User = get_user_model()
         self.Business = Business
+        self.Group = Group
 
+        self.business_group = self.Group.objects.get(name=EMPRESAS_GROUP_NAME)
         self.businees1_user = self.User(
             username="business1",
             first_name="Aviatto",
@@ -42,6 +46,7 @@ class BusinessData:
         try:
             user.set_password(os.environ["ADMIN_PASSWORD"])
             user.save()
+            user.groups.add(self.business_group)
         except IntegrityError:
             self.delete_user(user)
             user.save()
