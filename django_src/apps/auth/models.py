@@ -1,8 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django_src.apps.register.models import Mentor, Student
+from django_src.business.models import Business
+
 # If you’re starting a new project, it’s highly recommended to set up a custom user model, even if the default User model is sufficient for you
 # https://docs.djangoproject.com/en/stable/topics/auth/customizing/#using-a-custom-user-model-when-starting-a-project
+
 
 class User(AbstractUser):
     profile_pic = models.ImageField(
@@ -22,3 +25,9 @@ class User(AbstractUser):
         student_queryset = Student.objects.filter(user=self)
         is_student = student_queryset.exists()
         return is_student
+
+    @property
+    def is_business(self):
+        business_queryset = Business.objects.filter(user=self)
+        is_business = business_queryset.exists()
+        return is_business

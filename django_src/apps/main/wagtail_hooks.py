@@ -6,6 +6,8 @@ from wagtail.images.models import Image
 from wagtail.documents.models import Document
 
 from django_src.apps.register.models import Mentor
+from django_src.business.models import Business
+
 
 @hooks.register("construct_explorer_page_queryset")
 def filter_user_pages(parent_page: Page, pages, request: HttpRequest):
@@ -17,6 +19,7 @@ def filter_user_pages(parent_page: Page, pages, request: HttpRequest):
         return pages
 
     return pages.filter(owner=request.user)
+
 
 @hooks.register("after_create_page")
 @hooks.register("after_edit_page")
@@ -53,13 +56,16 @@ def list_my_images(images, request):
 
     return Image.objects.filter(uploaded_by_user=request.user)
 
-@hooks.register('construct_page_chooser_queryset')
+
+@hooks.register("construct_page_chooser_queryset")
 def show_my_pages_only(pages, request):
     """
-    Only show own pages if I'm a mentor
+    Only show own pages if I'm a mentor or if I'm a business
     """
 
-    if not Mentor.objects.filter(user=request.user).exists():
+    if (
+        not Mentor.objects.filter(user=request.user).exists()
+        or not Business.objects.filter(user=request.user).exists()
+    ):
         return pages
     return pages.filter(owner=request.user)
-

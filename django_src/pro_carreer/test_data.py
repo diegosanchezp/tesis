@@ -6,15 +6,9 @@ from pathlib import Path
 
 from django_src.test_utils import parse_test_data_args
 from shscripts.backup import setup
+
 # from django_src.settings.wagtail_pages import pro_carreer_index_path
 
-def delete_pro_carreers():
-    from .models import ProfessionalCarreer
-
-    frontend_dev = ProfessionalCarreer.objects.get(title="Frontend Developer")
-    fullstack_dev = ProfessionalCarreer.objects.get(title="Full stack Developer")
-    frontend_dev.delete()
-    fullstack_dev.delete()
 
 def create_pro_interes_themes():
     """
@@ -23,7 +17,11 @@ def create_pro_interes_themes():
     """
 
     from .models import ProfessionalCarreer
-    from django_src.apps.register.models import InterestTheme, ThemeSpecProCarreer, CarrerSpecialization
+    from django_src.apps.register.models import (
+        InterestTheme,
+        ThemeSpecProCarreer,
+        CarrerSpecialization,
+    )
 
     ati = CarrerSpecialization.objects.get(name="Aplicaciones Tecnología Internet")
 
@@ -40,29 +38,32 @@ def create_pro_interes_themes():
 
     # Relate html to frontend development
     html_theme.pro_carreers_match.create(
-        weight="10", pro_career=frontend_dev,
+        weight="10",
+        pro_career=frontend_dev,
     )
 
     # Relate css to frontend development
     css_frontend_dev = css_theme.pro_carreers_match.create(
-        weight="10", pro_career=frontend_dev,
+        weight="10",
+        pro_career=frontend_dev,
     )
 
     # Relate css to full development
     css_fullstack = css_theme.pro_carreers_match.create(
-        weight="8", pro_career=fullstack_dev,
+        weight="8",
+        pro_career=fullstack_dev,
     )
-
 
     # Put weight 10 (high correlation) to frontend_dev and fullstack_dev
     ati_frontend_dev = ati.pro_carreers_match.create(
-        weight="10", pro_career=frontend_dev,
+        weight="10",
+        pro_career=frontend_dev,
         content_object=ati,
     )
 
-
     ati_fullstack_dev = ati.pro_carreers_match.create(
-        weight="10", pro_career=fullstack_dev,
+        weight="10",
+        pro_career=fullstack_dev,
         content_object=ati,
     )
 
@@ -83,6 +84,7 @@ def create_pro_interes_themes():
         ati_frontend_dev=ati_frontend_dev,
         ati_fullstack_dev=ati_fullstack_dev,
     )
+
 
 def delete_pro_interes_themes():
     """
@@ -106,6 +108,7 @@ def delete_pro_interes_themes():
     html_theme.pro_carreers_match.filter(del_query).delete()
     css_theme.pro_carreers_match.filter(del_query).delete()
 
+
 class ProCarreerData:
     """
     Life cyle (the order you should call the methods)
@@ -121,7 +124,6 @@ class ProCarreerData:
         # section "Import at module level or at function level?"
 
         from .models import ProCarreerIndex, ProfessionalCarreer
-
 
         self.ProCarreerIndex = ProCarreerIndex
         self.ProfessionalCarreer = ProfessionalCarreer
@@ -144,12 +146,12 @@ class ProCarreerData:
                         </p>
                         """
                         # fmt: on
-                    )
+                    ),
                 )
-            ]
+            ],
         )
 
-        self.fullstack_dev  = ProfessionalCarreer(
+        self.fullstack_dev = ProfessionalCarreer(
             title="Full stack Developer",
             short_description="Makes WEB GUIs & codes backend services",
             slug="full-stack-developer",
@@ -171,23 +173,30 @@ class ProCarreerData:
                         </ul>
                         """
                         # fmt: on
-                    )
+                    ),
                 )
-            ]
+            ],
         )
 
     def create(self):
-        self.fullstack_dev = self.pro_career_index.add_child(instance=self.fullstack_dev)
+        self.fullstack_dev = self.pro_career_index.add_child(
+            instance=self.fullstack_dev
+        )
         self.frontend_dev = self.pro_career_index.add_child(instance=self.frontend_dev)
 
     def get(self):
-        self.frontend_dev = self.ProfessionalCarreer.objects.get(slug=self.frontend_dev.slug)
-        self.fullstack_dev = self.ProfessionalCarreer.objects.get(slug=self.fullstack_dev.slug)
+        self.frontend_dev = self.ProfessionalCarreer.objects.get(
+            slug=self.frontend_dev.slug
+        )
+        self.fullstack_dev = self.ProfessionalCarreer.objects.get(
+            slug=self.fullstack_dev.slug
+        )
 
     def delete(self):
         self.get()
         self.fullstack_dev.delete()
         self.frontend_dev.delete()
+
 
 # python -m django_src.pro_carreer.test_data --action create
 # python -m django_src.pro_carreer.test_data --action delete
