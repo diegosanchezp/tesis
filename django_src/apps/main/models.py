@@ -19,6 +19,8 @@ from wagtail.admin.panels import (
 from django_src.apps.register.approvals_view import get_page_number
 
 MAX_TITLE_LENGHT = 100
+
+
 # Create your models here.
 class HeroSection(Orderable):
     page = ParentalKey(
@@ -103,8 +105,13 @@ class HomePage(Page):
         ),
     ]
 
-    # Block the creation of child pages
-    subpage_types = ["BlogIndex", "pro_carreer.ProCarreerIndex", "NewsIndex"]
+    # Only allow this child pages
+    subpage_types = [
+        "BlogIndex",
+        "pro_carreer.ProCarreerIndex",
+        "NewsIndex",
+        "business.JobOfferIndex",
+    ]
 
 
 class BlogIndex(Page):
@@ -185,6 +192,7 @@ class NewsIndex(Page):
     """
     Acts like a folder list all Pages of type News
     """
+
     template = "main/news/news_index.html"
 
     # Only allow NewsPage as child pages
@@ -196,7 +204,8 @@ class NewsIndex(Page):
 
         super().__init__(*args, **kwargs)
         self.get_paginated_events = get_wagtailpage_paginated(
-            PageModel=NewsPage, per_page=20,
+            PageModel=NewsPage,
+            per_page=20,
         )
 
     def serve(self, request):
@@ -228,6 +237,7 @@ class NewsIndex(Page):
             )
         )
         return context
+
 
 class NewsPage(Page):
     """
@@ -311,6 +321,7 @@ class NewsPage(Page):
             {"name": truncatechars(self.title, MAX_TITLE_LENGHT)},
         ]
         return context
+
 
 class EventPage(Page):
     """

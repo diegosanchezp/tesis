@@ -2,7 +2,6 @@
 Functions for Uploading or Deleting all of the testing data
 """
 
-from dataclasses import dataclass
 from pathlib import Path
 import argparse
 from django_src.apps.register.test_data.mentors import MentorData
@@ -27,6 +26,10 @@ from django_src.pro_carreer.test_data import (
     create_pro_interes_themes,
     delete_pro_interes_themes,
 )
+from django_src.business.test_data.joboffer import JobsOfferData
+from django_src.business.test_data.businesses import BusinessData
+from django_src.apps.register.test_data.interest_themes import InterestThemeData
+
 from shscripts.backup import setup_django
 
 # python -m django_src.apps.main.dev_data upload
@@ -202,14 +205,21 @@ def reset_dev_pages(apps):
 
 
 def upload_dev_data():
+    interest_themes_data = InterestThemeData()
 
-    carreer_list = create_carreers()
+    carreer_list = create_carreers(interest_themes_data)
 
     student_data = StudentData()
     mentor_data = MentorData()
     mentor_blog_data = MentorBlogData(mentor_data)
     mentorship_data = MentorshipData(mentor_data, student_data)
+    business_data = BusinessData()
+    job_offer_data = JobsOfferData(
+        business_data=business_data, interest_themes_data=interest_themes_data
+    )
 
+    interest_themes_data.create()
+    interest_themes_data.get()
     student_data.create()
     pro_career_list = ProCarreerData()
     pro_career_list.create()
@@ -219,6 +229,8 @@ def upload_dev_data():
     )
     mentorship_data.create()
     mentor_blog_data.create()
+    business_data.create()
+    job_offer_data.create()
     dev_pages(apps)
     create_pro_interes_themes()
 

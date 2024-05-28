@@ -1,8 +1,6 @@
 from pathlib import Path
 
-from shscripts.backup import (
-    setup_django
-)
+from shscripts.backup import setup_django
 
 from .test_data.mentors import MentorData
 from .test_data.students import StudentData
@@ -12,35 +10,21 @@ from django.db import transaction
 
 from dataclasses import dataclass
 from django_src.pro_carreer.test_data import ProCarreerData
+from django_src.apps.register.test_data.interest_themes import InterestThemeData
 
 app_label = "register"
 # python -m django_src.apps.register.upload_data
 
-def create_interest_themes(carreer):
+
+def create_interest_themes(carreer, interest_themes_data: InterestThemeData):
     """
     Create interest themes for a carrer
     """
 
-    InterestTheme = apps.get_model(app_label, "InterestTheme")
+    carreer.interest_themes.add(*interest_themes_data.get_all_interests())
 
-    interests = InterestTheme.objects.bulk_create(
-        [
-            InterestTheme(name="Matemáticas"),
-            InterestTheme(name="Programación"),
-            InterestTheme(name="HTML"),
-            InterestTheme(name="Javascript"),
-            InterestTheme(name="CSS"),
-            InterestTheme(name="C++"),
-            InterestTheme(name="UI/UX"),
-            InterestTheme(name="Trabajo en equipo"),
-            InterestTheme(name="Gestion de Recursos"),
-            InterestTheme(name="BPM"),
-        ]
-    )
 
-    carreer.interest_themes.add(*interests)
-
-def create_carreers():
+def create_carreers(interest_themes_data: InterestThemeData):
     with transaction.atomic():
         Faculty = apps.get_model(app_label, "Faculty")
 
@@ -66,7 +50,7 @@ def create_carreers():
         biologia = ciencias.carreers.create(name="Biología")
         computacion = ciencias.carreers.create(name="Computación")
 
-        computacion_specialization =[
+        computacion_specialization = [
             "Aplicaciones Tecnología Internet",
             "Inteligencia artificial",
             "Base de datos",
@@ -77,7 +61,7 @@ def create_carreers():
             "Calculo Científico",
             "Modelos matemáticos",
             "Tecnologías educativas",
-            "Tecnologías en Comunicaciones y Redes de Computadoras"
+            "Tecnologías en Comunicaciones y Redes de Computadoras",
         ]
 
         for carrerspecialization in computacion_specialization:
@@ -85,7 +69,7 @@ def create_carreers():
                 name=carrerspecialization,
             )
 
-        create_interest_themes(computacion)
+        create_interest_themes(computacion, interest_themes_data)
 
         ciencias.carreers.create(name="Física")
 
@@ -116,7 +100,7 @@ def create_carreers():
             name="Humanidades y Educación",
         )
 
-        humanidades.carreers.create(name="Artes" )
+        humanidades.carreers.create(name="Artes")
         humanidades.carreers.create(name="Bibliotecología y Archivología")
         humanidades.carreers.create(name="Comunicación Social")
         humanidades.carreers.create(name="Educación")
@@ -163,11 +147,16 @@ def create_carreers():
             odontologia=odontologia,
         )
 
+
 def upload_data():
     """
     Put here all of the functions that create carreers
     """
-    carreer_list = create_carreers()
+    interest_themes_data = InterestThemeData()
+    interest_themes_data.create()
+    interest_themes_data.get()
+
+    carreer_list = create_carreers(interest_themes_data)
 
     student_data = StudentData()
     student_data.create()
@@ -188,6 +177,7 @@ def main():
     setup_django(BASE_DIR)
 
     upload_data()
+
 
 if __name__ == "__main__":
     main()

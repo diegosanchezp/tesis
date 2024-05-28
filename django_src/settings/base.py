@@ -6,13 +6,13 @@ from django.core.management.utils import get_random_secret_key
 
 # Set env var defaults for the builds
 env = environ.Env(
-    SECRET_KEY=(str,get_random_secret_key()),
+    SECRET_KEY=(str, get_random_secret_key()),
     GOOGLE_CLIENT_ID=(str, ""),
-    GOOGLE_SECRET=(str,""),
-    AWS_S3_REGION_NAME=(str,""),
-    AWS_S3_URL_PROTOCOL=(str,"https:"),
-    AWS_STORAGE_BUCKET_NAME=(str,"false_bucket_name"),
-    ADMIN_USERNAME=(str,""),
+    GOOGLE_SECRET=(str, ""),
+    AWS_S3_REGION_NAME=(str, ""),
+    AWS_S3_URL_PROTOCOL=(str, "https:"),
+    AWS_STORAGE_BUCKET_NAME=(str, "false_bucket_name"),
+    ADMIN_USERNAME=(str, ""),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Application definition
-ADMIN_URL="admin/"
+ADMIN_URL = "admin/"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -43,12 +43,13 @@ INSTALLED_APPS = [
     "django_src.pro_carreer.apps.ProCarreerConfig",
     "django_src.mentor.apps.MentorConfig",
     "django_src.student.apps.StudentConfig",
+    "django_src.business.apps.BusinessConfig",
     # ---- Third party ----
     # API REST
     "rest_framework",
     "drf_spectacular",
     # JS
-    'django_vite',
+    "django_vite",
     # CSS
     # Forms
     "widget_tweaks",
@@ -57,27 +58,27 @@ INSTALLED_APPS = [
     # CORS
     "corsheaders",
     # Alluth
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
     # Alluth providers
-    'allauth.socialaccount.providers.google',
+    "allauth.socialaccount.providers.google",
     # Wagtail
-    'wagtail.contrib.forms',
-    'wagtail.contrib.redirects',
-    'wagtail.embeds',
-    'wagtail.sites',
-    'wagtail.users',
-    'wagtail.snippets',
-    'wagtail.documents',
-    'wagtail.images',
-    'wagtail.search',
-    'wagtail.admin',
+    "wagtail.contrib.forms",
+    "wagtail.contrib.redirects",
+    "wagtail.embeds",
+    "wagtail.sites",
+    "wagtail.users",
+    "wagtail.snippets",
+    "wagtail.documents",
+    "wagtail.images",
+    "wagtail.search",
+    "wagtail.admin",
     # https://docs.wagtail.org/en/stable/advanced_topics/i18n.html#enabling-the-locale-management-ui-optional
-    'wagtail.locales',
-    'wagtail',
-    'modelcluster',
-    'taggit',
+    "wagtail.locales",
+    "wagtail",
+    "modelcluster",
+    "taggit",
     # wagtail storages
     "wagtail_storages.apps.WagtailStoragesConfig",
     # UI component framework for Django
@@ -100,7 +101,7 @@ MIDDLEWARE = [
     # Translation
     "django.middleware.locale.LocaleMiddleware",
     # wagtail
-    'wagtail.contrib.redirects.middleware.RedirectMiddleware',
+    "wagtail.contrib.redirects.middleware.RedirectMiddleware",
     # django-htmx
     "django_htmx.middleware.HtmxMiddleware",
 ]
@@ -149,17 +150,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL="customauth.User"
+AUTH_USER_MODEL = "customauth.User"
 
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`
-    'django.contrib.auth.backends.ModelBackend',
-
+    "django.contrib.auth.backends.ModelBackend",
     # `allauth` specific authentication methods, such as login by e-mail
-    'allauth.account.auth_backends.AuthenticationBackend',
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-ADMIN_USERNAME=env("ADMIN_USERNAME")
+ADMIN_USERNAME = env("ADMIN_USERNAME")
 
 # Enable internationalization in both Django and Wagtail
 # https://docs.djangoproject.com/en/stable/topics/i18n/
@@ -167,16 +167,16 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 WAGTAIL_I18N_ENABLED = True
 USE_L10N = True
-LANGUAGE_CODE = "es" # set default language as venezuelan spanish
+LANGUAGE_CODE = "es"  # set default language as venezuelan spanish
 USE_TZ = True
 # Add supported languages (including English for potential fallback):
 WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
-    ('es', 'Español'),
-    ('en', 'English'),
+    ("es", "Español"),
+    ("en", "English"),
 ]
 # where message files will reside:
 LOCALE_PATHS = [
-    BASE_DIR / 'locale/',
+    BASE_DIR / "locale/",
 ]
 
 STATICFILES_FINDERS = [
@@ -204,7 +204,7 @@ STATICFILES_DIRS = [
     str(BASE_DIR / STATIC_DIR_NAME / "img"),
     # Include DJANGO_VITE_ASSETS_PATH into STATICFILES_DIRS to be copied inside
     # when run command python manage.py collectstatic
-    DJANGO_VITE_ASSETS_PATH
+    DJANGO_VITE_ASSETS_PATH,
 ]  # noqa F405
 
 # Media Files
@@ -228,26 +228,26 @@ SPECTACULAR_SETTINGS = {
 
 
 SOCIALACCOUNT_PROVIDERS = {
-    'google': {
+    "google": {
         # For each OAuth based provider, either add a ``SocialApp``
         # (``socialaccount`` app) containing the required client
         # credentials, or list them here:
-        'APP': {
-            'client_id': env('GOOGLE_CLIENT_ID'),
-            'secret': env('GOOGLE_SECRET'),
-            'key': ''
+        "APP": {
+            "client_id": env("GOOGLE_CLIENT_ID"),
+            "secret": env("GOOGLE_SECRET"),
+            "key": "",
         },
-        'SCOPE': [
-            'profile',
-            'email',
+        "SCOPE": [
+            "profile",
+            "email",
         ],
-        'AUTH_PARAMS': {
-            'access_type': 'offline',
-        }
+        "AUTH_PARAMS": {
+            "access_type": "offline",
+        },
     }
 }
 
-WAGTAIL_SITE_NAME = 'Red Egresados UCV'
+WAGTAIL_SITE_NAME = "Red Egresados UCV"
 
 # --- Security settings --- #
 CORS_ALLOW_ALL_ORIGINS = False
