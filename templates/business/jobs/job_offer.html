@@ -75,14 +75,7 @@
         <article class="prose lg:prose-xl mt-8 max-w-none mx-auto w-full">
             {# Render streamfield content #}
             {% for block in page.description %}
-                {% if block.block_type == 'image' %}
-                    <div class="not-prose flex items-center justify-center w-full">
-                        {# {% img block.value %} #}
-                        {% include_block block %}
-                    </div>
-                {% else %}
-                    {% include_block block %}
-                {% endif %}
+                {% include_block block %}
             {% endfor %}
         </article>
     </div>
