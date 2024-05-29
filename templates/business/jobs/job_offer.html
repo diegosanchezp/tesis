@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load wagtailimages_tags wagtailcore_tags %}
+
+{% comment %}
+  Job offer Detail view
+{% endcomment %}
+
+
+{% block body %}
+
+{% include "components/navbar.html" %}
+<main class="page-x-spacing">
+    {# Breadcrumb #}
+    <div class="mt-4">
+        {% include "components/breadcrumbs.html" with breadcrumbs=breadcrumbs %}
+    </div>
+
+    <div id="job-offer-content" class="wagtail-page-max-size mt-8">
+
+        <header class="border-b-2 pb-4">
+            <h1 class="text-6xl mb-4">{{ page.title }}</h1>
+            {# Business Author #}
+            {# TODO: display business Logo #}
+            <a
+                {% if page.owner.business.web_page %}href="{{ page.owner.business.web_page }}"{% endif %}
+                class="text-xl mb-4 block {% if page.owner.business.web_page %} hover:text-ucv-blue {% endif %}"
+            >
+                <span>{{ page.owner.first_name }}</span>
+                <span>{{ page.owner.last_name }}</span>
+            </a>
+            <div class="flex gap-x-4 mb-4">
+                {# Workplace #}
+                <div id="workplace" class="p-2 border rounded border-ucv-yellow-dark bg-ucv-yellow text-ucv-yellow-dark flex flex-col justify-center items-center">
+                    <span class="uppercase">{{ page.get_workplace_display }}</span>
+                </div>
+                {# Linkedin link #}
+                {% if page.linkedin_link %}
+                <a
+                    id="linkedin-link"
+                    href="{{ page.linkedin_link }}"
+                    class="flex gap-x-4 border rounded border-[#0a66c2] p-2 "
+                >
+                    <i class="bi bi-linkedin text-[#0a66c2]"></i>
+                    Ver en Linkedin
+                </a>
+                {% endif %}
+
+                <div class="h-10 border-l-2 border-gray-500 mx-4"></div>
+                {# Interests #}
+                <ul class="flex gap-x-2 ">
+                    {% for interest in page.interests.all %}
+                    <li class="rounded-xl bg-slate-600 py-2 px-4 text-white">
+                        <span>{{ interest.interest.name }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            {# publishing date #}
+            <div id="publish-date" class="flex gap-x-2 text-slate-500">
+                <i class="bi bi-clock-fill"></i>
+                <div class="flex">
+                    <span class="mr-2">
+                        Publicado el: {{ page.first_published_at|date:"d F Y" }},
+                    </span>
+                    {% if page.last_published_at %}
+                    <span>
+                         Última edición: {{ page.last_published_at|date:"d F Y" }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+
+        <article class="prose lg:prose-xl mt-8 max-w-none mx-auto w-full">
+            {# Render streamfield content #}
+            {% for block in page.description %}
+                {% include_block block %}
+            {% endfor %}
+        </article>
+    </div>
+</main>
+{% endblock body %}
