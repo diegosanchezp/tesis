@@ -260,3 +260,6 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 # Mark CSRF_COOKIE  as “secure”, browsers may ensure that the cookie is only sent with an HTTPS connection
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
+
+# Breadcrumbs
+MAX_TITLE_LENGHT = 100

@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
+from django.template.defaultfilters import truncatechars
+from django.conf import settings
 
 from wagtail.models import Page, Orderable
 from modelcluster.fields import ParentalKey
@@ -56,6 +58,8 @@ class JobOffer(Page):
     """
     Job offer made by a business
     """
+
+    template = "business/jobs/job_offer.html"
 
     # To get job offers of a business use: Q(owner__business=)
 
@@ -132,6 +136,13 @@ class JobOffer(Page):
     class Meta:
         verbose_name = _("Oferta de trabajo")
         verbose_name_plural = _("Ofertas de trabajo")
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        context["breadcrumbs"] = [
+            {"name": truncatechars(self.title, settings.MAX_TITLE_LENGHT)},
+        ]
+        return context
 
 
 class JobOfferInterest(Orderable):
