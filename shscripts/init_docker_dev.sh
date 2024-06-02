@@ -2,6 +2,7 @@
 
 source .venv/bin/activate && \
 gunicorn --log-level DEBUG --reload \
+  --reload-engine poll \
   --keyfile mkcert/key.pem \
   --certfile mkcert/cert.pem \
   --timeout 0 \
