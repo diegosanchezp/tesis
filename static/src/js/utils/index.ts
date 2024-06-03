@@ -21,13 +21,17 @@ export function getCSRFToken(){
     return csrftoken
 }
 
+export function formDataToURLSearchParams(formData: FormData): URLSearchParams {
+    const searchParams = new URLSearchParams()
+    for (const pair of formData.entries()) {
+        searchParams.append(pair[0], pair[1])
+    }
+    return searchParams
+}
 /**
  * Converts a FormData object to a query string
  */
 export function formDataToQueryParam(formData: FormData): string {
-    const params = new URLSearchParams();
-    for (const pair of formData.entries()) {
-        params.append(pair[0], pair[1]);
-    }
+    const params = formDataToURLSearchParams(formData)
     return params.toString();
 }

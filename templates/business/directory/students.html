@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load django_vite slippers %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+{% endblock %}
+
+{% block title %}
+Directorio de egresados
+{% endblock title %}
+
+{% block body %}
+    {% include "components/navbar.html" %}
+    {# Header title #}
+    <section class="py-8 px-4 bg-gradient-to-t from-white to-ucv-yellow">
+        <h2 class="text-3xl text-center"><a href="{{ this_view_url }}">Directorio de Egresados y Estudiantes de la UCV</a></h2>
+    </section>
+
+    <main class="page-x-spacing">
+        {# Student Filters #}
+        <section id="filters" class="flex flex-col gap-y-2 justify-center items-center">
+            <div>
+                <p class="font-bold mb-2">Filtrar por:</p>
+                <form id="filter-form" class="flex flex-col gap-y-2 justify-center items-center" action="{{ this_view_url }}" hx-boost="true" hx-swap="outerHTML" hx-target="#career-students">
+                    <div id="filter-inputs" class="flex gap-x-2">
+                        {% include "forms/render_field.html" with field=filter_form.career %}
+                        {% include "forms/render_field.html" with field=filter_form.name_last_name %}
+                        {% include "forms/render_field.html" with field=filter_form.email %}
+                        {% include "forms/render_field.html" with field=filter_form.specialization %}
+
+                        <div class="flex flex-col gap-y-2" hx-boost="false" hx-push-url="false">
+                            <p class="text-sm font-medium text-gray-900">Intereses</p>
+                            <div class="max-w-md overflow-y-scroll overflow-x-scroll max-h-28 bg-gray-50 border border-gray-300 p-2.5">
+                                {% include "components/interests_selector.html" with interest_themes=interests_themes input_name="interests" small_interest="True" disable_hx_boost="True" %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-x-2">
+                        {% #button type="reset" variant="red" %}Resetear{% /button %}
+                        {% #button type="submit" name="action" value=Actions.FILTER_STUDENTS %}Buscar{% /button %}
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        {# Carrer and students container #}
+        {% block career_students %}
+        <section id="career-students">
+        {% if action_form.cleaned_data.action == Actions.FILTER_STUDENTS and total_students == 0 %}
+            <p class="text-center mt-8 mb-1 font-bold text-2xl">No se encontraron resultados</p>
+        {% else %}
+            {% for carreer in carreers %}
+                {% if carreer.students_num > 0 %}
+                    <h3 class="mt-4 mb-1 font-bold text-2xl">{{ carreer.name }}</h3>
+                    {# ---- Students of the carreer ---- #}
+
+                    {# If we are paginating the students of a specific career #}
+                    {% if carreer.id == page_carreer.id %}
+                        {% include "business/directory/students_row_page.html" with students=page_students %}
+                    {# Else we get a default page of students #}
+                    {% else %}
+                        {% include "business/directory/students_row_page.html" with students=carreer.paginated_students %}
+                    {% endif %}
+                {% endif %}
+            {% empty %}
+                {% if action_form.cleaned_data.action == Actions.FILTER_STUDENTS %}
+                    <p class="text-center mt-8 mb-1 font-bold text-2xl">No se encontraron resultados</p>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        </section>
+        {% endblock career_students %}
+    </main>
+{% endblock body %}

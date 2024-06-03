@@ -83,3 +83,7 @@ fmtfiles(){
   # Format python files that are going to be commited
   dockerpy 'git diff --name-only --cached | grep "\.py$" | xargs black --target-version py311 --verbose'
 }
+
+fmtlastfiles(){
+  dockerpy 'git log -1 --name-only --pretty=format: | grep "\.py$" | xargs black --target-version py311 --verbose'
+}

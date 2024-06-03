@@ -1,0 +1,49 @@
+{% comment %}
+  Renders a list of students
+  students: QuerySet[models.Student]
+  carreer: models.Carreer
+  search_query_params: str
+  form_query_string: str
+  action_form: the action that is being performed
+{% endcomment %}
+
+<section id="carreer-{{carreer.pk}}-students">
+    <div class="grid grid-cols-4 gap-x-4">
+    {% for student in students %}
+        {# Student card #}
+        <div class="flex flex-col justify-center items-center p-2 border rounded border-slate-400 min-h-[12rem]">
+            {# Student info #}
+            <div class="flex flex-col justify-center items-center mb-3">
+                {% include "pro_carreer/mentor_avatar.html" with user=student.user %}
+
+                <p class="font-bold text-lg text-center mt-2">{{ student.user.first_name }} {{ student.user.last_name }}</p>
+                <p class="">{{ student.user.email }}</p>
+
+                <p>{{ student.specialization.name }}</p>
+            </div>
+
+            {# Student intereset themes #}
+            <ul class="flex gap-x-2 justify-center">
+                {% for interest in student.interests.all %}
+                    <li class="rounded-xl bg-slate-600 px-2 text-white">
+                        <span>{{ interest.name }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% empty %}
+        {% with action=action_form.cleaned_data.action %}
+            {% if action == Actions.FILTER_STUDENTS or action == Actions.FILTER_PAGINATE_STUDENTS %}
+                <p class="text-center mt-8 mb-1 col-span-4 font-bold">No se encontraron resultados</p>
+            {% endif %}
+        {% endwith %}
+    {% endfor %}
+    </div>
+
+    {# Student pagination #}
+    <div id="pagination_container-{{ carreer.name }}" class="flex justify-center" hx-boost="true" hx-swap="outerHTML" hx-target="#carreer-{{carreer.pk}}-students">
+        {% include "components/pagination.html" with page_obj=students prevent_hxboost_scroll="True" search_query_params=carreer.paginate_search_query_params second_search_query_params=form_query_string %}
+        {# second_search_query_params=form_query_string #}
+    </div>
+</section>
+

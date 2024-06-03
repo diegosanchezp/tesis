@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django_src.mentor.apps.MentorConfig",
     "django_src.student.apps.StudentConfig",
     "django_src.business.apps.BusinessConfig",
+    "django_src.interests.apps.InterestsConfig",
     # ---- Third party ----
     # API REST
     "rest_framework",
