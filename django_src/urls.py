@@ -11,23 +11,32 @@ from django.views.static import serve
 from django.conf.urls.i18n import i18n_patterns
 from django_src.apps.main.views import forms_demo_view
 from django_src.apps.main.views import PrivateMediaView
+
 # Wagtail
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 from django_src.apps.main.views import ComponentsDemoView, color_demo_view
 from django_src.apps.main.urls import urlpatterns as main_urls
-urlpatterns = i18n_patterns(
 
-    #path('i18n/', include('django.conf.urls.i18n')),
+urlpatterns = i18n_patterns(
+    # path('i18n/', include('django.conf.urls.i18n')),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
-    #path('accounts/', include('allauth.urls')),
-    path('register/', include('django_src.apps.register.urls', namespace="register")),
-    path('pro_carrer/', include('django_src.pro_carreer.urls', namespace="pro_carreers")),
-    path('mentor/', include('django_src.mentor.urls', namespace="mentor")),
-    path('student/', include('django_src.student.urls', namespace="student")),
-    path('logout/', auth_views.LogoutView.as_view(next_page=reverse_lazy("wagtailadmin_home")), name='logout'),
+    # path('accounts/', include('allauth.urls')),
+    path("register/", include("django_src.apps.register.urls", namespace="register")),
+    path(
+        "pro_carrer/", include("django_src.pro_carreer.urls", namespace="pro_carreers")
+    ),
+    path("mentor/", include("django_src.mentor.urls", namespace="mentor")),
+    path("student/", include("django_src.student.urls", namespace="student")),
+    path("business/", include("django_src.business.urls", namespace="business")),
+    path("interests/", include("django_src.interests.urls", namespace="interests")),
+    path(
+        "logout/",
+        auth_views.LogoutView.as_view(next_page=reverse_lazy("wagtailadmin_home")),
+        name="logout",
+    ),
     prefix_default_language=False,
 )
 urlpatterns += main_urls
@@ -40,8 +49,18 @@ if settings.DEBUG:
     urlpatterns += [
         # First path below is similar to
         # + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-        path(f"{MEDIA_URL}<path:path>/", serve, {'document_root': settings.MEDIA_ROOT,  'show_indexes':True},),
-        path("private_media/<path:path>/", serve_login, {'document_root': settings.PRIVATE_MEDIA_ROOT,}),
+        path(
+            f"{MEDIA_URL}<path:path>/",
+            serve,
+            {"document_root": settings.MEDIA_ROOT, "show_indexes": True},
+        ),
+        path(
+            "private_media/<path:path>/",
+            serve_login,
+            {
+                "document_root": settings.PRIVATE_MEDIA_ROOT,
+            },
+        ),
     ]
     # Static file serving when using Gunicorn + Uvicorn for local web socket development
     urlpatterns += staticfiles_urlpatterns()
@@ -87,15 +106,13 @@ if settings.DEBUG:
         urlpatterns = [path("__debug__/", include(debug_toolbar.urls))] + urlpatterns
 
 urlpatterns += i18n_patterns(
-
     # Wagtail
-    path('cms/', include(wagtailadmin_urls)),
-    path('documents/', include(wagtaildocs_urls)),
-    path("color_demo/<str:color>", color_demo_view, name="color_demo"), # Delete later
+    path("cms/", include(wagtailadmin_urls)),
+    path("documents/", include(wagtaildocs_urls)),
+    path("color_demo/<str:color>", color_demo_view, name="color_demo"),  # Delete later
     # End wagtail
-
     # Landing page Wagtail
     # Placing at the end ensures that it doesn’t override more specific URL patterns.
-    path('', include(wagtail_urls)),
+    path("", include(wagtail_urls)),
     prefix_default_language=False,
 )

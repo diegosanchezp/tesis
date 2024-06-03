@@ -1,0 +1,14 @@
+{% comment %}
+  Crafts the href attribute for the pagination links
+
+  Context:
+  - page_num: int
+  - prevent_hxboost_scroll: Optional[bool], defaults to false, prevents hx-boost from scrolling
+  - search_query_params: Optional[str]
+  - second_search_query_params: Optional[str]
+
+{% endcomment %}
+
+?page={{ page_num }}&{{search_query_params}}
+{% if second_search_query_params %}&{{second_search_query_params}}{% endif %}
+{% if prevent_hxboost_scroll %}#{% endif %}
