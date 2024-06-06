@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load slippers django_vite %}
+
+{% comment %}
+  See django_src/business/register/forms.py for extra html attributes added to the forms,
+  x-model is added this way
+{% endcomment %}
+{% block extrascripts %}
+    {% vite_asset 'js/business_register_index.ts' %}
+{% endblock extrascripts %}
+
+{% block title %}
+   Registrar Empresa
+{% endblock %}
+
+{% block body %}
+<div class="flex justify-center mt-10 mb-8">
+    {% stepper left_line="false" number=1 text="Seleccionar perfil" url=step_urls.select_perfil %}
+    {% stepper right_line="false" number=2 text="Información sobre la Empresa" %}
+</div>
+
+<div class="flex flex-col justify-center items-center">
+    {% block user_business_form %}
+    <form id="user_business_form" x-data="form_component" method="post" action="">
+        {% csrf_token %}
+        <div id="user_business_form_core_inputs" class="flex gap-x-6">
+            <div class="max-w-md flex flex-col gap-y-4">
+                {% include "forms/form.html" with form=user_form %}
+            </div>
+            <div class="max-w-md flex flex-col gap-y-4">
+                {% include "forms/form.html" with form=business_form %}
+            </div>
+        </div>
+        <div class="my-4 flex justify-center">
+            <div>
+                {% #button type="submit" name="action" value=BusinessRegisterAction.REGISTER icon_right="bi bi-arrow-right" %}
+                Registrarse
+                {% /button %}
+            </div>
+        </div>
+    </form>
+    {% endblock user_business_form %}
+</div>
+
+{% endblock body %}
