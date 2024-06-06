@@ -4,6 +4,7 @@ from typing import cast
 from pathlib import Path
 
 from django.http.response import HttpResponse
+from django.http.request import QueryDict
 from django.conf import settings
 
 from django.template.response import TemplateResponse
@@ -693,6 +694,7 @@ class TestCaseWithData(TestCase):
         cls.computacion.interest_themes.add(*cls.computacion_interests)
         cls.matematicas.interest_themes.add(*cls.mates_interest_set)
 
+# ./manage.py test --keepdb django_src.apps.register.tests.TestCreateMentorExpView
 class TestCreateMentorExpView(TestCaseWithData):
 
     def setUp(self):
@@ -798,7 +800,7 @@ class TestCreateMentorExpView(TestCaseWithData):
 
         # Formset two works for adding an extra form, but validates to invalid
         formset2 = MentorExperienceFormSet(initial=initial2)
-        breakpoint()
+        # breakpoint()
         self.assertEqual(formset.total_form_count(), len(initial2))
 
         # print(formset2)
@@ -934,8 +936,6 @@ class TestCreateMentorExpView(TestCaseWithData):
             }
         )
 
-        pass
-
         # mock htmx
         request.htmx = True
 
@@ -952,7 +952,16 @@ class TestCreateMentorExpView(TestCaseWithData):
         htmx_evt_data =  json.loads(response.headers["HX-Trigger"])
         # Initial data should of have been sent to the frontend via an event
         self.assertEqual(htmx_evt_data["formset_validated"]["action"], context["action"], msg=htmx_evt_data.keys())
-        self.assertEqual(htmx_evt_data["formset_validated"]["next_url"], reverse_lazy("register:complete_profile"), msg=htmx_evt_data.keys())
+        query_next_url = QueryDict(mutable=True)
+        query_next_url["profile"] = self.form_data["profile"]
+        query_next_url["carreer"] = self.form_data["carreer"]
+
+        next_url = f"{reverse_lazy('register:complete_profile')}?{query_next_url.urlencode()}"
+        self.assertEqual(
+            htmx_evt_data["formset_validated"]["next_url"],
+            next_url,
+            msg=htmx_evt_data.keys()
+        )
         self.assertEqual(htmx_evt_data["formset_validated"]["form_valid"], formset.is_valid(), msg=htmx_evt_data.keys())
 
 

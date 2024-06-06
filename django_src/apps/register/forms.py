@@ -217,6 +217,10 @@ class MentorExperienceForm(forms.ModelForm):
         return cleaned_data
 
 class MentorExperienceBaseFormSet(forms.BaseModelFormSet):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.queryset = MentorExperience.objects.none()
+
     def clean(self):
         """
         Check that no two experiences have the same name.
@@ -253,6 +257,7 @@ def get_MentorExperienceFormSet(extra: int = 1, max_num: int | None = None):
         form=MentorExperienceForm,
         extra=extra,
         max_num=max_num,
+        exclude=["id", "mentor"],
     )
     return MentorExperienceFormSet
 

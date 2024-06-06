@@ -27,7 +27,7 @@ class MainView(TemplateView):
         context["form_urls"] = {
             "estudiante": select_carrera_url,
             "mentor": select_carrera_url,
-            "empresa": "todo",
+            "empresa": reverse_lazy("register:bussines"),
         }
         return context
 

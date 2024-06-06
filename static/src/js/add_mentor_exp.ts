@@ -30,6 +30,9 @@ document.body.addEventListener("formset_validated", function(evt){
 document.addEventListener("DOMContentLoaded", (event) => {
     const storage_key = "mentor_cleaned_data";
     const raw_exp = localStorage.getItem(storage_key);
+    if (raw_exp === null){
+        return;
+    }
     const mentor_exp = JSON.parse(raw_exp)
     if (mentor_exp.length > 0) {
         console.log(mentor_exp);
