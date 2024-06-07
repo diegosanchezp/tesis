@@ -1,10 +1,18 @@
-from django_src.business.models import JobOffer, JobOfferIndex
 from django.template.response import TemplateResponse
-from django_src.mentor.utils import loggedin_and_approved
 from django.core.paginator import Paginator
 from django_src.settings.wagtail_pages import jobs_index_path
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
+
+from django_src.business.models import JobOffer, JobOfferIndex
+from django_src.mentor.utils import loggedin_and_approved
+from django_src.apps.main.news_event_views import (
+    get_paginated_events,
+    get_paginated_news,
+    NEWS_SECTION,
+    EVENT_SECTION,
+    get_news_evt_index,
+)
 
 
 def get_job_offers_queryset(user):
@@ -34,9 +42,24 @@ def landing_view(request):
 
     context = {
         "job_offers": job_offers_page,
+        "job_offer_count": job_offers_page.object_list.count(),
         # The url to add a new job offer, redirects to the wagtail cms
         "add_url": reverse(
             "wagtailadmin_pages:add_subpage", kwargs={"parent_page_id": job_index.id}
+        ),
+        # News and events
+        "EVENT_SECTION": EVENT_SECTION,
+        "NEWS_SECTION": NEWS_SECTION,
+        **get_news_evt_index(),
+        **get_paginated_news(
+            page_obj_name="news",
+            page_number_name="news_page_number",
+            paginator_name="news_paginator",
+        ),
+        **get_paginated_events(
+            page_obj_name="events",
+            page_number_name="events_page_number",
+            paginator_name="events_paginator",
         ),
     }
 

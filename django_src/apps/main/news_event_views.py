@@ -9,6 +9,8 @@ from django_htmx.http import trigger_client_event
 from .models import NewsPage, EventPage
 from django_src.apps.register.approvals_view import get_page_number
 from django_src.mentor.utils import loggedin_and_approved
+from django_src.apps.main.models import EventsIndex, NewsIndex
+from django_src.settings.wagtail_pages import events_index_path, news_index_path
 
 
 def get_wagtailpage_paginated(PageModel: Page, per_page: int = 6):
@@ -90,3 +92,12 @@ get_events_view = evt_news_factory(section_id=EVENT_SECTION)
 
 NEWS_SECTION = "news_feed"
 get_more_news_view = evt_news_factory(section_id=NEWS_SECTION)
+
+
+def get_news_evt_index():
+    events_index = EventsIndex.objects.get(path=events_index_path)
+    news_index = NewsIndex.objects.get(path=news_index_path)
+    return {
+        "events_index": events_index,
+        "news_index": news_index,
+    }
