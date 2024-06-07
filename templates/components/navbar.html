@@ -19,6 +19,8 @@
                 {# if logged in user is mentor #}
                 {% elif request.user.is_mentor %}
                     {% url "mentor:landing" %}
+                {% elif request.user.is_business %}
+                    {% url "business:landing" %}
                 {% endif %}">
                 Home
             </a>

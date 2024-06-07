@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load django_vite slippers wagtailcore_tags %}
+
+{% comment %}
+  Main page of the business user
+  required context:
+    - job_offers: Page[JobOffer]
+    - add_url: str, the url to add a new job offer
+{% endcomment %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+{% endblock %}
+
+{% block title %}
+    Página principal - Empresa
+{% endblock title %}
+
+{% block body %}
+{% include "components/navbar.html" %}
+
+<main id="main-content" class="grid grid-cols-2 page-x-spacing gap-x-8 mt-4">
+    <section id="published-jobs">
+        <h2 class="text-2xl font-bold mb-4">Ofertas laborales publicadas</h2>
+        {# Table #}
+        <div class="border rounded-lg border-slate-200">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="pt-6 pl-6 text-left">Nombre</th>
+                        <th class="pl-6 pr-6 pt-6 text-left">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job_offer in job_offers %}
+                        <tr>
+                            <td class="pl-6 pb-6">
+                                <a class="text-ucv-blue hover:underline"
+                                   href="{% pageurl job_offer %}">
+                                    {{ job_offer.title }}
+                                </a>
+                            </td>
+                            <td class="pl-6 pr-6 pb-6 flex justify-center gap-x-2">
+                                <a href="{% url 'wagtailadmin_pages:edit' page_id=job_offer.id %}">
+                                    {% #button icon_right="bi bi-pencil-square" type="button" title="Editar" %}
+                                    {% /button %}
+                                </a>
+                                {% comment %}
+                                Very sad :(, can't delete job offers, wagtail doesn't allows it, even tho I've set the correct permissions in the Business Group
+
+                                <a href="{% url 'wagtailadmin_pages:delete' page_id=job_offer.id %}">
+                                    {% #button icon_right="bi bi-trash text-white" variant="red" type="button" title="Eliminar" %}
+                                    {% /button %}
+                                </a>
+                                {% endcomment %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3" class="py-2 pl-6 text-center">No hay ofertas laborales que mostrar</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {# Job offer actions #}
+        <div id="job-offer-actions" class="flex justify-end mt-4 gap-x-2">
+            <a href="{% url 'wagtailadmin_explore_root' %}">
+                {% #button icon_right="bi bi-arrow-right" type="button" %}
+                    Ver todas
+                {% /button %}
+            </a>
+            <a href="{{ add_url }}">
+                {% #button icon_left="bi bi-plus" type="button" %}
+                    Añadir oferta
+                {% /button %}
+            </a>
+        </div>
+    </section>
+</main>
+
+{% endblock body %}
