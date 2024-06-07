@@ -20,62 +20,88 @@
 {% include "components/navbar.html" %}
 
 <main id="main-content" class="grid grid-cols-2 page-x-spacing gap-x-8 mt-4">
-    <section id="published-jobs">
-        <h2 class="text-2xl font-bold mb-4">Ofertas laborales publicadas</h2>
-        {# Table #}
-        <div class="border rounded-lg border-slate-200">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="pt-6 pl-6 text-left">Nombre</th>
-                        <th class="pl-6 pr-6 pt-6 text-left">Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for job_offer in job_offers %}
+    {# First column: Job offers and link to directory of students #}
+    <div class="flex flex-col gap-y-8">
+        <section id="published-jobs">
+            <h2 class="text-2xl font-bold mb-4">Ofertas laborales publicadas</h2>
+            {# Table #}
+            <div class="border rounded-lg border-slate-200">
+                <table>
+                    <thead>
                         <tr>
-                            <td class="pl-6 pb-6">
-                                <a class="text-ucv-blue hover:underline"
-                                   href="{% pageurl job_offer %}">
-                                    {{ job_offer.title }}
-                                </a>
-                            </td>
-                            <td class="pl-6 pr-6 pb-6 flex justify-center gap-x-2">
-                                <a href="{% url 'wagtailadmin_pages:edit' page_id=job_offer.id %}">
-                                    {% #button icon_right="bi bi-pencil-square" type="button" title="Editar" %}
-                                    {% /button %}
-                                </a>
-                                {% comment %}
-                                Very sad :(, can't delete job offers, wagtail doesn't allows it, even tho I've set the correct permissions in the Business Group
+                            <th class="pt-6 pl-6 text-left">Nombre</th>
+                            <th class="pl-6 pr-6 pt-6 text-left">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job_offer in job_offers %}
+                            <tr>
+                                <td class="pl-6 pb-6">
+                                    <a class="text-ucv-blue hover:underline"
+                                       href="{% pageurl job_offer %}">
+                                        {{ job_offer.title }}
+                                    </a>
+                                </td>
+                                <td class="pl-6 pr-6 pb-6 flex justify-center gap-x-2">
+                                    <a href="{% url 'wagtailadmin_pages:edit' page_id=job_offer.id %}">
+                                        {% #button icon_right="bi bi-pencil-square" type="button" title="Editar" %}
+                                        {% /button %}
+                                    </a>
+                                    {% comment %}
+                                    Very sad :(, can't delete job offers, wagtail doesn't allows it, even tho I've set the correct permissions in the Business Group
 
-                                <a href="{% url 'wagtailadmin_pages:delete' page_id=job_offer.id %}">
-                                    {% #button icon_right="bi bi-trash text-white" variant="red" type="button" title="Eliminar" %}
-                                    {% /button %}
-                                </a>
-                                {% endcomment %}
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="3" class="py-2 pl-6 text-center">No hay ofertas laborales que mostrar</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {# Job offer actions #}
-        <div id="job-offer-actions" class="flex justify-end mt-4 gap-x-2">
-            <a href="{% url 'wagtailadmin_explore_root' %}">
-                {% #button icon_right="bi bi-arrow-right" type="button" %}
-                    Ver todas
-                {% /button %}
-            </a>
-            <a href="{{ add_url }}">
-                {% #button icon_left="bi bi-plus" type="button" %}
-                    Añadir oferta
-                {% /button %}
-            </a>
-        </div>
+                                    <a href="{% url 'wagtailadmin_pages:delete' page_id=job_offer.id %}">
+                                        {% #button icon_right="bi bi-trash text-white" variant="red" type="button" title="Eliminar" %}
+                                        {% /button %}
+                                    </a>
+                                    {% endcomment %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="3" class="py-2 pl-6">
+                                    <div class="flex gap-x-2 justify-center items-center">
+                                        <p>No hay ofertas creadas, añade una dando click en</p>
+                                        {% include "business/landing/btn_ver_todas.html" with size="small"%}
+                                    </div>
+                                    </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {# Job offer actions #}
+            {% if job_offer_count > 0 %}
+            <div id="job-offer-actions" class="flex justify-end mt-4 gap-x-2">
+                <a href="{% url 'wagtailadmin_explore_root' %}">
+                    {% #button icon_right="bi bi-arrow-right" type="button" %}
+                        Ver todas
+                    {% /button %}
+                </a>
+                {% include "business/landing/btn_ver_todas.html" %}
+            </div>
+            {% endif %}
+        </section>
+        <section id="students-directory">
+            <h2 class="text-2xl font-bold mb-4 ">Directorio de Egresados</h2>
+            <div class="bg-gradient-to-t from-white border border-ucv-yellow-dark rounded-lg to-ucv-yellow py-8 px-2 flex flex-col justify-center items-center">
+                <p class="font-semibold mb-4">Contacta Egresados y Estudiantes recien graduados.</p>
+                <a href="{% url 'business:students_directory' %}">
+                    {% #button icon_right="bi bi-arrow-right" type="button" title="Editar" %}
+                        Ir al directorio
+                    {% /button %}
+                </a>
+            </div>
+        </section>
+
+    </div>
+
+    <section id="feeds">
+        {% url 'events_feed' as events_feed_url %}
+        {% include "main/event_news_feed.html" with id=EVENT_SECTION pages=events page_index=events_index title="Próximos eventos" load_more_url=events_feed_url page_number=events_page_number page_obj=events_paginator %}
+
+        {% url 'news_feed' as news_feed_url %}
+        {% include "main/event_news_feed.html" with id=NEWS_SECTION top_margin_title="True" pages=news title="Noticias" page_index=news_index load_more_url=news_feed_url page_number=news_page_number page_obj=news_paginator %}
     </section>
 </main>
 

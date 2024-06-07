@@ -32,6 +32,13 @@
                 <a class="text-white" href="{% pro_carrer_index_link %}">Carreras profesionales</a>
             </li>
         {% endif %}
+        {# Business links #}
+        {% if request.user.is_business %}
+            <li>
+                <a class="text-white" href="{% url 'business:students_directory' %}">Directorio Estudiantes</a>
+            </li>
+        {% endif %}
+
     </ul>
 
     <ul class="flex text-white items-center">
@@ -54,7 +61,7 @@
 
     {# Avatar links #}
     <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="avatarButton">
-        {% if request.user.is_superuser %}
+        {% if request.user.is_superuser or request.user.is_business or request.user.is_mentor %}
         <li>
             <a href="{% url 'wagtailadmin_home' %}" class="block px-4 py-2 hover:bg-gray-100">
                 CMS
