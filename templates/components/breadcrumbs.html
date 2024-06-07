@@ -16,6 +16,9 @@
                 {% if request.user.is_student %}
                     {% url "pro_carreer:student_carreer_match" %}
                 {% endif %}
+                {% if request.user.is_business %}
+                    {% url "business:landing" %}
+                {% endif %}
             "
                class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
             >
