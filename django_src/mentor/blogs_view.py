@@ -14,7 +14,9 @@ def view(request, username):
 
     mentor = get_mentor(username, prefetch_related="user__owned_pages")
 
-    blogs = BlogPage.objects.filter(owner=mentor.user).order_by("-last_published_at")
+    # The .live() method filters the QuerySet to only contain published pages.
+    # See https://docs.wagtail.org/en/stable/reference/pages/queryset_reference.html#
+    blogs = BlogPage.objects.filter(owner=mentor.user).live().order_by("-last_published_at")
 
     context = {
         "mentor": mentor,

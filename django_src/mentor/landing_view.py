@@ -4,14 +4,16 @@ from django.views.decorators.http import require_http_methods
 from django.core.paginator import Paginator
 from django.db import models
 from django.template.response import TemplateResponse
-
+from django.urls import reverse
+from django.core.exceptions import PermissionDenied
 
 from .utils import get_mentor, loggedin_and_approved
 from .models import MentorshipRequest
 from .forms import MentorshipReqFilterForm
 
+from django_src.settings.wagtail_pages import blogs_index_path
 from django_src.apps.register.models import Mentor
-from django_src.apps.main.models import EventsIndex, NewsIndex
+from django_src.apps.main.models import EventsIndex, NewsIndex, BlogPage, BlogIndex
 from django_src.apps.register.approvals_view import get_page_number
 from django_src.apps.main.news_event_views import (
     get_paginated_events,
@@ -123,14 +125,31 @@ def render_mentorship_req_table(template_name: str, context: dict):
     )
     return response
 
+def paginate_blogs(blogs_queryset, page_number: int):
+
+    paginator = Paginator(
+        object_list=blogs_queryset, per_page=12
+    )  # Change to Show 12 mentorship requests.
+    blogs_page = paginator.get_page(page_number)
+    return blogs_page
+
 @require_http_methods(["GET"])
 @loggedin_and_approved
 def landing_view(request):
+    """
+    Main dashboard for the currently logged in user
+    """
+    if not (request.user.is_mentor or request.user.is_superuser):
+        raise PermissionDenied
+
     template = "mentor/landing.html"
     mentor = get_mentor(request.user.get_username())
     events_index = EventsIndex.objects.first()
     news_index = NewsIndex.objects.first()
     page_number = get_page_number(request)
+    blogs_index = BlogIndex.objects.get(path=blogs_index_path)
+    myblogs_queryset = BlogPage.objects.filter(owner=mentor.user).order_by("-last_published_at")
+    myblogs_paginated = paginate_blogs(myblogs_queryset, page_number=1)
 
     filter_form = MentorshipReqFilterForm(data=request.GET)
     filter_form.is_valid()
@@ -141,6 +160,12 @@ def landing_view(request):
 
     context = {
         "mentor": mentor,
+        "myblogs": myblogs_paginated,
+        "blogs_count": myblogs_paginated.object_list.count(),
+        # The url to add a blog, redirects to the wagtail cms
+        "add_blog_url": reverse(
+            "wagtailadmin_pages:add_subpage", kwargs={"parent_page_id": blogs_index.id}
+        ),
         "filter_form": filter_form,
         "EVENT_SECTION": EVENT_SECTION,
         "NEWS_SECTION": NEWS_SECTION,

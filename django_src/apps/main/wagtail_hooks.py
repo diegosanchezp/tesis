@@ -13,9 +13,10 @@ from django_src.business.models import Business
 def filter_user_pages(parent_page: Page, pages, request: HttpRequest):
     """
     Get the pages that the user has created,
-    applicable to mentors only
+    applicable to mentors and business only
     """
-    if not Mentor.objects.filter(user=request.user).exists():
+    if not (Mentor.objects.filter(user=request.user).exists()
+        or Business.objects.filter(user=request.user).exists()):
         return pages
 
     return pages.filter(owner=request.user)
@@ -27,7 +28,9 @@ def set_privacy_page_create(request, page):
     """
     Set the privacy of the page such that only logged in users can see it
     """
-    if not Mentor.objects.filter(user=request.user).exists():
+    if not (
+            Mentor.objects.filter(user=request.user).exists() or Business.objects.filter(user=request.user).exists()
+    ):
         return page
 
     # Add the login restriction to the page
@@ -63,9 +66,9 @@ def show_my_pages_only(pages, request):
     Only show own pages if I'm a mentor or if I'm a business
     """
 
-    if (
-        not Mentor.objects.filter(user=request.user).exists()
-        or not Business.objects.filter(user=request.user).exists()
+    if not (
+        Mentor.objects.filter(user=request.user).exists()
+        or Business.objects.filter(user=request.user).exists()
     ):
         return pages
     return pages.filter(owner=request.user)

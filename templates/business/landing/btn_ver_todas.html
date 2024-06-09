@@ -1,9 +1,10 @@
 {% comment %}
 - add_url: str, URL to create a new job offer
 - size: str, size of the button, see components/button_class.html for available sizes.
+- btn_text: str, the text of the button defaults to "Añadir oferta"
 {% endcomment %}
 <a href="{{ add_url }}">
     {% #button icon_left="bi bi-plus" type="button" size=size %}
-    Añadir oferta
+    {{ btn_text|default:"Añadir oferta" }}
     {% /button %}
 </a>
