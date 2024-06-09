@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load wagtailimages_tags django_vite slippers pro_careers%}
+{% load wagtailimages_tags django_vite slippers pro_careers wagtailcore_tags %}
 
 {% block extrascripts %}
     {% vite_asset 'js/htmx.ts' %}
@@ -35,7 +35,9 @@ Página principal - Mentor
 
     </div>
     <div class="grid grid-cols-2 page-x-spacing gap-x-8 mt-4">
+        {# 1st column #}
         <div class="flex flex-col gap-y-8">
+            {# Mentorship table #}
             <section id="mentorship-info">
                 <h2 class="text-2xl font-bold mb-4">Solicitudes de mentoría</h2>
                 {# table container #}
@@ -44,7 +46,12 @@ Página principal - Mentor
                     {% include "mentor/mentorship_req_table.html" with with_mentorship_name="True" %}
                 </div>
                 {% endblock mentorship_req_table %}
+
+                <!-- Container of the student modal -->
+                <div id="student-info-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                </div>
             </section>
+            {# Other links #}
             <section id="other-links">
                 <h2 class="text-2xl font-bold mb-4">Otros enlaces</h2>
                 <ul class="">
@@ -53,8 +60,62 @@ Página principal - Mentor
                     </li>
                 </ul>
             </section>
+            {# Blogs table #}
+            <section id="blogs-table">
+                <h2 class="text-2xl font-bold mb-4">Mis blogs</h2>
+
+                <div class="border rounded-lg border-slate-200">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="pt-6 pl-6 text-left">Título</th>
+                                <th class="pl-6 pr-6 pt-6 text-left">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for blog in myblogs %}
+                                <tr>
+                                    <td class="pt-6 pl-6 text-left pb-4">
+                                        <a class="text-ucv-blue hover:underline" href="{% pageurl blog %}">
+                                            {{ blog.title }}
+                                        </a>
+                                    </td>
+                                    <td class="pl-6 pr-6 pt-6 text-left pb-4">
+                                        <a href="{% url 'wagtailadmin_pages:edit' page_id=blog.id %}">
+                                            {% #button icon_right="bi bi-pencil-square" type="button" title="Editar" %}
+                                            {% /button %}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="3" class="py-2 pl-6">
+                                        <div class="flex gap-x-2 justify-center items-center">
+                                            <p>No hay blogs creados, añade uno dando click en</p>
+                                            {% include "business/landing/btn_ver_todas.html" with size="small" add_url=add_blog_url btn_text="Añadir blog" %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {# Blogs table actions #}
+                {% if blogs_count > 0 %}
+                    <div id="blog-list-actions" class="flex justify-end mt-4 gap-x-2">
+                        <a href="{% url 'wagtailadmin_explore_root' %}">
+                            {% #button icon_right="bi bi-arrow-right" type="button" %}
+                                Ver todos
+                            {% /button %}
+                        </a>
+                        {% include "business/landing/btn_ver_todas.html" with add_url=add_blog_url btn_text="Añadir blog" %}
+                    </div>
+                {% endif %}
+
+            </section>
         </div>
 
+        {# 2nd column #}
         <section id="feeds">
             {% url 'events_feed' as events_feed_url %}
             {% include "main/event_news_feed.html" with id=EVENT_SECTION pages=events page_index=events_index title="Próximos eventos" load_more_url=events_feed_url page_number=events_page_number page_obj=events_paginator %}
@@ -65,8 +126,5 @@ Página principal - Mentor
 
     </div>
 
-    <!-- Container of the student modal -->
-    <div id="student-info-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    </div>
 </main>
 {% endblock body %}
