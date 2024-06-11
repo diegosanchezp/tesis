@@ -13,7 +13,7 @@ from wagtail.admin.panels import (
     TitleFieldPanel,
     InlinePanel,
 )
-
+from django_src.utils import remove_index_publish_permission
 
 # ./manage.py dumpdata --natural-primary --indent 4 --verbosity 2 --output /app/fixtures/tmp/jobs.json business.JobOfferIndex business.JobOffer business.JobOfferInterest wagtailcore.Page business.Business
 
@@ -52,6 +52,15 @@ class JobOfferIndex(Page):
     class Meta:
         verbose_name = _("Indice de ofertas de trabajo")
         verbose_name_plural = _("Indices de ofertas de trabajo")
+
+    def permissions_for_user(self, user):
+        """
+        Override this method to remove the publish permission from certain users
+        on this job offer index page
+        """
+
+        page_permission_tester = super().permissions_for_user(user)
+        return remove_index_publish_permission(page_permission_tester, user)
 
 
 class JobOffer(Page):

@@ -17,6 +17,7 @@ from wagtail.admin.panels import (
 )
 
 from django_src.apps.register.approvals_view import get_page_number
+from django_src.utils import remove_index_publish_permission
 
 MAX_TITLE_LENGHT = 100
 
@@ -121,6 +122,15 @@ class BlogIndex(Page):
 
     # no label specified in subpage_types, because BlogPage is in the same app
     subpage_types = ["BlogPage"]
+
+    def permissions_for_user(self, user):
+        """
+        Override this method to remove the publish permission from certain users
+        on this blog index page
+        """
+
+        page_permission_tester = super().permissions_for_user(user)
+        return remove_index_publish_permission(page_permission_tester, user)
 
 
 class BlogPage(Page):
