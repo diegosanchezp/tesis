@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.template.defaultfilters import truncatechars
 from render_block import render_block_to_string
 from modelcluster.fields import ParentalKey
-
+from django_src.customwagtail.permission_tester import MyPagePermissionTester
 from wagtail import blocks
 from wagtail.fields import StreamField
 from wagtail.images.blocks import ImageChooserBlock
@@ -196,6 +196,14 @@ class BlogPage(Page):
 
     # Block the creation of child pages
     subpage_types = []
+
+    def permissions_for_user(self, user):
+        """
+        Mentors can unpublish, but not, publish their blogs
+        """
+        # Override the method to use the custom permission tester
+        page_permission_tester = MyPagePermissionTester(user, self)
+        return page_permission_tester
 
 
 class NewsIndex(Page):

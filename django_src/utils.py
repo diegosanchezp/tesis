@@ -21,10 +21,8 @@ def remove_index_publish_permission(page_permission_tester, user):
         return page_permission_tester
 
     if (
-        user.is_mentor
-        or user.is_business
-        and "publish" in page_permission_tester.permissions
-    ):
+        user.is_mentor or user.is_business
+    ) and "publish" in page_permission_tester.permissions:
         page_permission_tester.permissions.remove("publish")
 
     return page_permission_tester

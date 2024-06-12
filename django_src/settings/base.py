@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django_src.student.apps.StudentConfig",
     "django_src.business.apps.BusinessConfig",
     "django_src.interests.apps.InterestsConfig",
+    "django_src.customwagtail.apps.CustomWagtailConfig",
     # ---- Third party ----
     # API REST
     "rest_framework",
@@ -69,7 +70,8 @@ INSTALLED_APPS = [
     "wagtail.contrib.redirects",
     "wagtail.embeds",
     "wagtail.sites",
-    "wagtail.users",
+    # "wagtail.users",
+    "django_src.customwagtail.apps.CustomUsersAppConfig",
     "wagtail.snippets",
     "wagtail.documents",
     "wagtail.images",
