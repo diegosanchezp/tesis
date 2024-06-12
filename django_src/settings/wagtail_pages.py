@@ -6,3 +6,4 @@ events_index_path = f"{home_page_path}0004"
 jobs_index_path = f"{home_page_path}0005"
 
 EMPRESAS_GROUP_NAME = "Empresas"
+MENTORS_GROUP_NAME = "Mentores"

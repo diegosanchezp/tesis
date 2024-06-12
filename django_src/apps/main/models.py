@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.template.defaultfilters import truncatechars
 from render_block import render_block_to_string
 from modelcluster.fields import ParentalKey
-
+from django_src.customwagtail.permission_tester import MyPagePermissionTester
 from wagtail import blocks
 from wagtail.fields import StreamField
 from wagtail.images.blocks import ImageChooserBlock
@@ -17,6 +17,7 @@ from wagtail.admin.panels import (
 )
 
 from django_src.apps.register.approvals_view import get_page_number
+from django_src.utils import remove_index_publish_permission
 
 MAX_TITLE_LENGHT = 100
 
@@ -122,6 +123,15 @@ class BlogIndex(Page):
     # no label specified in subpage_types, because BlogPage is in the same app
     subpage_types = ["BlogPage"]
 
+    def permissions_for_user(self, user):
+        """
+        Override this method to remove the publish permission from certain users
+        on this blog index page
+        """
+
+        page_permission_tester = super().permissions_for_user(user)
+        return remove_index_publish_permission(page_permission_tester, user)
+
 
 class BlogPage(Page):
     """
@@ -186,6 +196,14 @@ class BlogPage(Page):
 
     # Block the creation of child pages
     subpage_types = []
+
+    def permissions_for_user(self, user):
+        """
+        Mentors can unpublish, but not, publish their blogs
+        """
+        # Override the method to use the custom permission tester
+        page_permission_tester = MyPagePermissionTester(user, self)
+        return page_permission_tester
 
 
 class NewsIndex(Page):

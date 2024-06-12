@@ -1,4 +1,6 @@
 from django.http.request import HttpRequest
+from django.urls import reverse
+from wagtail.admin import widgets as wagtailadmin_widgets
 
 from wagtail import hooks
 from wagtail.models import Page, BaseViewRestriction
@@ -15,8 +17,10 @@ def filter_user_pages(parent_page: Page, pages, request: HttpRequest):
     Get the pages that the user has created,
     applicable to mentors and business only
     """
-    if not (Mentor.objects.filter(user=request.user).exists()
-        or Business.objects.filter(user=request.user).exists()):
+    if not (
+        Mentor.objects.filter(user=request.user).exists()
+        or Business.objects.filter(user=request.user).exists()
+    ):
         return pages
 
     return pages.filter(owner=request.user)
@@ -29,7 +33,8 @@ def set_privacy_page_create(request, page):
     Set the privacy of the page such that only logged in users can see it
     """
     if not (
-            Mentor.objects.filter(user=request.user).exists() or Business.objects.filter(user=request.user).exists()
+        Mentor.objects.filter(user=request.user).exists()
+        or Business.objects.filter(user=request.user).exists()
     ):
         return page
 
