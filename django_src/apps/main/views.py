@@ -1,5 +1,6 @@
 import posixpath
 import os
+from django.contrib.auth.decorators import login_required
 
 from django.views.generic.base import TemplateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -7,6 +8,7 @@ from django.http import HttpResponse
 from django.template.response import TemplateResponse # Delete
 from django.views.decorators.http import require_http_methods # Delete
 from django import forms
+from django.conf import settings
 
 # Create your views here.
 
@@ -42,7 +44,6 @@ class ComponentsDemoView(TemplateView):
         return super().get(request,*args,**kwargs)
 
 @require_http_methods(["GET",])
-
 def forms_demo_view(request):
     from django.forms.renderers import TemplatesSetting
 
@@ -90,6 +91,35 @@ def forms_demo_view(request):
         "form": form,
     }
     return TemplateResponse(request, "forms/forms_demo.html", context=context)
+
+@require_http_methods(["GET",])
+@login_required
+def email_preview_view(request, template_name: str):
+    """
+    Email preview view
+    """
+    from django_src.apps.register.approvals_view import get_send_approval_email_context, get_absolute_login_url
+    from django_src.apps.register.models import RegisterApprovals, RegisterApprovalStates
+    from datetime import datetime
+    from django.urls import reverse
+
+    # strip the end '/' char of the template_name
+    template_name = template_name.removesuffix("/")
+
+    approval = RegisterApprovals(
+        user=request.user,
+        state=RegisterApprovalStates.APPROVED,
+        date=datetime.now(),
+    )
+    context = get_send_approval_email_context(
+        user=request.user, approval=approval,
+        extra_context={
+            "url": get_absolute_login_url(),
+            "email": settings.SUPPORT_EMAIL,
+        },
+    )
+
+    return TemplateResponse(request, f"{template_name}", context=context)
 
 # Delete later
 @require_http_methods(["GET",])

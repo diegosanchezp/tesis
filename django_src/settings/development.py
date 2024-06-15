@@ -12,16 +12,15 @@ https://docs.djangoproject.com/en/stable/ref/settings/
 
 from .base import *  # noqa
 
+
 def load_env_array(envar_name: str):
     """
     Strip whitespaces for enviroment variables
     that are comma separated strings
     """
 
-    return list(map(
-        lambda x: x.strip(' '),
-        env(envar_name).split(",")
-    ))
+    return list(map(lambda x: x.strip(" "), env(envar_name).split(",")))
+
 
 # read environment files
 ENV_DIR = BASE_DIR / "envs" / "dev"  # noqa F405
@@ -31,7 +30,7 @@ env.read_env(str(ENV_DIR / "postgres"))  # noqa F405
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -53,9 +52,13 @@ TEMPLATES[0]["OPTIONS"]["loaders"] = default_loaders
 
 # WAGTAILADMIN_BASE_URL required for notification emails
 WAGTAILADMIN_BASE_URL = f"https://{env('HOST_NAME')}:8000"
+WAGTAILADMIN_NOTIFICATION_FROM_EMAIL = "noreply@egresados.org"
+
+# The support email for requests / questions
+SUPPORT_EMAIL = env("SUPPORT_EMAIL")
 
 # Serve static and media files staticfiles
-MIDDLEWARE.insert(3,"whitenoise.middleware.WhiteNoiseMiddleware")
+MIDDLEWARE.insert(3, "whitenoise.middleware.WhiteNoiseMiddleware")
 
 ALLOWED_HOSTS = load_env_array("ALLOWED_HOSTS")
 
@@ -70,4 +73,6 @@ MEDIA_ROOT_TEST = os.path.join(BASE_DIR, "tests", "media")
 
 # Wagtail needs this for send emails, otherwise might get
 # OSError: [Errno 99] Cannot assign requested address, sending emails
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_HOST = "mailhog"
+EMAIL_PORT = 1025

@@ -1,0 +1,131 @@
+{% comment %}
+  Some of the styles in this template were copied from wagtail/admin/templates/wagtailadmin/notifications/base.html
+{% endcomment %}
+
+{% load i18n static %}
+
+{% get_current_language as LANGUAGE_CODE %}
+{% get_current_language_bidi as LANGUAGE_BIDI %}
+
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title></title>
+        <style>
+            {% block styles_content %}
+                body {
+                    min-width:100%;
+                    -webkit-text-size-adjust: none;
+                    padding: 0;
+                    margin: 0;
+                }
+                .ReadMsgBody {
+                    width: 100%;
+                }
+                .ExternalClass {
+                    width: 100%;
+                }
+                table {
+                    border-collapse:collapse;
+                    mso-table-lspace:0pt;
+                    mso-table-rspace:0pt;
+                }
+                table td {
+                    border-collapse:collapse;
+                }
+                td.date a:link {
+                    color:#6b6b6b;
+                    text-decoration:none;
+                }
+                button.blue {
+                    color: white;
+                    background-color: #1a56db;
+                    box-sizing: border-box;
+                    border-width: 0;
+                    border-style: solid;
+                    border-color: #E5E7EB;
+                    font-size: 0.875rem;
+                    line-height: 1.25rem;
+                    padding-top: 0.625rem;
+                    padding-bottom: 0.625rem;
+                    padding-left: 1.25rem;
+                    padding-right: 1.25rem;
+                    border-radius: 0.5rem;
+                    cursor: pointer;
+                }
+
+                {% block extra_style %}
+                {% endblock extra_style %}
+            {% endblock %}
+        </style>
+    </head>
+
+    <body style="background-color:#E6E6E6;padding:0px;margin:0px;" yahoo="fix" topmargin="0" bottommargin="0" leftmargin="0" rightmargin="0">
+
+        {# Email content #}
+        <table width="600" border="0" align="center" class="mobile" cellspacing="0" cellpadding="0">
+            <tr>
+                <td style="background:#FAFAFA;">
+
+                    {# This is a white space, acts as the top padding #}
+                    <table width="600" border="0" align="center" cellspacing="0" cellpadding="0" class="mobile">
+                        <tr>
+                            <td height="30" class="spacer_height">&nbsp;</td>
+                        </tr>
+                    </table>
+
+                    <table width="600">
+                        <tr>
+                            {# Padding left #}
+                            <td width="30" class="spacer">&nbsp;</td>
+                            <td>
+                                <div style="display: flex; column-gap: 10px; justify-content: center; align-items: center;">
+                                    <img src="https://egresadosucv.org/wp-content/uploads/2019/08/logo.jpg?1e88c4&1e88c4" width="62" height="62" border="0" style="display: block;">
+                                    <p style="font-family:Arial, Helvetica, sans-serif; font-size:16px; color: #000000;">Asociación de Egresados y Amigos de la UCV</p>
+                                </div>
+                            </td>
+                            {# Padding right #}
+                            <td width="30" class="spacer">&nbsp;</td>
+                        </tr>
+                        {# Padding bottom #}
+                        <tr>
+                            <td height="30" class="spacer_height">&nbsp;</td>
+                        </tr>
+                    </table>
+
+                    <table width="600">
+                        <tbody>
+                            <tr>
+                                {# Padding left #}
+                                <td width="30" class="spacer">&nbsp;</td>
+
+                                {# Main content of the email #}
+                                <td>
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0" align="left" class="content">
+                                        <tr>
+                                            <td style="font-family:Arial, Helvetica, sans-serif; font-size:12px; color: #000000; line-height: 18px;">
+                                                {% block content %}
+                                                {% endblock content %}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                {# /Main content of the email #}
+
+                                {# Padding right #}
+                                <td width="30" class="spacer">&nbsp;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    {# This is a white space, acts as the bottom padding #}
+                    <table width="600" border="0" align="center" cellspacing="0" cellpadding="0" class="mobile">
+                        <tr>
+                            <td height="30" class="spacer_height">&nbsp;</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+</html>

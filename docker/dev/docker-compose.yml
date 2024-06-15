@@ -42,3 +42,8 @@ services:
       - ../../envs/dev/postgres
     ports:
       - "5432:5432"
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    ports:
+      - "8025:8025"
+
