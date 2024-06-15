@@ -1,20 +1,31 @@
 from datetime import datetime
+from urllib.parse import urljoin
 from django.db.models.query import QuerySet
 from django.db.models import Case, When, Value, IntegerField
 from django.http import HttpResponse, QueryDict
+from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.core.mail import get_connection
+from django.core.paginator import Paginator
+from django.template import RequestContext
+from django.urls import reverse
+from django.conf import settings
+
+from wagtail.admin.mail import send_mail
+from wagtail.admin.utils import get_admin_base_url
+from render_block import render_block_to_string
 
 from .forms import ApprovalsFilterForm
-from .models import RegisterApprovals, RegisterApprovalEvents, RegisterApprovalStates, approval_state_machine
-from django.core.paginator import Paginator
-
-from django.template import RequestContext
-
-from render_block import render_block_to_string
+from .models import (
+    RegisterApprovals,
+    RegisterApprovalEvents,
+    RegisterApprovalStates,
+    approval_state_machine,
+)
 
 
 def paginate_queryset(request, queryset):
@@ -24,7 +35,9 @@ def paginate_queryset(request, queryset):
 
     # Don't forget to change per_page to 12 when testing is done
     # 12 it's what looks best in the UI
-    paginator = Paginator(object_list=queryset, per_page=12)  # Show 12 approvals per page.
+    paginator = Paginator(
+        object_list=queryset, per_page=12
+    )  # Show 12 approvals per page.
     page_obj = paginator.get_page(page_number)
 
     # Create a QueryDict to store the search query params
@@ -33,10 +46,8 @@ def paginate_queryset(request, queryset):
     # Validate to populate cleaned_data
     filter_form.is_valid()
 
-    for (key,value) in filter_form.cleaned_data.items():
-        if (
-            value  and value != '' and key not in ["action", "approvals"]
-        ):
+    for key, value in filter_form.cleaned_data.items():
+        if value and value != "" and key not in ["action", "approvals"]:
             if key == "user_type":
                 search_query_params[key] = value.model
             else:
@@ -67,6 +78,7 @@ def get_approvals():
 
     return approvals
 
+
 def get_page_number(request):
     page_number: str | int | None = request.GET.get("page") or request.POST.get("page")
 
@@ -77,9 +89,11 @@ def get_page_number(request):
 
     return page_number
 
+
 def get_approvals_form(request):
 
     return ApprovalsFilterForm(getattr(request, request.method))
+
 
 def filter_approvals(approvals, status=None, name=None, user_type=None):
     if status:
@@ -91,6 +105,7 @@ def filter_approvals(approvals, status=None, name=None, user_type=None):
         approvals = approvals.filter(user_type=user_type)
 
     return approvals
+
 
 def filter_users(request):
     """
@@ -110,7 +125,7 @@ def filter_users(request):
             approvals,
             status=filter_form.cleaned_data["status"],
             name=filter_form.cleaned_data["name"],
-            user_type=filter_form.cleaned_data["user_type"]
+            user_type=filter_form.cleaned_data["user_type"],
         )
 
     context = {
@@ -120,6 +135,75 @@ def filter_users(request):
     }
 
     return context
+
+
+def get_absolute_login_url():
+    wagtail_base_url = get_admin_base_url()
+    login_page_url = reverse("wagtailcore_login")
+    return urljoin(wagtail_base_url, login_page_url)
+
+
+def get_send_approval_email_context(
+    approval: RegisterApprovals, user, extra_context: dict = {}
+):
+    """
+    Returns the context for the email template
+    """
+    return {
+        "approval": approval,
+        "user": user,
+        **extra_context,
+    }
+
+
+def send_aproval_email(
+    approval: RegisterApprovals,
+    email_subject: str,
+    template_text: str,
+    template_html: str,
+    context: dict = {},
+):
+    recipient = approval.user
+
+    extended_context = get_send_approval_email_context(
+        approval=approval, user=recipient, extra_context=context
+    )
+
+    with get_connection() as connection:
+        email_subject = f"{email_subject} | Asociación de Egresados y Amigos de la UCV"
+        email_content = render_to_string(template_text, extended_context).strip()
+        html_message = render_to_string(template_html, extended_context)
+
+        send_mail(
+            email_subject,
+            email_content,
+            [recipient.email],
+            html_message=html_message,
+            connection=connection,
+        )
+
+
+def send_aprove_reject_email(approval: RegisterApprovals):
+    """
+    Sends an email to the user when his/her request is approved or rejected
+    """
+    if approval.state == RegisterApprovalStates.APPROVED:
+        send_aproval_email(
+            approval,
+            email_subject="Tu solicitud de registro ha sido aprobada",
+            template_text="register/email/approved.txt",
+            template_html="register/email/approved.html",
+            context={"url": get_absolute_login_url()},
+        )
+    if approval.state == RegisterApprovalStates.REJECTED:
+        send_aproval_email(
+            approval,
+            email_subject="Tu solicitud de registro ha sido rechazada",
+            template_text="register/email/approved_denied.txt",
+            template_html="register/email/approved_denied.html",
+            context={"email": settings.SUPPORT_EMAIL},
+        )
+
 
 def approve_reject_users(request):
     """
@@ -135,10 +219,7 @@ def approve_reject_users(request):
     form_valid = filter_form.is_valid()
     cleaned_data = filter_form.cleaned_data
 
-    if (
-        form_valid and "action" in cleaned_data
-        and "approvals" in cleaned_data
-    ):
+    if form_valid and "action" in cleaned_data and "approvals" in cleaned_data:
         action = cleaned_data["action"]
         approvals: QuerySet[RegisterApprovals] = cleaned_data["approvals"]
 
@@ -152,31 +233,38 @@ def approve_reject_users(request):
             approval.admin = request.user
             approval.date = datetime.now()
             approval.save()
+            # Send email
+            send_aprove_reject_email(approval)
 
         # If there are any approvals, add a success message
         if len(approvals) > 0:
             # Add success message
-            user_names = ", ".join([f"{approval.user.first_name} {approval.user.last_name}, " for approval in approvals])
+            user_names = ", ".join(
+                [
+                    f"{approval.user.first_name} {approval.user.last_name}, "
+                    for approval in approvals
+                ]
+            )
             user_str = _("usuario")
             if len(approvals) > 1:
                 user_str = _("usuarios")
             messages.success(
                 request,
-                _("%(action)s %(user_str)s %(user_names)s") % {
+                _("%(action)s %(user_str)s %(user_names)s")
+                % {
                     "user_names": user_names,
                     "action": RegisterApprovalEvents[action].label,
                     "user_str": user_str,
-                }
+                },
             )
 
     approvals = filter_approvals(
         get_approvals(),
         # I think we should ignore the status filter when approving or rejecting
         # The admin won't be able to see the approved user
-
         # status=filter_form.cleaned_data["status"],
         name=filter_form.cleaned_data["name"],
-        user_type=filter_form.cleaned_data["user_type"]
+        user_type=filter_form.cleaned_data["user_type"],
     )
     context.update(paginate_queryset(request, approvals))
     return context
@@ -228,16 +316,19 @@ def approvals_view(request):
                 context.update(**filter_users(request))
 
             # We are trying to approve or reject, one or more, students or mentors
-            if action in [RegisterApprovalEvents.APPROVE, RegisterApprovalEvents.REJECT]:
+            if action in [
+                RegisterApprovalEvents.APPROVE,
+                RegisterApprovalEvents.REJECT,
+            ]:
                 context.update(**approve_reject_users(request))
 
         # Use request context to add the messages
-        request_context = RequestContext(
-            request, context
-        )
+        request_context = RequestContext(request, context)
 
         # Make a response with the filtered/updated approvals table
-        form_html = render_block_to_string(template_name, "approvals_table", request_context)
+        form_html = render_block_to_string(
+            template_name, "approvals_table", request_context
+        )
         htmx_reponse = HttpResponse(form_html)
 
         return htmx_reponse

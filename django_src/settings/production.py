@@ -2,15 +2,14 @@ import os
 
 from .base import *  # noqa
 
+
 def load_env_array(envar_name: str):
     """
     Strip whitespaces for enviroment variables
     that are comma separated strings
     """
-    return list(map(
-        lambda x: x.strip(' '),
-        os.getenv(envar_name, "").split(",")
-    ))
+    return list(map(lambda x: x.strip(" "), os.getenv(envar_name, "").split(",")))
+
 
 SECRET_KEY = env("SECRET_KEY")
 
@@ -39,7 +38,7 @@ CSRF_TRUSTED_ORIGINS = load_env_array("CSRF_TRUSTED_ORIGINS")
 
 # For NGINX
 # https://stackoverflow.com/a/71482883
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # https://docs.djangoproject.com/en/stable/ref/settings/#std-setting-SECURE_SSL_REDIRECT
@@ -50,6 +49,9 @@ SECURE_SSL_REDIRECT = True
 
 # TODO: test
 WAGTAILADMIN_BASE_URL = f"https://{os.getenv('HOST_NAME')}"
+WAGTAILADMIN_NOTIFICATION_FROM_EMAIL = os.getenv("WAGTAILADMIN_NOTIFICATION_FROM_EMAIL")
+# The support email for requests / questions
+SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL")
 
 TEMPLATES[0]["OPTIONS"]["loaders"] = cached_loaders
 

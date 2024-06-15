@@ -16,7 +16,7 @@ from django_src.apps.main.views import PrivateMediaView
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
-from django_src.apps.main.views import ComponentsDemoView, color_demo_view
+from django_src.apps.main.views import ComponentsDemoView, color_demo_view, email_preview_view
 from django_src.apps.main.urls import urlpatterns as main_urls
 
 urlpatterns = i18n_patterns(
@@ -96,8 +96,10 @@ if settings.DEBUG:
             kwargs={"exception": Exception("Page not Found")},
         ),
         path("500/", default_views.server_error),
+        # Development aid views
         path("components/<str:template_name>/", ComponentsDemoView.as_view()),
         path("forms_style_demo/", forms_demo_view),
+        path("email_preview/<path:template_name>", email_preview_view),
     ]
 
     if "debug_toolbar" in settings.INSTALLED_APPS:

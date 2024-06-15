@@ -1,0 +1,11 @@
+Hola {{ user.first_name }}
+
+¡Felicidades! Tu solicitud de registro ha sido aprobada. 🎉
+
+Bienvenido a la Red de Egresados de la UCV.
+
+Puedes ingresar a través de este enlace: {{ url }}, con tu correo electrónico y la contraseña que elegiste.
+
+
+
+

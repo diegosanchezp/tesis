@@ -252,6 +252,9 @@ SOCIALACCOUNT_PROVIDERS = {
 
 WAGTAIL_SITE_NAME = "Red Egresados UCV"
 
+# --- Wagtail Email settings ---
+WAGTAILADMIN_NOTIFICATION_USE_HTML = True
+
 # --- Security settings --- #
 CORS_ALLOW_ALL_ORIGINS = False
 

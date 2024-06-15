@@ -1,0 +1,30 @@
+{% extends "register/email/base.html" %}
+
+{% block extra_style %}
+
+{% endblock extra_style %}
+
+{% block content %}
+
+<p>Hola {{ user.first_name }}</p>
+
+<p style="text-align: center">
+    ¡Felicidades! Tu solicitud de registro realizada el {{ approval.date|date:"d/m/Y" }} ha sido <span style="font-weight: bold">aprobada</span>. 🎉
+</p>
+
+<p>
+    Bienvenido a la Red de Egresados de la UCV.
+</p>
+
+<p>
+    Puedes ingresar con tu correo electrónico y la contraseña que elegiste.
+</p>
+
+<div style="display: flex; justify-content: center">
+    <a href="{{ url }}">
+        <button class="blue">
+            Ingresar
+        </button>
+    </a>
+</div>
+{% endblock content %}

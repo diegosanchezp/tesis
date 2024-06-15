@@ -1,0 +1,17 @@
+{% extends "register/email/base.html" %}
+
+{% block extra_style %}
+
+{% endblock extra_style %}
+
+{% block content %}
+
+<p>Hola {{ user.first_name }}</p>
+
+<p>
+    Tu solicitud de registro realizada el {{ approval.date|date:"d/m/Y" }} <span style="font-weight: bold">no pudo ser aprobada</span>.
+</p>
+
+<p>Puedes contactar a <a href="mailto:{{ email }}">{{ email }}</a>, si tienes dudas adicionales.</p>
+
+{% endblock content %}

@@ -1,0 +1,8 @@
+Hola {{ user.first_name }}
+
+Tu solicitud de registro realizada el {{ approval.date|date:"d/m/Y" }}, no pudo ser aprobada.
+
+Puedes contactar a {{ email }}, si tienes dudas adicionales.
+
+
+

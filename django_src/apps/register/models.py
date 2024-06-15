@@ -81,9 +81,11 @@ class RegisterApprovals(models.Model):
         choices=RegisterApprovalStates.choices,
     )
 
+    # Creation date of the approval
     date = models.DateTimeField(
         verbose_name=_("Fecha"),
-        auto_now=True,
+        # Automatically set the field to now when the object is first created
+        auto_now_add=True,
     )
 
     class Meta:
