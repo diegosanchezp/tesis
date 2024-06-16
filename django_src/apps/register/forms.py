@@ -1,6 +1,6 @@
 from datetime import date
 from django import forms
-from django.db.models import Q
+from django.db.models import Q,  TextChoices
 from django.contrib.auth.forms import BaseUserCreationForm
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -294,11 +294,16 @@ class UserTypeChoiceField(forms.ModelChoiceField):
     Just to get a better name for the options of this field
     """
     def label_from_instance(self, obj: ContentType):
-        translate={
-            "mentor": _("Mentor"),
-            "student": _("Estudiante"),
-        }
-        return f"{translate[obj.model]}"
+        return obj.name
+
+class ApprovalModalitys(TextChoices):
+    """
+    UI ways to approve or reject a request
+    """
+    # A single Approval is being approved or rejected in a modal
+    MODAL = "modal", _("Modal")
+    # One or More Approvals are being approved or rejected from the table
+    TABLE = "table", _("Tabla")
 
 class ApprovalsFilterForm(forms.Form):
 
@@ -322,9 +327,15 @@ class ApprovalsFilterForm(forms.Form):
         required=True,
     )
 
+    modality = forms.ChoiceField(
+        choices=ApprovalModalitys.choices,
+    )
+
     user_type = UserTypeChoiceField(
         label=_("Tipo"),
-        queryset=ContentType.objects.filter(Q(model="mentor") | Q(model="student")),
+        queryset=ContentType.objects.filter(
+            model__in=["mentor", "student", "business"]
+        ),
         to_field_name="model",
         empty_label=_("Todos"),
         required=False,

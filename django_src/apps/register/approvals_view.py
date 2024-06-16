@@ -1,8 +1,10 @@
 from datetime import datetime
+import socket
 from urllib.parse import urljoin
 from django.db.models.query import QuerySet
 from django.db.models import Case, When, Value, IntegerField
 from django.http import HttpResponse, QueryDict
+from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.contrib import messages
@@ -18,8 +20,9 @@ from django.conf import settings
 from wagtail.admin.mail import send_mail
 from wagtail.admin.utils import get_admin_base_url
 from render_block import render_block_to_string
+from django_htmx.http import trigger_client_event
 
-from .forms import ApprovalsFilterForm
+from .forms import ApprovalsFilterForm, ApprovalModalitys
 from .models import (
     RegisterApprovals,
     RegisterApprovalEvents,
@@ -169,19 +172,22 @@ def send_aproval_email(
         approval=approval, user=recipient, extra_context=context
     )
 
-    with get_connection() as connection:
-        email_subject = f"{email_subject} | Asociación de Egresados y Amigos de la UCV"
-        email_content = render_to_string(template_text, extended_context).strip()
-        html_message = render_to_string(template_html, extended_context)
+    try:
+        with get_connection() as connection:
+            email_subject = f"{email_subject} | Asociación de Egresados y Amigos de la UCV"
+            email_content = render_to_string(template_text, extended_context).strip()
+            html_message = render_to_string(template_html, extended_context)
 
-        send_mail(
-            email_subject,
-            email_content,
-            [recipient.email],
-            html_message=html_message,
-            connection=connection,
-        )
+            send_mail(
+                email_subject,
+                email_content,
+                [recipient.email],
+                html_message=html_message,
+                connection=connection,
+            )
 
+    except socket.gaierror:
+        print("Error sending email {email_subject}", "couldn't stablish connection with the SMTP outgoin server", )
 
 def send_aprove_reject_email(approval: RegisterApprovals):
     """
@@ -207,7 +213,7 @@ def send_aprove_reject_email(approval: RegisterApprovals):
 
 def approve_reject_users(request):
     """
-    Approves or rejects an user register request
+    Approves or rejects a user register request
     """
 
     filter_form = get_approvals_form(request)
@@ -279,22 +285,42 @@ def approvals_view(request):
     if not request.user.is_superuser:
         raise PermissionDenied
 
-    template_name = "register/approvals.html"
+    template_name = "register/approvals/index.html"
 
     approvals = get_approvals()
 
+    base_context = {
+        "RegisterApprovalStates": RegisterApprovalStates,
+        "RegisterApprovalEvents": RegisterApprovalEvents,
+        "ApprovalModalitys": ApprovalModalitys,
+    }
+
+    action = request.GET.get("action")
     # We are visiting the page for the first time, or asking for a filtered page
-    if request.method == "GET" and not request.htmx:
-        filter_form = get_approvals_form(request)
+    if request.method == "GET":
+        if request.htmx:
+            if action == "get_modal":
+                user_approval = get_object_or_404(
+                    approvals, pk=request.GET.get("approval_pk")
+                )
+                return TemplateResponse(
+                    request,
+                    template="register/approvals/modal.html",
+                    context={
+                        **base_context,
+                        "user_approval": user_approval,
+                    },
+                )
+        else:
+            filter_form = get_approvals_form(request)
 
-        context = {
-            "filter_form": filter_form,
-            "RegisterApprovalStates": RegisterApprovalStates,
-            "RegisterApprovalEvents": RegisterApprovalEvents,
-            **paginate_queryset(request, approvals),
-        }
+            context = {
+                **base_context,
+                "filter_form": filter_form,
+                **paginate_queryset(request, approvals),
+            }
 
-        return TemplateResponse(request, template_name, context)
+            return TemplateResponse(request, template_name, context)
 
     if request.method == "POST" and request.htmx:
 
@@ -303,13 +329,15 @@ def approvals_view(request):
         # Default context, was it's returned when the page was first visited
         context = {
             "filter_form": approvals_form,
-            "RegisterApprovalStates": RegisterApprovalStates,
-            "RegisterApprovalEvents": RegisterApprovalEvents,
+            **base_context,
             **paginate_queryset(request, approvals),
         }
+        approvals_form_is_valid = approvals_form.is_valid()
+        cleaned_data = approvals_form.cleaned_data
+        modality = cleaned_data["modality"]
 
-        if approvals_form.is_valid():
-            action = approvals_form.cleaned_data["action"]
+        if approvals_form_is_valid:
+            action = cleaned_data["action"]
 
             # We are trying to filter the list of students/mentors
             if action == "search":
@@ -331,4 +359,22 @@ def approvals_view(request):
         )
         htmx_reponse = HttpResponse(form_html)
 
+        # Tell the frontend to update the modal actions based on the state
+        if approvals_form_is_valid and modality == ApprovalModalitys.MODAL:
+            form_approval = cleaned_data["approvals"].first()
+            approval = RegisterApprovals.objects.get(pk=form_approval.pk)
+            context.update(user_approval=approval)
+            trigger_client_event(
+                response=htmx_reponse,
+                name="jsSwap", # hx-swap
+                params={
+                    "target_element_id": f"modal_footer",
+                    "position": "outerHTML",
+                    "text_html": render_block_to_string(
+                        template_name="register/approvals/modal.html",
+                        block_name="modal_footer",
+                        context=request_context,
+                    )
+                },
+            )
         return htmx_reponse
