@@ -174,7 +174,9 @@ def send_aproval_email(
 
     try:
         with get_connection() as connection:
-            email_subject = f"{email_subject} | Asociación de Egresados y Amigos de la UCV"
+            email_subject = (
+                f"{email_subject} | Asociación de Egresados y Amigos de la UCV"
+            )
             email_content = render_to_string(template_text, extended_context).strip()
             html_message = render_to_string(template_html, extended_context)
 
@@ -187,7 +189,11 @@ def send_aproval_email(
             )
 
     except socket.gaierror:
-        print("Error sending email {email_subject}", "couldn't stablish connection with the SMTP outgoin server", )
+        print(
+            "Error sending email {email_subject}",
+            "couldn't stablish connection with the SMTP outgoin server",
+        )
+
 
 def send_aprove_reject_email(approval: RegisterApprovals):
     """
@@ -366,7 +372,7 @@ def approvals_view(request):
             context.update(user_approval=approval)
             trigger_client_event(
                 response=htmx_reponse,
-                name="jsSwap", # hx-swap
+                name="jsSwap",  # hx-swap
                 params={
                     "target_element_id": f"modal_footer",
                     "position": "outerHTML",
@@ -374,7 +380,7 @@ def approvals_view(request):
                         template_name="register/approvals/modal.html",
                         block_name="modal_footer",
                         context=request_context,
-                    )
+                    ),
                 },
             )
         return htmx_reponse
