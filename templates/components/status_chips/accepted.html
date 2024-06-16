@@ -1,0 +1,9 @@
+{% comment %}
+Optional context
+- text: string, defaults to "Aceptada"
+{% endcomment %}
+
+<div class="flex gap-x-2 bg-green-600 text-white p-4 rounded justify-center items-center">
+    <i class="bi bi-check2-circle"></i>
+    <p>{{ text|default:"Aceptada"}}</p>
+</div>

@@ -39,8 +39,8 @@ class Business(models.Model):
         return self.user.get_username()
 
     class Meta:
-        verbose_name = _("Negocio")
-        verbose_name_plural = _("Negocios")
+        verbose_name = _("Empresa")
+        verbose_name_plural = _("Empresas")
 
 
 class JobOfferIndex(Page):

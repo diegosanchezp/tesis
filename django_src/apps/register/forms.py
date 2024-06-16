@@ -1,21 +1,26 @@
 from datetime import date
 from django import forms
-from django.db.models import Q
+from django.db.models import Q, TextChoices
 from django.contrib.auth.forms import BaseUserCreationForm
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.query import QuerySet
 
 from django_src.apps.register.models import (
-    Carreer, Mentor, Student, MentorExperience,
+    Carreer,
+    Mentor,
+    Student,
+    MentorExperience,
     RegisterApprovals,
-    RegisterApprovalStates, RegisterApprovalEvents,
+    RegisterApprovalStates,
+    RegisterApprovalEvents,
     approval_state_machine,
 )
 
 from django.core.exceptions import ValidationError
 
 from django.utils.translation import gettext_lazy as _
+
 
 class QueryForm(forms.Form):
     """
@@ -30,7 +35,7 @@ class QueryForm(forms.Form):
         choices=[
             (ESTUDIANTE, _("Estudiante")),
             (MENTOR, _("Mentor")),
-            (EMPRESA,_("Empresa")),
+            (EMPRESA, _("Empresa")),
         ],
         widget=forms.HiddenInput(),
         required=True,
@@ -42,6 +47,7 @@ class QueryForm(forms.Form):
         to_field_name="name",
         widget=forms.HiddenInput(),
     )
+
 
 class StudentForm(forms.ModelForm):
 
@@ -55,7 +61,12 @@ class StudentForm(forms.ModelForm):
 
     class Meta:
         model = Student
-        fields = ["interests", "specialization", "carreer", "voucher",]
+        fields = [
+            "interests",
+            "specialization",
+            "carreer",
+            "voucher",
+        ]
 
         # https://docs.djangoproject.com/en/stable/topics/forms/modelforms#overriding-the-default-fields
         widgets = {
@@ -69,18 +80,20 @@ class StudentForm(forms.ModelForm):
         error_messages = {
             "specialization": {
                 "invalid_choice": _(
-                    "La especialización seleccionada no pertenece a la carrera seleccionada. "\
+                    "La especialización seleccionada no pertenece a la carrera seleccionada. "
                     "Vuelve al paso 3, para corregir"
                 )
             },
             "carreer": {
-                "invalid_choice": _("La carrera seleccionada no existe. Vuelve al paso 2, para corregir"),
+                "invalid_choice": _(
+                    "La carrera seleccionada no existe. Vuelve al paso 2, para corregir"
+                ),
             },
             # "interests": {
             #
             # },
-
         }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Enforce the fields to be required
@@ -107,9 +120,12 @@ class StudentForm(forms.ModelForm):
             return
 
         if interests and specialization:
-            self.add_error(field="interests", error="No se puede seleccionar temas de interés ya que tienes una especialización.")
+            self.add_error(
+                field="interests",
+                error="No se puede seleccionar temas de interés ya que tienes una especialización.",
+            )
 
-        if not ( interests or specialization ):
+        if not (interests or specialization):
             raise ValidationError(
                 _("No haz seleccionado ni especialización ni tema de interés")
             )
@@ -119,7 +135,10 @@ class StudentForm(forms.ModelForm):
             ).exists()
 
             if not count_interests:
-                self.add_error(field="interests", error="No se puede seleccionar temas de interés que no pertenezca a la carrera seleccionada.")
+                self.add_error(
+                    field="interests",
+                    error="No se puede seleccionar temas de interés que no pertenezca a la carrera seleccionada.",
+                )
 
         if specialization:
             count_specialization = carreer.carrerspecialization_set.filter(
@@ -127,7 +146,10 @@ class StudentForm(forms.ModelForm):
             ).exists()
 
             if not count_specialization:
-                self.add_error(field="specialization", error="La especialización seleccionada no pertenece a la carrera seleccionada.")
+                self.add_error(
+                    field="specialization",
+                    error="La especialización seleccionada no pertenece a la carrera seleccionada.",
+                )
 
 
 class UserCreationForm(BaseUserCreationForm):
@@ -150,19 +172,21 @@ class UserCreationForm(BaseUserCreationForm):
             return
 
         if get_user_model().objects.filter(email=email).exists():
-            raise ValidationError(
-                _("Ya existe un usuario con este correo electrónico")
-            )
+            raise ValidationError(_("Ya existe un usuario con este correo electrónico"))
 
         return email
-
 
     class Meta(BaseUserCreationForm.Meta):
 
         # https://docs.djangoproject.com/en/stable/ref/contrib/auth/#django.contrib.auth.models.User
         model = get_user_model()
         fields = (
-            "profile_pic", "first_name", "last_name", "email", "password1", "password2",
+            "profile_pic",
+            "first_name",
+            "last_name",
+            "email",
+            "password1",
+            "password2",
         )
 
         labels = {
@@ -186,7 +210,9 @@ class MentorExperienceForm(forms.ModelForm):
         widgets = {
             "name": forms.TextInput(attrs={"required": True, "minlength": 4}),
             "company": forms.TextInput(attrs={"required": True, "minlength": 1}),
-            "description": forms.Textarea(attrs={"rows": 3, "required": True, "minlength": 4}),
+            "description": forms.Textarea(
+                attrs={"rows": 3, "required": True, "minlength": 4}
+            ),
             "init_year": forms.DateInput(attrs={"type": "date", "required": True}),
             "end_year": forms.DateInput(attrs={"type": "date"}),
         }
@@ -194,7 +220,7 @@ class MentorExperienceForm(forms.ModelForm):
             "name": _("Ej: Frontend developer"),
         }
 
-        exclude=["mentor", "id", "pk"]
+        exclude = ["mentor", "id", "pk"]
 
     def clean(self):
 
@@ -207,14 +233,23 @@ class MentorExperienceForm(forms.ModelForm):
         init_year = cleaned_data.get("init_year")
 
         if not current and not end_year:
-                self.add_error(field="current", error=_("Marca si este cargo es el actual, o añade el año de finalización"))
+            self.add_error(
+                field="current",
+                error=_(
+                    "Marca si este cargo es el actual, o añade el año de finalización"
+                ),
+            )
 
         if init_year:
             if init_year > self.today:
-                self.add_error(field="init_year", error=_("El año de inicio no puede ser mayor al año actual"))
+                self.add_error(
+                    field="init_year",
+                    error=_("El año de inicio no puede ser mayor al año actual"),
+                )
 
         # End year can be
         return cleaned_data
+
 
 class MentorExperienceBaseFormSet(forms.BaseModelFormSet):
     def __init__(self, *args, **kwargs):
@@ -243,11 +278,14 @@ class MentorExperienceBaseFormSet(forms.BaseModelFormSet):
             if current:
                 actual_exp_count += 1
             if actual_exp_count > 3:
-                raise ValidationError(_("No se puede tener más de tres cargos actuales"))
+                raise ValidationError(
+                    _("No se puede tener más de tres cargos actuales")
+                )
 
             # if experience in experiences:
             #     raise ValidationError(_("No se puede tener dos experiencias con el mismo nombre"))
             # experiences.add(experience)
+
 
 def get_MentorExperienceFormSet(extra: int = 1, max_num: int | None = None):
 
@@ -260,6 +298,7 @@ def get_MentorExperienceFormSet(extra: int = 1, max_num: int | None = None):
         exclude=["id", "mentor"],
     )
     return MentorExperienceFormSet
+
 
 class MentorForm(forms.ModelForm):
 
@@ -285,23 +324,30 @@ class MentorForm(forms.ModelForm):
         )
 
         # https://docs.djangoproject.com/en/stable/topics/forms/modelforms#overriding-the-default-fields
-        widgets = {
-            "carreer": forms.HiddenInput()
-        }
+        widgets = {"carreer": forms.HiddenInput()}
+
 
 class UserTypeChoiceField(forms.ModelChoiceField):
     """
     Just to get a better name for the options of this field
     """
+
     def label_from_instance(self, obj: ContentType):
-        translate={
-            "mentor": _("Mentor"),
-            "student": _("Estudiante"),
-        }
-        return f"{translate[obj.model]}"
+        return obj.name
+
+
+class ApprovalModalitys(TextChoices):
+    """
+    UI ways to approve or reject a request
+    """
+
+    # A single Approval is being approved or rejected in a modal
+    MODAL = "modal", _("Modal")
+    # One or More Approvals are being approved or rejected from the table
+    TABLE = "table", _("Tabla")
+
 
 class ApprovalsFilterForm(forms.Form):
-
 
     # --- Filters ---
     name = forms.CharField(
@@ -322,16 +368,22 @@ class ApprovalsFilterForm(forms.Form):
         required=True,
     )
 
+    modality = forms.ChoiceField(
+        choices=ApprovalModalitys.choices,
+    )
+
     user_type = UserTypeChoiceField(
         label=_("Tipo"),
-        queryset=ContentType.objects.filter(Q(model="mentor") | Q(model="student")),
+        queryset=ContentType.objects.filter(
+            model__in=["mentor", "student", "business"]
+        ),
         to_field_name="model",
         empty_label=_("Todos"),
         required=False,
     )
 
     # --- End Filters ---
-    approvals=forms.ModelMultipleChoiceField(queryset=None, required=False)
+    approvals = forms.ModelMultipleChoiceField(queryset=None, required=False)
 
     def __init__(self, *args, approvals=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -373,7 +425,9 @@ class ApprovalsFilterForm(forms.Form):
                     # If there is no next state, it means that the action is not valid for the current state
                     approval_errors.append(
                         ValidationError(
-                            _("Acción %(accion)s, es inválida para el estado %(state)s de %(user)s"),
+                            _(
+                                "Acción %(accion)s, es inválida para el estado %(state)s de %(user)s"
+                            ),
                             params={
                                 "accion": RegisterApprovalEvents[action].label,
                                 "state": RegisterApprovalStates[approval.state].label,

@@ -1,22 +1,23 @@
 import { initFlowbite } from 'flowbite';
 import 'flowbite'
+import { Modal } from 'flowbite';
+import type { ModalOptions } from 'flowbite';
 import htmx from 'htmx.org'
+import { initHTMXutils } from 'js/utils/htmx'
 
 const form_id = "approvals-form"
 
+// Init events listeners for RPC communication beteween the server and the browser
+initHTMXutils()
+
 document.addEventListener("htmx:afterRequest",(evt)=>{
     if(evt.detail.target.id === form_id){
-        // Reinitialize flowbite after htmx request
-        // so the data attributes can work again after the html
-        // being replaced by htmx
-        initFlowbite()
-
-        // Same thing goes for any other event listeners in the table
+        // Reinitialize event listeners on the table after htmx replaces them
         setupForm()
     }
 })
 
-/* Checks or unchecks all of the checkboxes of the table */
+/** Checks or unchecks all of the checkboxes of the table */
 function setupForm(){
     const form = document.querySelector(`#${form_id}`) as HTMLFormElement | null
 
@@ -37,36 +38,6 @@ document.addEventListener("DOMContentLoaded", (evt) => {
     setupForm()
 })
 
-
-// Used to prevent setting the onclick attribute multiple times
-let prevApprovalId: number
-
-/** Adds events listeners to the modal buttons */
-function addEventListerners(approvalId: number, approveBtn: HTMLButtonElement | null, rejectBtn: HTMLButtonElement | null){
-
-    // If we are still showing the same approval, we don't need to add the event listeners again
-    if (prevApprovalId === approvalId) {
-        return
-    }
-
-    // Add or replace the onclick event listener, we need to use setAttribute because
-    // addEventListener can add an unlimited amount of event listeners, thus causing multiple
-    // executions of the approveReject function
-    approveBtn?.setAttribute(
-        "onclick",
-        `approveReject(${approvalId}, 'APPROVE')`,
-    )
-
-    rejectBtn?.setAttribute(
-        "onclick",
-        `approveReject(${approvalId}, 'REJECT')`,
-    )
-
-    // Update the previous approval id
-    prevApprovalId = approvalId
-
-}
-
 /**
 Sets the content of the modal for two types of files
 
@@ -74,67 +45,39 @@ Needed to set openModal on the window object because vite wraps this script
 into a module, which means that the function is not available in the global scope
 and can't be used on the onclick attribute of an element
 */
-window.openModal = (approvalId: number, user_name: string, user_type: string, file_type: string, file_url: string) =>{
+window.openModal = async (approvalId: number) =>{
+    const modalTarget = "#approval-modal"
 
+    await htmx.ajax("GET", "", {
+        target: `${modalTarget}`,
+        values: {
+            "approval_pk": approvalId,
+            "action": "get_modal"
+        },
+        swap: "innerHTML",
+    })
 
-    const approveBtn = document.querySelector("#approve-btn") as HTMLButtonElement | null
-    const rejectBtn = document.querySelector("#reject-btn") as HTMLButtonElement | null
-    console.log(approvalId, user_name, user_type, file_type, file_url)
+    const modalElement = document.querySelector(modalTarget) as HTMLElement
 
-    // Add event listeners to the buttons
-    addEventListerners(approvalId, approveBtn, rejectBtn)
-
-    const modalElement = document.querySelector('#default-modal');
-    // If the modal element is not found we can't continue the excution
-    if (!modalElement) {
-      throw new Error('Could not find modal element');
+    const modalOptions: ModalOptions = {
+        closable: true,
+        placement: 'bottom-right',
     }
+    const modal = new Modal(modalElement,modalOptions);
 
-    const userNameElement = modalElement.querySelector("#user_name")
-    const fileViewerElement  = modalElement.querySelector("#file_viewer")
-    const userTypeElement = modalElement.querySelector("#user_type")
+    // Show the modal after we get its HTML
+    modal.show()
 
-    if(!userNameElement || !fileViewerElement || !userTypeElement){
-        throw new Error('Could not find user_name or file_viewer element');
-    }
+    const closeBtn = modalElement.querySelector("#close-btn")
 
-    userNameElement.innerHTML = user_name
-    userTypeElement.innerHTML = user_type
-
-    // Provide a link to download the file, if it is PDF
-    // PDF can't be embedded because of X-Frame-Options: DENY header
-    if(file_type === "pdf"){
-        const template = document.querySelector("#pdf_template") as HTMLTemplateElement
-
-        if(!template){
-            console.error("pdf template element not found")
-            return
-        }
-        // Use an html template element to not create the element
-        // structure from scratch
-        const pdfMessage = template.content.cloneNode(true)
-        const anchor = pdfMessage.querySelector("a")
-        anchor.setAttribute("href", file_url)
-
-        fileViewerElement.replaceChildren(pdfMessage)
-    // Display an image
-    } else if(file_type === "image"){
-        const imgElement = document.createElement("img")
-
-        imgElement.src = file_url
-
-        // Insert img element in fileViewerElement
-        fileViewerElement.replaceChildren(imgElement)
-    } else {
-
-        const message = document.createElement("p")
-        message.innerHTML = `La extensión de archivo ${file_type} no se puede mostrar`
-    }
+    // Close the modal when X button is clicked
+    closeBtn.addEventListener("click", ()=>{
+        modal.hide()
+    })
 }
 
 /** Approves or rejects a register approval */
 window.approveReject = (approvalId: number, action: "APPROVE" | "REJECT") => {
-
     let form = document.querySelector(`#${form_id}`) as HTMLFormElement | null
 
     const checkboxId = form?.querySelector(`input[value="${approvalId}"]`) as HTMLInputElement
@@ -158,6 +101,7 @@ window.approveReject = (approvalId: number, action: "APPROVE" | "REJECT") => {
     }
 
     values["action"] = action
+    values["modality"] = "modal"
 
     // Think i should return this promise
     htmx.ajax("POST","", {
