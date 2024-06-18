@@ -6,20 +6,19 @@ Temas de interés
 {% endblock title %}
 
 {% block body %}
-<main x-data="select_theme('{{urlCarrer}}')" class="px-20 flex flex-col justify-center items-center">
 
+{% #stepper_container %}
+    {% stepper left_line="false" number=1 text="Seleccionar perfil" url=step_urls.select_perfil state="completed" green_right_line="true" %}
+    {% stepper number=2 text="Selecciona tu carrera" url=step_urls.select_carrera state="completed" green_left_line="true" green_right_line="true" %}
+    {% stepper number=3 text="Selecciona tu especialización" url=step_urls.specialization state="completed" green_left_line="true" %}
+    {% stepper right_line="false" number=4 text="Temas de interés" %}
+{% /stepper_container %}
+<main x-data="select_theme('{{urlCarrer}}')" class="px-20 flex flex-col justify-center items-center">
     {# Numbered Steps #}
 
-    <div class="flex justify-center my-10">
-        {% stepper left_line="false" number=1 text="Seleccionar perfil" url=step_urls.select_perfil %}
-        {% stepper number=2 text="Selecciona tu carrera" url=step_urls.select_carrera %}
-        {% stepper number=3 text="Selecciona tu especialización" url=step_urls.specialization %}
-        {% stepper right_line="false" number=4 text="Temas de interés" %}
-    </div>
     <h3 class=" text-xl">Elige uno o más temas de interés</h3>
 
     <form class=" w-[550px] flex gap-y-2 my-6 flex-col justify-center align-center">
-
         <ul class="flex gap-2 flex-wrap max-h-[80vh] overflow-y-scroll" x-on:fetchedpage="on_new_page">
             {% block theme_list %}
                 {% for theme in object_list %}

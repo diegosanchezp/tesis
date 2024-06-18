@@ -2,7 +2,7 @@
 
 Decides how to render a field based on the type
 field: BoundField
-
+container_css_classes: str, extra container classes
 {% endcomment %}
 
 {% load widget_tweaks %}
@@ -11,7 +11,7 @@ field: BoundField
     {% include "forms/widgets/checkbox.html" %}
 {% elif field.widget_type == "radioselect" %}
     {% include "forms/widgets/radio.html" %}
-{% elif field.widget_type == "file" %}
+{% elif field.widget_type == "file" or field.widget_type == "clearablefile" %}
     {% include "forms/widgets/file.html" %}
 {# input of type text,select,password,number,date,textarea #}
 {% else %}
@@ -20,7 +20,7 @@ field: BoundField
             {% if classes %}
                 class="{{ classes }}"
             {% else %}
-                class=""
+                class="{{ container_css_classes }}"
             {% endif %}
         {% endwith %}
     >

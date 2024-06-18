@@ -1,8 +1,10 @@
+{% var icon=icon|default:"person" %}
+
 <div x-data="profile_selector('{{id}}', {{selected}})">
-    <div @click="set_current" class="flex flex-col rounded-sm border border-solid border-black px-8 py-3 relative">
-        <i x-show="selected" class="bi bi-check-circle text-base absolute right-1 top-0.5"></i>
+    <div @click="set_current" class="flex flex-col rounded-sm border border-gray-200 rounded-lg shadow px-8 py-3 relative" :class="{'border-gray-200': !selected, 'border-ucv-yellow-dark': selected}">
+        <i x-show="selected" class="bi bi-check-circle text-base absolute right-1 top-0.5 text-ucv-yellow-dark"></i>
         <div class="flex items-center">
-            <i class="bi bi-person text-xl"></i>
+            <i class="bi bi-{{ icon }} text-xl"></i>
             <p class="ml-2">{{profile_name}}</p>
         </div>
     </div>

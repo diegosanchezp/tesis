@@ -6,16 +6,16 @@ Añade tu experiencia profesional
 {% endblock title %}
 
 {% block body %}
+{% #stepper_container %}
+    {% stepper number=1 text="Seleccionar perfil" left_line="false"  url=step_urls.select_perfil state="completed" green_right_line="true" %}
+    {% stepper number=2 text="Selecciona tu carrera" url=step_urls.select_carrera state="completed" green_left_line="true" %}
+    {% stepper number=3 text="Añade tu experiencia profesional" url=step_urls.specialization right_line="false"  %}
+{% /stepper_container %}
 <main
     class="px-20 flex flex-col justify-center items-center"
     x-data="form_component('{{ formset.prefix }}')"
     >
 
-    <div class="flex justify-center mt-10 mb-14">
-        {% stepper number=1 text="Seleccionar perfil" left_line="false"  url=step_urls.select_perfil %}
-        {% stepper number=2 text="Selecciona tu carrera" url=step_urls.select_carrera %}
-        {% stepper number=3 text="Añade tu experiencia profesional" url=step_urls.specialization right_line="false" %}
-    </div>
 
     <section class="w-full grid grid-cols-[1fr_60%_1fr]">
     <div></div>
@@ -27,7 +27,7 @@ Añade tu experiencia profesional
             hx-post=""
             hx-target="#formset"
             hx-swap="outerHTML"
-            class="border border-black rounded"
+            class="border border-gray-200 rounded-lg shadow"
             >
             {{ formset.management_form }}
             {% for form in formset %}
@@ -35,24 +35,17 @@ Añade tu experiencia profesional
                 {# The count field should appear in the first row #}
                 {% if formset.total_form_count > 1 %}
                     {% if forloop.counter > 1 %}
-                        <div class="col-span-full h-[1px] w-full bg-black"></div>
+                        {# Add a horizontal line to separate the forms #}
+                        <div class="col-span-full h-[1px] w-full bg-gray-200"></div>
                     {% endif %}
                 {% endif %}
                 <div id="{{form.prefix}}" class="grid grid-cols-3 gap-x-2 gap-y-3 p-6">
 
                     <div class="flex justify-between col-span-full">
-                        <p>#{{ forloop.counter }}</p>
+                        <p class="text-sm font-medium text-gray-900">#{{ forloop.counter }}</p>
                         {% if forloop.counter > 1 %}
                         <button type="button" @click="remove_subform('{{form.prefix}}', '{{forloop.counter}}')" >Borrar este cargo</button>
                         {% endif %}
-                        {% comment %}
-                            {% if form.is_valid %}
-                                <div class="flex items-baseline gap-x-2">
-                                    {{ form.DELETE }}
-                                    <label for="{{ form.DELETE.id_for_label }}">¿ Borrar este cargo ?</label>
-                                </div>
-                            {% endif %}
-                        {% endcomment %}
                     </div>
                     {% for field in form.visible_fields %}
                         <div class="
@@ -89,25 +82,21 @@ Añade tu experiencia profesional
                         ">
 
                             {% if "current" not in field.name and "Delete" not in field.label %}
-                                <label for="{{ field.id_for_label }}">{{field.label}}</label>
-                                {# Render the input element #}
-                                {{ field }}
-                                {% if field.help_text %}
-                                    <p class="mt-2">{{ field.help_text }}</p>
-                                {% endif %}
+                                {% include "forms/render_field.html" %}
                             {% endif %}
 
                             {% if "current" in field.name %}
-                                {{ field }}
-                                <label for="{{ field.id_for_label }}">{{field.label}}</label>
+                                {% include "forms/render_field.html" %}
                             {% endif %}
 
                             {# Render the error list of the filed #}
+                            {% comment %}
                             <ul class="text-red-600">
                                 {% for error in field.errors %}
                                     <li>{{ error|escape }}</li>
                                 {% endfor %}
                             </ul>
+                            {% endcomment %}
                         </div>
                     {% endfor %}
                 </div>

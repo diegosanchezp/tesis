@@ -7,12 +7,12 @@
 
 {% block body %}
 
-<div class="flex justify-center my-10">
-    {% stepper left_line="false" number=1 text="Seleccionar perfil" url=step_urls.select_perfil %}
+{% #stepper_container %}
+    {% stepper left_line="false" number=1 text="Seleccionar perfil" url=step_urls.select_perfil state="completed" %}
     {% stepper  right_line="false" number=2 text="Selecciona tu carrera" %}
-</div>
+{% /stepper_container %}
 
-<p x-data="{profile: $persist('').as('profile')}" class="my-10 text-center">
+<p x-data="{profile: $persist('').as('profile')}" class="mb-4 text-center">
     Selecciona la carrera que <span x-show="profile == 'estudiante'">estudias.</span> <span x-show="profile == 'mentor'">estudiaste.</span>
 </p>
 
@@ -29,7 +29,7 @@
                 <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only">Search</label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <i class="bi bi-search"></i>
+                    <i class="bi bi-search text-gray-700"></i>
                     </div>
                     <input
                         type="search"
@@ -40,7 +40,7 @@
                         hx-target="#search-results"
                         hx-swap="outerHTML"
                         hx-indicator=".htmx-indicator"
-                        class="block w-full p-4 pl-10 text-sm text-gray-900 border border-black rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        class="block w-full p-4 pl-10 text-sm text-gray-900 bg-gray-50 border border-gray-300 shadow rounded-lg focus:ring-blue-500 focus:border-blue-500"
                         placeholder="Buscar...">
                 </div>
             </div>
@@ -50,7 +50,10 @@
                 <img src="https://htmx.org/img/bars.svg" style="width: 20px"/>
                 <p>Buscando...</p>
             </span>
-            <p class="text-center" x-show="Boolean(carreer)" x-text="`Seleccionaste ${carreer}`"></p>
+            <p class="text-center" x-show="Boolean(carreer)" >
+                <span>Seleccionaste</span>
+                <span x-text="carreer" class="underline decoration-2 underline-offset-8 decoration-ucv-yellow-dark"></span>
+            </p>
 
             {# List of carreers and professions #}
             {% block carrer_form %}
@@ -58,6 +61,7 @@
                     id="search-results"
                     :class="Boolean(carreer) ? 'mb-24' : 'mb-2'"
                     class="w-full self-center grid
+                    border border-gray-200 rounded-lg shadow
                     {# For better looks adjust the grid number of grid columns #}
                     {% if faculty_num == 1 %}grid-cols-1{% endif %}
                     {% if faculty_num == 2 %}grid-cols-2{% endif %}

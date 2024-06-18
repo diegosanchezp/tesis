@@ -14,10 +14,10 @@
 {% endblock %}
 
 {% block body %}
-<div class="flex justify-center mt-10 mb-8">
-    {% stepper left_line="false" number=1 text="Seleccionar perfil" url=step_urls.select_perfil %}
+{% #stepper_container %}
+    {% stepper left_line="false" number=1 text="Seleccionar perfil" url=step_urls.select_perfil state="completed" %}
     {% stepper right_line="false" number=2 text="Información sobre la Empresa" %}
-</div>
+{% /stepper_container %}
 
 <div class="flex flex-col justify-center items-center">
     {% block user_business_form %}

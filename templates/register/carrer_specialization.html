@@ -8,11 +8,11 @@
 {% block body %}
 
 {# Steps #}
-<div class="flex justify-center my-10">
-    {% stepper left_line="false" number=1 text="Seleccionar perfil" url=step_urls.select_perfil %}
-    {% stepper number=2 text="Selecciona tu carrera" url=step_urls.select_carrera %}
+{% #stepper_container %}
+    {% stepper left_line="false" number=1 text="Seleccionar perfil" url=step_urls.select_perfil state="completed" green_right_line="true" %}
+    {% stepper number=2 text="Selecciona tu carrera" url=step_urls.select_carrera state="completed" green_left_line="true" %}
     {% stepper right_line="false" number=3 text="Selecciona tu especialización" %}
-</div>
+{% /stepper_container %}
 
 
 {# Selector de especializaciones #}
@@ -39,14 +39,14 @@
     </div>
     <div class="flex flex-col items-center justify-center my-4" x-show="!errorCarreer && !errorProfile">
 
-        <div class="flex w-[400px] flex-col justify-center items-center border border-black border-solid rounded-md">
+        <div class="flex w-[400px] flex-col justify-center items-center bg-gray-50 border border-gray-300 shadow rounded-md">
             {# Searcher #}
             <input
                 type="search"
                 name="search"
                 id="default-search"
                 placeholder="Busca por nombre..."
-                class="w-1/2 my-4 rounded-md"
+                class="w-1/2 my-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
                 x-model="search_key"
             />
                 <ul class="mx-12 mb-4 max-h-[80vh] overflow-y-scroll">
