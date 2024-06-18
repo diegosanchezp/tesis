@@ -5,13 +5,30 @@
 {% var right_line=right_line|default:"true" %}
 {% var number=number|default:1 %}
 {% var state=state|default:"not_completed" %}
+{% var green_right_line %}
+{% var green_left_line %}
+
+{% var text=text|default:"" %}
+{% var url=url|default:"" %}
 
 {# configuration variables #}
 {% var line_class="flex flex-col w-full justify-center items-center" %}
 
 {# main body of the stepper component #}
 <div class="flex flex-col w-[300px]">
-    <p class="text-lg text-center mb-3">{{ text }}</p>
+    <a {% if url %} href="{{ url }}" {% endif %}
+    class="
+    {% spaceless %}
+        text-base
+        {% if state == "completed" %}
+            text-gray-600
+        {% else %}
+            text-gray-700
+        {% endif %}
+        text-center mb-3
+    {% endspaceless %}
+    "
+    >{{ text }}</a>
     <div class="flex">
 
         {# left line #}
@@ -19,7 +36,18 @@
 
             {# If left_line is false set the background color as transparent #}
             <div class="
-                {% if left_line == 'true'%} bg-black {% else %} bg-transparent {% endif %} h-[1px] w-full
+                {% spaceless %}
+                    {% if left_line == 'true'%}
+                        {% if green_left_line %}
+                            bg-green-200
+                        {% else %}
+                            bg-blue-400
+                        {% endif %}
+                    {% else %}
+                        bg-transparent
+                    {% endif %}
+                    h-[1px] w-full
+                {% endspaceless %}
             ">
             </div>
         </div>
@@ -28,7 +56,11 @@
         {# This div is circle that contains the number #}
         <a {% if url %} href="{{ url }}" {% endif %}>
             {% if state != "completed" %}
-                <div class="flex items-center justify-center w-12 h-12 border border-blue-600 rounded-full shrink-0">
+                <div class="
+                    flex items-center justify-center w-12 h-12 border border-blue-600 rounded-full shrink-0
+                    bg-blue-700 text-white
+
+                    ">
                     <span class="text-base">{{ number }}</span>
                 </div>
             {% else %}
@@ -44,7 +76,18 @@
         <div class="{{ line_class }}">
             {# If left_line is false the background color as transparent #}
             <div class="
-                {% if right_line == 'true'%} bg-black {% else %} bg-transparent {% endif %} h-[1px] w-full"
+            {% spaceless %}
+                {% if right_line == 'true'%}
+                    {% if green_right_line %}
+                        bg-green-200
+                    {% else %}
+                        bg-blue-400
+                    {% endif %}
+                {% else %}
+                    bg-transparent
+                {% endif %}
+                    h-[1px] w-full"
+            {% endspaceless %}
             >
             </div>
         </div>

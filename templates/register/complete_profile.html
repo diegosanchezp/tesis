@@ -8,28 +8,28 @@
 
 {% block body %}
 
-<main class="flex flex-col justify-center items-center" x-data="complete_profile('{{urlCarrer}}', '{{formset_prefix}}')" @formerrors.document="set_form_errors">
-    <div class="flex justify-center mt-10 mb-14">
-        {% stepper number=1 text="Seleccionar perfil" left_line="false"  url=step_urls.select_perfil %}
-        {% stepper number=2 text="Selecciona tu carrera" url=step_urls.select_carrera %}
-        {% if profile == query_form.ESTUDIANTE %}
-            {% stepper number=3 text="Selecciona tu especialización" url=step_urls.specialization %}
+{% #stepper_container %}
+    {% stepper number=1 text="Seleccionar perfil" left_line="false" url=step_urls.select_perfil state="completed" green_right_line="true" %}
+    {% stepper number=2 text="Selecciona tu carrera" url=step_urls.select_carrera state="completed" green_left_line="true" green_right_line="true" %}
+    {% if profile == query_form.ESTUDIANTE %}
 
-            {# Student doesn't have a specialization, so he must of have selected themes #}
-            {% if no_spec %}
-                {% stepper number=4 text="Temas de interés" url=step_urls.specialization %}
-                {% stepper number=5 text="Completa el perfil" right_line="false" %}
-            {% else %}
-                {% stepper number=4 text="Completa el perfil" right_line="false" %}
-            {% endif %}
+        {# Student doesn't have a specialization, so he must of have selected themes #}
+        {% if no_spec %}
+            {% stepper number=3 text="Selecciona tu especialización" url=step_urls.specialization state="completed" green_left_line="true" green_right_line="true" %}
+            {% stepper number=4 text="Temas de interés" url=step_urls.specialization state="completed" green_left_line="true" %}
+            {% stepper number=5 text="Completa el perfil" right_line="false" %}
+        {% else %}
+            {% stepper number=3 text="Selecciona tu especialización" url=step_urls.specialization state="completed" green_left_line="true" %}
+            {% stepper number=4 text="Completa el perfil" right_line="false"  %}
         {% endif %}
+    {% endif %}
 
-        {% if profile == query_form.MENTOR %}
-            {% stepper number=3 text="Añade tu experiencia profesional" url=step_urls.add_exp %}
-            {% stepper number=4 text="Completa el perfil" right_line="false"   %}
-        {% endif %}
-
-    </div>
+    {% if profile == query_form.MENTOR %}
+        {% stepper number=3 text="Añade tu experiencia profesional" url=step_urls.add_exp green_left_line="true" green_left_line="true" state="completed" %}
+        {% stepper number=4 text="Completa el perfil" right_line="false" %}
+    {% endif %}
+{% /stepper_container %}
+<main class="flex flex-col justify-center items-center border border-gray-200 rounded-lg shadow mx-20 mb-10 p-4" x-data="complete_profile('{{urlCarrer}}', '{{formset_prefix}}')" @formerrors.document="set_form_errors">
     {% if query_form.errors %}
     <div>
         <h2 class="text-lg">Uh oh, Algo malo ha pasado</h2>
@@ -50,13 +50,13 @@
     {# Profile pic #}
 
     {% if not query_form.errors %}
-        <div class="flex flex-col justify-center text-center my-4">
+        <div class="flex flex-col justify-center text-center mb-4">
             <label for="{{ user_form.profile_pic.id_for_label }}">{{user_form.profile_pic.label}}</label>
             <div class="my-4">
                 <i class="bi bi-person-circle text-[50px]"></i>
             </div>
             <input type="file"
-                   class="self-center"
+                   class="self-center block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
                    id="{{ user_form.profile_pic.id_for_label }}"
                    name="{{user_form.profile_pic.html_name}}"
                    form="abc-form"
@@ -89,27 +89,12 @@
             {# Render all of the form fields of the user_form excluding those that are hidden #}
             {% for field in user_form %}
                 {% if not field.is_hidden and field != user_form.profile_pic %}
-                    <div
-                        class="
-                            flex flex-col
-                            {% if field == user_form.password1 %}
-                                col-start-1
-                            {% endif %}
-                        ">
-                        <label for="{{ field.id_for_label }}">{{field.label}}</label>
-
-                        {# Render the input element #}
-                        {{ field }}
-
-                        {# Render the error list of the filed #}
-                        {% if field.errors %}
-                            <ul class="text-red-600">
-                                {% for error in field.errors %}
-                                    <li>{{ error|escape }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
+                
+                    {% if field == user_form.password1 %}
+                        {% include "forms/render_field.html" with container_css_classes="col-start-1" %}
+                    {% else %}
+                        {% include "forms/render_field.html" %}
+                    {% endif %}
                 {% endif %}
             {% endfor %}
 
@@ -123,7 +108,6 @@
             {% endif %}
 
             {% if profile == query_form.MENTOR %}
-
                 {# Formset meta #}
                 <input type="hidden" name="form-TOTAL_FORMS" x-bind:value="mentor_exp.length">
                 <input type="hidden" name="form-INITIAL_FORMS" value="0">
@@ -143,6 +127,9 @@
             {# Entity form fields #}
             {% for field in entity_form.visible_fields %}
                 {% if field != entity_form.voucher %}
+                    {% include "forms/render_field.html" %}
+
+                {% comment %}
                     <div class="flex flex-col">
                         <label for="{{ field.id_for_label }}">{{field.label}}</label>
                         {{ field }}
@@ -152,6 +139,7 @@
                             {% endfor %}
                         </ul>
                     </div>
+                {% endcomment %}
                 {% endif %}
             {% endfor %}
 
@@ -192,13 +180,14 @@
                 {% endif %}
 
             {% endfor %}
-
         </form>
         {% endblock form %}
 
 
     {% if not query_form.errors %}
-        {% include "register/file_field.html" with field=entity_form.voucher form_id="abc-form" required=entity_form.voucher.field.required %}
+        <div class="my-4">
+            {% include "forms/render_field.html" with field=entity_form.voucher %}
+        </div>
         {# render errors of the below input unsing alpinejs #}
         <template x-if="errors['entity_form']">
             <ul class="col-span-full text-red-600">

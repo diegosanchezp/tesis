@@ -1,5 +1,6 @@
 components:
   stepper: "components/stepper.html"
+  stepper_container: "components/stepper_container.html"
   profile_selector: "components/profile_selector.html"
   button: "components/button.html"
   pro_career_tabs: "components/pro_career/detail_tabs.html"

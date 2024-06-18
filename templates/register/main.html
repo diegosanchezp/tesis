@@ -6,18 +6,17 @@
 {% endblock %}
 
 {% block body %}
+{# Numbered Steps #}
+{% #stepper_container %}
+    {% stepper left_line="false" right_line="false" number=1 text="Seleccionar perfil" %}
+{% /stepper_container %}
 <main class="px-20">
-    {# Numbered Steps #}
-    <div class="flex justify-center mt-10">
-        {% stepper left_line="false" right_line="false" number=1 text="Seleccionar perfil" %}
-    </div>
-
     <form x-data class="flex flex-col justify-center">
         {# Profile Selectors #}
         <div class="flex gap-x-5 mt-14 justify-center">
             {% profile_selector id="estudiante" profile_name="Estudiante" selected="true" %}
-            {% profile_selector id="mentor" profile_name="Mentor" %}
-            {% profile_selector id="empresa" profile_name="Empresa" %}
+            {% profile_selector id="mentor" profile_name="Mentor" icon="mortarboard" %}
+            {% profile_selector id="empresa" profile_name="Empresa" icon="building" %}
         </div>
         <div class="self-center mt-20" x-show="$store.profile.profile == 'empresa'">
             <p class="mb-5 text-center text-xl font-semibold">

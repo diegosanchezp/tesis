@@ -76,6 +76,10 @@ class StudentForm(forms.ModelForm):
             "specialization": forms.HiddenInput(),
             "carreer": forms.HiddenInput(),
         }
+        help_texts = {
+            "voucher": _("Puedes utilizar tu carnet, kardex, o cualquier documento que compruebe que eres estudiante de la UCV."),
+        }
+
 
         error_messages = {
             "specialization": {
@@ -103,6 +107,8 @@ class StudentForm(forms.ModelForm):
         self.fields["carreer"].to_field_name = "name"
         self.fields["specialization"].to_field_name = "name"
         self.fields["interests"].to_field_name = "name"
+        self.fields["voucher"].widget.attrs.update(form="abc-form")
+
 
     def clean(self):
         cleaned_data = super().clean()
@@ -165,6 +171,10 @@ class UserCreationForm(BaseUserCreationForm):
 
         # Profile pic is not enforced
         self.fields["profile_pic"].required = False
+        self.fields["email"].required = True
+        self.fields["email"].widget.attrs.update(
+            {"placeholder": "diego@mail.com", "autocomplete": "email"}
+        )
 
     def clean_email(self):
         email = self.cleaned_data.get("email")
@@ -315,6 +325,7 @@ class MentorForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["voucher"].required = True
         self.fields["carreer"].to_field_name = "name"
+        self.fields["voucher"].widget.attrs.update(form="abc-form")
 
     class Meta:
         model = Mentor
@@ -322,6 +333,9 @@ class MentorForm(forms.ModelForm):
             "carreer",
             "voucher",
         )
+        help_texts = {
+            "voucher": _("Puedes utilizar tu carnet, kardex, o cualquier documento que compruebe que fuiste estudiante de la UCV."),
+        }
 
         # https://docs.djangoproject.com/en/stable/topics/forms/modelforms#overriding-the-default-fields
         widgets = {"carreer": forms.HiddenInput()}
