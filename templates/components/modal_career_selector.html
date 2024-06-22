@@ -1,0 +1,25 @@
+{% extends "components/modal/modal.html" %}
+
+{% block modal_id %}career-selector-modal{% endblock %}
+
+{% block title %}
+    Cambiar carrera académica
+{% endblock title %}
+
+{% block body %}
+<form id="career-selector-form" hx-post="{% url 'change_career' %}">
+    {% include "components/career_selector.html" %}
+</form>
+{% endblock body %}
+
+{% block modal_footer %}
+<div id="modal_footer" class="flex items-center justify-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+    <div
+        class="col-span-full flex justify-center items-center"
+    >
+        {% #button icon_left="bi bi-floppy text-white" type="submit" form="career-selector-form" %}
+            Guardar
+        {% /button %}
+    </div>
+</div>
+{% endblock modal_footer %}

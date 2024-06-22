@@ -3,7 +3,11 @@ from django_src.mentor.utils import loggedin_and_approved
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseBadRequest
 from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
+
 from .forms import UserProfileForm
+from django_src.utils import renderMessagesAsToasts
 
 
 def get_profile_forms(user, data=None, files=None):
@@ -32,10 +36,13 @@ def change_password_view(request):
     password_form = context["password_form"]
     if password_form.is_valid():
         password_form.save()
+        messages.success(request, _("¡Contraseña cambiada!"))
 
-    return TemplateResponse(
+    response = TemplateResponse(
         request, template="customauth/change_password.html", context=context
     )
+    renderMessagesAsToasts(request, response)
+    return response
 
 
 # Create your views here.
@@ -57,9 +64,16 @@ def change_profile_view(request):
     }
 
     if not request.htmx:
-        return HttpResponseBadRequest("Request not made with htmx")
+        response = HttpResponseBadRequest("Request not made with htmx")
+        messages.error(request, _("La solicitud no fue hecha con htmx"))
+        renderMessagesAsToasts(request, response)
+        return response
+
+    response = TemplateResponse(request, template=template_name, context=context)
 
     if user_form.has_changed() and user_form.is_valid():
+        messages.success(request, _("¡Perfil actualizado!"))
         user_form.save()
 
-    return TemplateResponse(request, template=template_name, context=context)
+    renderMessagesAsToasts(request, response)
+    return response
