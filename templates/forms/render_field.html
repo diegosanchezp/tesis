@@ -7,12 +7,15 @@ container_css_classes: str, extra container classes
 
 {% load widget_tweaks %}
 
-{% if field.widget_type == "checkbox" %}
+{% if field.is_hidden %}
+    {{ field }}
+{% elif field.widget_type == "checkbox" %}
     {% include "forms/widgets/checkbox.html" %}
 {% elif field.widget_type == "radioselect" %}
     {% include "forms/widgets/radio.html" %}
 {% elif field.widget_type == "file" or field.widget_type == "clearablefile" %}
     {% include "forms/widgets/file.html" %}
+
 {# input of type text,select,password,number,date,textarea #}
 {% else %}
     <div
@@ -38,14 +41,4 @@ container_css_classes: str, extra container classes
 {% endif %}
 
 {# errors #}
-{% if field.errors %}
-    <ul class="mb-5 mt-1">
-        {% for error in field.errors %}
-            <li class="text-sm text-red-600">{{ error|escape }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
-
-{% if forloop.last %}
-    {% for field in hidden_fields %}{{ field }}{% endfor %}
-{% endif %}
+{% include "forms/render_field_errors.html" %}
