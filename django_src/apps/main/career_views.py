@@ -6,10 +6,16 @@ from django.contrib import messages
 from django_htmx.http import trigger_client_event
 from django_src.apps.register.models import Faculty, Carreer, Student, Mentor
 from render_block import render_block_to_string
-from django_src.apps.register.forms import QueryForm, StudentForm, MentorForm
+from django_src.apps.register.forms import QueryForm
 from django_src.mentor.utils import loggedin_and_approved
-from django_src.utils import hxSwap, renderMessagesAsToasts
+from django_src.utils.webui import (
+    hxSwap,
+    renderMessagesAsToasts,
+    close_modal,
+    open_modal,
+)
 from django.utils.translation import gettext_lazy as _
+from django_src.student.profile.view import open_spec_modal, render_spec_section
 
 
 def get_career_context(request):
@@ -33,15 +39,6 @@ def get_career_context(request):
         "carreer": carreer,
         "carreer_name": carreer.name,
     }
-
-
-def close_modal_rpc(response: HttpResponse):
-
-    trigger_client_event(
-        response=response,
-        name="closeModal",
-        params={"modalTargetId": "#career-selector-modal"},
-    )
 
 
 def update_career_name(response, entity):
@@ -75,6 +72,7 @@ def change_career(request):
     if query_form.is_valid():
         profile = query_form.cleaned_data["profile"]
         carreer = query_form.cleaned_data["carreer"]
+        change_career_modal_id = "#career-selector-modal"
 
         if profile == QueryForm.ESTUDIANTE:
             student = Student.objects.get(user__pk=entity_id)
@@ -82,29 +80,46 @@ def change_career(request):
             student.save()
             response = HttpResponse("Carrera cambiada exitosamente")
 
-            close_modal_rpc(response)
-
-            update_career_name(response=response, entity=student)
+            close_modal(response, change_career_modal_id)
 
             # Show a success message
             messages.success(request, "Carrera cambiada exitosamente")
 
-            # TODO: If there are any specializations in the career, tell the student to select one
+            # If there are any specializations in the career, tell the student to select one
             if carreer.carrerspecialization_set.count() > 0:
                 messages.info(
                     request, message=_("Por favor selecciona una especialización")
                 )
-                pass
+                open_spec_modal(response, career_id=carreer.pk)
+            else:
+                # Reset the specialization
+                student.specialization = None
+                student.save()
+                messages.warning(
+                    request,
+                    _(
+                        "Especialización reseteada, la carrera seleccionada no tiene especializaciones"
+                    ),
+                )
+                # Refresh the specialization section
+                hxSwap(
+                    response,
+                    target_element_id="change-specialization",
+                    position="outerHTML",
+                    text_html=render_spec_section(student),
+                )
 
+            update_career_name(response=response, entity=student)
             renderMessagesAsToasts(request, response)
 
+            breakpoint()
             return response
 
         if query_form.cleaned_data["profile"] == QueryForm.MENTOR:
             mentor = Mentor.objects.get(user__pk=entity_id)
             mentor.carreer = carreer
             response = HttpResponse("Carrera cambiada exitosamente")
-            close_modal_rpc(response)
+            close_modal(response, change_career_modal_id)
             return response
 
     response = HttpResponseBadRequest("Error al cambiar la carrera")

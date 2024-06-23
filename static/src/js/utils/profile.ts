@@ -1,4 +1,4 @@
-import { openModal, closeModalRPC } from 'js/utils/modal'
+import { openModal, closeModalRPC, openModalRPC } from 'js/utils/modal'
 import htmx from 'htmx.org';
 import { initHTMXutils } from 'js/utils/htmx'
 
@@ -14,6 +14,7 @@ export function setupProfile(){
     }
 
     document.body.addEventListener("closeModal", closeModalRPC)
+    document.body.addEventListener("openModal", openModalRPC)
 
     initHTMXutils()
 }

@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 
 from .forms import UserProfileForm
-from django_src.utils import renderMessagesAsToasts
+from django_src.utils.webui import renderMessagesAsToasts
 
 
 def get_profile_forms(user, data=None, files=None):

@@ -7,7 +7,7 @@
 {% endblock title %}
 
 {% block body %}
-<form id="career-selector-form" hx-post="{% url 'change_career' %}">
+<form id="career-selector-form" hx-post="{% url 'change_career' %}" class="px-8">
     {% include "components/career_selector.html" %}
 </form>
 {% endblock body %}

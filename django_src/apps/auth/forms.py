@@ -12,6 +12,9 @@ class UserProfileForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["profile_pic"].required = False
         self.fields["profile_pic"].widget.attrs.update(form="profile-form")
+        self.fields["first_name"].required = True
+        self.fields["last_name"].required = True
+        self.fields["email"].required = True
 
     class Meta:
         # https://docs.djangoproject.com/en/stable/ref/contrib/auth/#django.contrib.auth.models.User
