@@ -9,10 +9,9 @@ from render_block import render_block_to_string
 from django_src.apps.register.forms import QueryForm
 from django_src.mentor.utils import loggedin_and_approved
 from django_src.utils.webui import (
-    hxSwap,
     renderMessagesAsToasts,
     close_modal,
-    open_modal,
+    HXSwap,
 )
 from django.utils.translation import gettext_lazy as _
 from django_src.student.profile.view import open_spec_modal, render_spec_section
@@ -41,13 +40,11 @@ def get_career_context(request):
     }
 
 
-def update_career_name(response, entity):
+def update_career_name(entity, hx_util: HXSwap):
     """
     Update the career name in the profile edit UI
     """
-
-    hxSwap(
-        response,
+    hx_util.swap(
         target_element_id="career-form",
         position="outerHTML",
         text_html=render_to_string(
@@ -79,6 +76,7 @@ def change_career(request):
             student.carreer = carreer
             student.save()
             response = HttpResponse("Carrera cambiada exitosamente")
+            hx_util = HXSwap(response)
 
             close_modal(response, change_career_modal_id)
 
@@ -102,17 +100,16 @@ def change_career(request):
                     ),
                 )
                 # Refresh the specialization section
-                hxSwap(
-                    response,
+                hx_util.swap(
                     target_element_id="change-specialization",
                     position="outerHTML",
                     text_html=render_spec_section(student),
                 )
 
-            update_career_name(response=response, entity=student)
+            update_career_name(entity=student, hx_util=hx_util)
             renderMessagesAsToasts(request, response)
 
-            breakpoint()
+            hx_util.triggerSwap()
             return response
 
         if query_form.cleaned_data["profile"] == QueryForm.MENTOR:

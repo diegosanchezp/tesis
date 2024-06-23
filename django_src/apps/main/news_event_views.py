@@ -11,9 +11,10 @@ from django_src.apps.register.approvals_view import get_page_number
 from django_src.mentor.utils import loggedin_and_approved
 from django_src.apps.main.models import EventsIndex, NewsIndex
 from django_src.settings.wagtail_pages import events_index_path, news_index_path
+from django_src.utils.webui import HXSwap
 
 
-def get_wagtailpage_paginated(PageModel: Page, per_page: int = 6):
+def get_wagtailpage_paginated(PageModel: Page, per_page: int = 1):
     """
     Get paginated queryset of wagtail pages
     """
@@ -63,23 +64,37 @@ def evt_news_factory(section_id: str):
     def view(request):
         template = "main/event_news_feed_card.html"
 
+        indexes = get_news_evt_index()
+
         page_number = get_page_number(request)
-        context.update(
-            get_paginated_events(page_obj_name="pages", page_number=page_number)
-        )
+        if section_id == EVENT_SECTION:
+            context.update(
+                get_paginated_events(page_obj_name="pages", page_number=page_number)
+            )
+            context.update(
+                {
+                    "page_index": indexes["events_index"],
+                }
+            )
+        if section_id == NEWS_SECTION:
+            context.update(
+                get_paginated_news(page_obj_name="pages", page_number=page_number)
+            )
+            context.update(
+                {
+                    "page_index": indexes["news_index"],
+                }
+            )
+
         response = TemplateResponse(request, template, context)
-        trigger_client_event(
-            response=response,
-            name="jsSwap",  # hx-swap
-            params={
-                "target_element_id": f"{section_id}-load_more_btn",
-                "position": "outerHTML",
-                "text_html": render_block_to_string(
-                    template_name="main/event_news_feed.html",
-                    block_name="load_more_btn",
-                    context=context,
-                ),
-            },
+        HXSwap(response).singleSwap(
+            target_element_id=f"{section_id}-load_more_btn",
+            position="outerHTML",
+            text_html=render_block_to_string(
+                template_name="main/event_news_feed.html",
+                block_name="load_more_btn",
+                context=context,
+            ),
         )
 
         return response

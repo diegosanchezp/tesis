@@ -1,10 +1,13 @@
 import { initFlowbite } from 'flowbite';
 
+export interface SwapEvtDetail {
+    target_element_id: string
+    position: "innerHTML" | "outerHTML" | InsertPosition
+    text_html: string
+}
 export interface SwapEvent extends CustomEvent {
     detail: {
-        target_element_id: string
-        position: "innerHTML" | "outerHTML" | InsertPosition
-        text_html: string
+        swaps: SwapEvtDetail[]
     }
 }
 
@@ -14,22 +17,25 @@ export interface SwapEvent extends CustomEvent {
  */
 export function hxSwap(evt: SwapEvent){
     // Search for the target element
-    const targetElement = document.getElementById(evt.detail.target_element_id)
+    console.log(evt.detail.swaps)
+    for( const swap of evt.detail.swaps){
+        const targetElement = document.getElementById(swap.target_element_id)
 
-    // If the target element is not found, log an error and exit
-    if(!targetElement){
-        console.error(`Element with id ${evt.detail.target_element_id} not found`)
-        return
-    }
-    const { position, text_html } = evt.detail
+        // If the target element is not found, log an error and exit
+        if(!targetElement){
+            console.error(`Element with id ${swap.target_element_id} not found`)
+            return
+        }
+        const { position, text_html } = swap
 
-    // Replace the content of the target element
-    if(position === "innerHTML"){
-        targetElement.innerHTML = text_html
-    } else if(position === "outerHTML"){
-        targetElement.outerHTML = text_html
-    } else {
-        targetElement.insertAdjacentHTML(position, text_html)
+        // Replace the content of the target element
+        if(position === "innerHTML"){
+            targetElement.innerHTML = text_html
+        } else if(position === "outerHTML"){
+            targetElement.outerHTML = text_html
+        } else {
+            targetElement.insertAdjacentHTML(position, text_html)
+        }
     }
 }
 
