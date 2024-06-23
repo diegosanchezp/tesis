@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 from django_src.apps.register.models import Student, Carreer
 from django_src.mentor.utils import loggedin_and_approved
-from django_src.student.profile.forms import EditStudentForm, ChangeSpecializationForm
+from django_src.student.profile.forms import ChangeSpecializationForm
 from django_src.apps.auth.views import get_profile_forms
 from django_src.utils.webui import close_modal, renderMessagesAsToasts
 from render_block import render_block_to_string
@@ -27,19 +27,18 @@ def get_GET_context(request):
     profile_forms = get_profile_forms(user)
 
     student = get_object_or_404(Student, user=user)
-    student_form = EditStudentForm(instance=student)
-    student_form.is_valid()
 
     return {
         "student": student,
-        "student_form": student_form,
         **profile_forms,
     }
 
 
 def get_specialization_modal(request, career_id: int):
     template_name = "student/profile/modal_change_specialization.html"
-    context = {}
+    context = {
+        "student": get_object_or_404(Student, user=request.user),
+    }
 
     carreer: Carreer = get_object_or_404(
         Carreer.objects.prefetch_related("carrerspecialization_set"), pk=career_id
