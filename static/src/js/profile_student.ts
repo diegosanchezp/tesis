@@ -3,11 +3,11 @@ import { setupProfile } from 'js/utils/profile'
 import { openModal } from 'js/utils/modal'
 import htmx from 'htmx.org';
 
-const select_spec = () => ({
+const select_spec = (selectedSpecialization: string = '') => ({
 
     specializations: [],
     search_key: "",
-    specialization_selected: "",
+    specialization_selected: selectedSpecialization,
 
     init(){
         // Grab specializations names that came from the server

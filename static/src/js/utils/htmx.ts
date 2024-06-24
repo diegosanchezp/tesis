@@ -1,4 +1,5 @@
 import { initFlowbite } from 'flowbite';
+import htmx from 'htmx.org'
 
 export interface SwapEvtDetail {
     target_element_id: string
@@ -17,9 +18,8 @@ export interface SwapEvent extends CustomEvent {
  */
 export function hxSwap(evt: SwapEvent){
     // Search for the target element
-    console.log(evt.detail.swaps)
     for( const swap of evt.detail.swaps){
-        const targetElement = document.getElementById(swap.target_element_id)
+        let targetElement = document.getElementById(swap.target_element_id)
 
         // If the target element is not found, log an error and exit
         if(!targetElement){
@@ -36,6 +36,19 @@ export function hxSwap(evt: SwapEvent){
         } else {
             targetElement.insertAdjacentHTML(position, text_html)
         }
+
+        // Enable htmx behaviour for replaced element
+        // https://htmx.org/api/#process
+
+        // Get the target element again
+        targetElement = document.getElementById(swap.target_element_id)
+
+        // If the target element is not found, log an error and exit
+        if(!targetElement){
+            console.error(`Element with id ${swap.target_element_id} not found`)
+            return
+        }
+        htmx.process(targetElement)
     }
 }
 

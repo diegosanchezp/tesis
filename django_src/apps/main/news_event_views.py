@@ -14,7 +14,7 @@ from django_src.settings.wagtail_pages import events_index_path, news_index_path
 from django_src.utils.webui import HXSwap
 
 
-def get_wagtailpage_paginated(PageModel: Page, per_page: int = 1):
+def get_wagtailpage_paginated(PageModel: Page, per_page: int = 6):
     """
     Get paginated queryset of wagtail pages
     """

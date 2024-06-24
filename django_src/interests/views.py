@@ -20,7 +20,7 @@ def get_interest_theme_page(page_number: int, interests: QuerySet | None = None)
         interests = get_interest_queryset()
     paginator = Paginator(
         object_list=interests,
-        # Show 4 themes per page.
+        # Show 8 themes per page.
         per_page=8,
     )
 
@@ -29,7 +29,9 @@ def get_interest_theme_page(page_number: int, interests: QuerySet | None = None)
 
 
 @loggedin_and_approved
-def get_interest_theme_page_view(request, extra_context: dict[str, Any] = {}):
+def get_interest_theme_page_view(
+    request, extra_context: dict[str, Any] = {}, interest_queryset=None
+):
     """
     Used in interest theme selector component
 
@@ -37,8 +39,9 @@ def get_interest_theme_page_view(request, extra_context: dict[str, Any] = {}):
     """
 
     page_number = get_page_number(request)
-    interest_themes = get_interest_queryset()
-    interest_themes_page = get_interest_theme_page(page_number, interest_themes)
+    if not interest_queryset:
+        interest_queryset = get_interest_queryset()
+    interest_themes_page = get_interest_theme_page(page_number, interest_queryset)
 
     context = {
         "interest_themes": interest_themes_page,

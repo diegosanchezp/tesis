@@ -13,7 +13,7 @@
         <p class="text-center">Escoge una Especialización para la carrera <span>{{ carrer.name }}</span></p>
 
         {# Especialización chooser component #}
-        <div class="flex w-[400px] flex-col justify-center items-center bg-gray-50 border border-gray-300 shadow rounded-md" x-data="select_spec">
+        <div class="flex w-[400px] flex-col justify-center items-center bg-gray-50 border border-gray-300 shadow rounded-md" x-data="select_spec('{{student.specialization|default:''}}')">
             {# Searcher #}
             <input
                 type="search"
@@ -50,8 +50,8 @@
                             type="radio"
                             id="no_tengo"
                             name="specialization"
-                            value="no_tengo"
-                            x-bind:checked="specialization_selected == 'no_tengo'"
+                            value=""
+                            x-bind:checked="specialization_selected == ''"
                             x-model="specialization_selected"
                         />
                         <label for="no_tengo" class="font-bold">

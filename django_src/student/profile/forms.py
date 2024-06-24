@@ -1,5 +1,9 @@
 from django import forms
-from django_src.apps.register.models import Student, Carreer, CarrerSpecialization
+from django_src.apps.register.models import Student, Carreer, InterestTheme
+
+
+def get_add_interest_queryset(student):
+    return InterestTheme.objects.exclude(student=student).order_by("name")
 
 
 class ChangeCareerForm(forms.Form):
@@ -43,3 +47,33 @@ class ChangeSpecializationForm(forms.ModelForm):
                     field="specialization",
                     error="La especialización seleccionada no pertenece a la carrera seleccionada.",
                 )
+
+
+class ChangeInterestForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["interests"].queryset = InterestTheme.objects.filter(
+            student=self.instance
+        )
+
+    class Meta:
+        model = Student
+        fields = [
+            "interests",
+        ]
+
+
+class AddInterestForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        student = self.instance
+        self.fields["interests"].queryset = get_add_interest_queryset(student)
+        self.fields["interests"].to_field_name = "name"
+
+    class Meta:
+        model = Student
+        fields = [
+            "interests",
+        ]
