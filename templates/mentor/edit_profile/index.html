@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load django_vite slippers %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+    {% vite_asset 'js/mentor_edit_profile.ts' %}
+{% endblock %}
+
+{% block title %}
+Editar perfil - Mentor
+{% endblock title %}
+
+
+{% block body %}
+
+{% include "components/navbar.html" %}
+
+<main class="page-x-spacing">
+
+    <section id="profile-form-section" class="{% include "student/profile/container_styles.html" %}">
+        {% include "student/profile/h2.html" with text="Perfil" %}
+        {% include "customauth/profile_form.html" %}
+    </section>
+
+    <section id="change-password-section" class="{% include "student/profile/container_styles.html" %}">
+        {% include "student/profile/h2.html" with text="Cambiar contraseña" %}
+        {% include "customauth/change_password.html" %}
+    </section>
+
+    {# Render the section to select the academic career #}
+    {% include "main/career/change_career.html" with entity=mentor %}
+
+</main>
+{% endblock %}

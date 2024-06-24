@@ -85,6 +85,7 @@
                     {% spaceless %}
                     {# TODO #}
                     {% if request.user.is_mentor %}
+                        {% url 'mentor:edit_profile' %}
                     {% endif %}
 
                     {% if request.user.is_business %}
