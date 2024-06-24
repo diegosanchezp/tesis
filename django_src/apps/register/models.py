@@ -206,6 +206,9 @@ class StudentInterest(models.Model):
         on_delete=models.CASCADE,
     )
 
+    def __str__(self) -> str:
+        return f"{self.student.user.username} {self.interest.name}"
+
 
 class InterestTheme(models.Model):
     """

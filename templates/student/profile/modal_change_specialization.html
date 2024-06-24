@@ -1,0 +1,72 @@
+{% extends "components/modal/modal.html" %}
+
+{% block modal_id %}modal-change-specialization{% endblock %}
+{% block title %}Cambiar Especialización{% endblock %}
+
+
+{% block body %}
+    <form class="px-12"
+          hx-target="#change-specialization"
+          hx-post=""
+          hx-swap="outerHTML"
+    >
+        <p class="text-center">Escoge una Especialización para la carrera <span>{{ carrer.name }}</span></p>
+
+        {# Especialización chooser component #}
+        <div class="flex w-[400px] flex-col justify-center items-center bg-gray-50 border border-gray-300 shadow rounded-md" x-data="select_spec('{{student.specialization|default:''}}')">
+            {# Searcher #}
+            <input
+                type="search"
+                name="search"
+                id="default-search"
+                placeholder="Busca por nombre..."
+                class="w-1/2 my-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+                x-model="search_key"
+            />
+                <ul class="mx-12 mb-4 max-h-[80vh] overflow-y-scroll">
+                    <template x-for="specialization in filteredSpecialization" :key="specialization.name">
+                        <li class="flex items-start my-2" >
+                            <input
+                                type="radio"
+                                name="specialization"
+                                x-model="specialization_selected"
+                                x-bind:id="specialization.name"
+                                x-bind:value="specialization.name"
+                                x-bind:checked="specialization_selected == specialization.name"
+                                />
+
+                            <label
+                                class="ml-2"
+                                x-bind:for="specialization.name"
+                                x-text="specialization.name"
+                                :class="specialization.name === no_tengo ? 'font-bold': ''"
+                                >
+                            </label>
+                        </li>
+                    </template>
+
+                    <li>
+                        <input
+                            type="radio"
+                            id="no_tengo"
+                            name="specialization"
+                            value=""
+                            x-bind:checked="specialization_selected == ''"
+                            x-model="specialization_selected"
+                        />
+                        <label for="no_tengo" class="font-bold">
+                            No tengo especialización
+                        </label>
+                    </li>
+                </ul>
+        </div>
+
+        <div class="flex items-center justify-center my-2">
+            {% #button icon_left="bi bi-floppy text-white" type="submit" name="action" value="change_specialization" %}
+            Guardar
+            {% /button %}
+        </div>
+    </form>
+
+    {{ specializations_json|json_script:"specializations" }}
+{% endblock body %}

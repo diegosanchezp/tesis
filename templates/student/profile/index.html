@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load django_vite slippers %}
+
+{% comment %}
+Edit student profile
+
+{% endcomment %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+    {% vite_asset 'js/profile_student.ts' %}
+{% endblock %}
+
+
+{% block title %}
+Editar perfil - Studiante
+{% endblock title %}
+
+{% block body %}
+
+{% include "components/navbar.html" %}
+
+<main class="page-x-spacing">
+    <section id="quicklinks" class="flex gap-x-2 mt-4">
+        <a href="#career-form">
+            {% #button icon_right="bi bi-arrow-right"%}
+                Cambiar carrera
+            {% /button %}
+        </a>
+        <a href="#change-specialization">
+            {% #button icon_right="bi bi-arrow-right"%}
+                Cambiar especialización
+            {% /button %}
+        </a>
+        <a href="#change-interests">
+            {% #button icon_right="bi bi-arrow-right"%}
+                Cambiar temas de interés
+            {% /button %}
+        </a>
+    </section>
+
+
+    <section id="profile-form-section" class="{% include "student/profile/container_styles.html" %}">
+        {% include "student/profile/h2.html" with text="Perfil" %}
+        {% include "customauth/profile_form.html" %}
+    </section>
+
+
+    <section id="change-password-section" class="{% include "student/profile/container_styles.html" %}">
+        {% include "student/profile/h2.html" with text="Cambiar contraseña" %}
+        {% include "customauth/change_password.html" %}
+    </section>
+
+
+    {# Render the section to select the academic career #}
+    {% include "main/career/change_career.html" with entity=student %}
+
+
+    {% block change_specialization %}
+    <section id="change-specialization" class="{% include "student/profile/container_styles.html" %}">
+        {% include "student/profile/h2.html" with text="Especialización" %}
+
+        <p class="mb-2 text-sm font-medium text-gray-900">Especialización seleccionada</p>
+        <div class="flex gap-x-2 items-center">
+            {% if student.specialization %}
+                <div class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    {{ student.specialization.name }}
+                </div>
+            {% else %}
+                <p>No haz seleccionado Especialización</p>
+            {% endif %}
+
+            <div onclick="getSpecModal('{{ student.carreer.pk }}')">
+                {% #button icon_right="bi bi-pencil" type="button" %}
+                    {% if student.specialization %}
+                        Cambiar
+                    {% else %}
+                        Seleccionar
+                    {% endif %}
+                {% /button %}
+            </div>
+        </div>
+
+        <!-- Container of the career selector modal -->
+        <div id="modal-change-specialization-container" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-40 bg-gray-900 bg-opacity-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        </div>
+    </section>
+    {% endblock change_specialization %}
+
+    <section id="change-interests" class="{% include "student/profile/container_styles.html" %}">
+        {% include "student/profile/h2.html" with text="Intereses" %}
+
+        <div class="grid grid-cols-2">
+            {% block actual_interests %}
+            <form id="actual-interests" hx-post="" hx-target="this" hx-swap="outerHTML">
+                <p>Intereses actuales</p>
+                <div class="max-w-md overflow-y-scroll overflow-x-scroll max-h-28 bg-gray-50 border border-gray-300 p-2.5">
+                    <ul class="flex gap-2 flex-wrap items-center">
+                        {% for interest in student.interests.all %}
+                            <li>
+                                <div class="bg-slate-600 {% if small_interest %}px-1.5 py-1.5 rounded-xl{% else %}py-2 px-4 rounded-2xl {% endif %} text-white">
+                                    <input type="checkbox" name="interests" id="{{ interest.name }}" value="{{ interest.pk }}"/>
+                                    <label for="{{ interest.name }}">{{ interest.name }}</label>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% if interest_form.errors %}
+                    <div class="my-2">
+                        {% include "forms/render_field_errors.html" with field=interest_form.interests %}
+                    </div>
+                {% endif %}
+                <div class="my-2">
+                {% #button icon_right="bi bi-trash" type="submit" variant="red" name="action" value="delete_student_interests" %}
+                    Borrar
+                {% /button %}
+                </div>
+            </form>
+            {% endblock actual_interests %}
+
+            {% block other_interests %}
+            <form id="other-interests" hx-post="" hx-target="#interests-to-add-list" hx-swap="innerHTML" >
+                <p>Otros intereses</p>
+
+                <div class="max-w-md overflow-y-scroll overflow-x-scroll max-h-28 bg-gray-50 border border-gray-300 p-2.5">
+                    {% include "components/interests_selector.html" with interest_themes=interests_to_add input_name="interests" disable_hx_boost="True" action_name="paginate_student_interests" list_id="interests-to-add-list" %}
+                </div>
+
+                <div class="my-2">
+                {% #button icon_left="bi bi-plus" type="submit" name="action" value="add_interest_to_student" %}
+                    Añadir
+                {% /button %}
+                </div>
+            </form>
+            {% endblock other_interests %}
+        </div>
+    </section>
+</main>
+{% endblock %}

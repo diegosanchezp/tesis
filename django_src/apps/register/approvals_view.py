@@ -22,6 +22,8 @@ from wagtail.admin.utils import get_admin_base_url
 from render_block import render_block_to_string
 from django_htmx.http import trigger_client_event
 
+from django_src.utils.webui import HXSwap
+
 from .forms import ApprovalsFilterForm, ApprovalModalitys
 from .models import (
     RegisterApprovals,
@@ -370,17 +372,13 @@ def approvals_view(request):
             form_approval = cleaned_data["approvals"].first()
             approval = RegisterApprovals.objects.get(pk=form_approval.pk)
             context.update(user_approval=approval)
-            trigger_client_event(
-                response=htmx_reponse,
-                name="jsSwap",  # hx-swap
-                params={
-                    "target_element_id": f"modal_footer",
-                    "position": "outerHTML",
-                    "text_html": render_block_to_string(
-                        template_name="register/approvals/modal.html",
-                        block_name="modal_footer",
-                        context=request_context,
-                    ),
-                },
+            HXSwap(htmx_reponse).singleSwap(
+                target_element_id=f"modal_footer",
+                position="outerHTML",
+                text_html=render_block_to_string(
+                    template_name="register/approvals/modal.html",
+                    block_name="modal_footer",
+                    context=request_context,
+                ),
             )
         return htmx_reponse

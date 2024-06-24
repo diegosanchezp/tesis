@@ -5,6 +5,7 @@
 {% endcomment %}
 {% load slippers wagtailcore_tags pro_careers %}
 
+{# Links that show in the blue bar #}
 <nav class="flex px-2 py-2 bg-ucv-blue justify-between items-center">
     <i class="bi bi-list text-white text-3xl self-center mr-6"></i>
     <ul id="navbar-text-links" class="ml-2 w-full flex gap-x-6">
@@ -38,7 +39,6 @@
                 <a class="text-white" href="{% url 'business:students_directory' %}">Directorio Estudiantes</a>
             </li>
         {% endif %}
-
     </ul>
 
     <ul class="flex text-white items-center">
@@ -52,7 +52,7 @@
     </ul>
 </nav>
 
-<!-- Dropdown menu -->
+<!-- PROFILE Dropdown menu -->
 <div id="userDropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
     <div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
       <p class="mb-px">{{ request.user.first_name }} {{ request.user.last_name }}</p>
@@ -60,24 +60,50 @@
     </div>
 
     {# Avatar links #}
-    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="avatarButton">
+    <ul class="py-2 text-sm text-gray-800" aria-labelledby="avatarButton">
         {% if request.user.is_superuser or request.user.is_business or request.user.is_mentor %}
         <li>
-            <a href="{% url 'wagtailadmin_home' %}" class="block px-4 py-2 hover:bg-gray-100">
+            <a href="{% url 'wagtailadmin_home' %}" class="{% include "components/navbar/link_css.html" %}">
                 CMS
             </a>
         </li>
         {% endif %}
+
         {% if request.user.is_mentor %}
         <li>
-            <a href="{% url 'mentor:profile' username=request.user.get_username %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+            <a href="{% url 'mentor:profile' username=request.user.get_username %}" class="{% include "components/navbar/link_css.html" %}">
                 Mi perfil
             </a>
         </li>
         {% endif %}
+
+        {# ---- Edit Profile link ---- #}
+        <li>
+            <a
+                class="{% include "components/navbar/link_css.html" %}"
+                href="
+                    {% spaceless %}
+                    {# TODO #}
+                    {% if request.user.is_mentor %}
+                    {% endif %}
+
+                    {% if request.user.is_business %}
+                    {% endif %}
+
+                    {% if request.user.is_student %}
+                        {% url 'student:profile' %}
+                    {% endif %}
+                    {% endspaceless %}
+                "
+            >
+                Editar perfil
+            </a>
+
+        </li>
+
         </ul>
     <div class="py-1">
-        <form method="post" action="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200">
+        <form method="post" action="{% url 'logout' %}" class="text-sm {% include "components/navbar/link_css.html" %}">
             {% csrf_token %}
             <button type="submit">Cerrar sesión</button>
         </form>

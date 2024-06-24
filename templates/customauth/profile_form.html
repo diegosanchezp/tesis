@@ -1,0 +1,49 @@
+{% load slippers %}
+
+{# Profile picture field is rendered outside the form so that the file field doesn't loose its value when the form is submitted by htmx #}
+<div class="flex flex-col justify-center text-center mb-4 col-span-full">
+    <label for="{{ user_form.profile_pic.id_for_label }}">{{user_form.profile_pic.label}}</label>
+    <div class="flex justify-center my-4">
+        {% include "pro_carreer/mentor_avatar.html" with user=request.user %}
+    </div>
+    <input type="file"
+       class="self-center block text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
+       id="{{ user_form.profile_pic.id_for_label }}"
+       name="{{user_form.profile_pic.html_name}}"
+       {% if user_form.profile_pic.field.required %} required {% endif %}
+       form="profile-form"
+    >
+    <div id="profile_pic_errors" hx-swap-oob="true">
+        {% include "forms/render_field_errors.html" %}
+    </div>
+</div>
+
+<form
+    id="profile-form"
+    class="flex flex-col gap-y-4"
+    hx-post="{% url 'customauth:change_profile' %}"
+    hx-target="#profile-form"
+    hx-swap-oob="true"
+>
+    {% csrf_token %}
+
+    {% block profile_inputs %}
+    <div id="profile_inputs" class="flex flex-col gap-y-4">
+        <div class="grid grid-cols-2 gap-x-2">
+            <div>
+                {% include "forms/render_field.html" with field=user_form.first_name %}
+            </div>
+            <div>
+                {% include "forms/render_field.html" with field=user_form.last_name %}
+            </div>
+        </div>
+        {% include "forms/render_field.html" with field=user_form.email %}
+    </div>
+    {% endblock %}
+
+    <div class="col-span-full flex justify-center items-center">
+    {% #button icon_left="bi bi-floppy text-white" type="submit" %}
+        Guardar
+    {% /button %}
+    </div>
+</form>

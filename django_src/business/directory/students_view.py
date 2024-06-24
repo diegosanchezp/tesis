@@ -75,7 +75,6 @@ def students_directory_view(request):
     """ """
     template = "business/directory/students.html"
 
-    print(request.GET)
     if not (request.user.is_business or request.user.is_superuser):
         HttpResponseForbidden("You are not allowed to view this page")
 

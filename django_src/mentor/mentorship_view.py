@@ -1,7 +1,20 @@
 from django.urls.base import reverse, reverse_lazy
+
+from django_src.utils.webui import HXSwap
 from .utils import get_mentor, is_approved, validate_add_tasks, loggedin_and_approved
-from .forms import MentorshipForm, MentorshipTaskFormSet, MentorshipRequestActionForm, get_MentorshipTaskFormSet
-from .models import MentorshipRequest, Mentorship, TransitionError, StudentMentorshipTask, MentorshipTask
+from .forms import (
+    MentorshipForm,
+    MentorshipTaskFormSet,
+    MentorshipRequestActionForm,
+    get_MentorshipTaskFormSet,
+)
+from .models import (
+    MentorshipRequest,
+    Mentorship,
+    TransitionError,
+    StudentMentorshipTask,
+    MentorshipTask,
+)
 from django_src.apps.auth.models import User
 from django_src.apps.register.models import Student, Mentor
 from render_block import render_block_to_string
@@ -12,7 +25,12 @@ from django_htmx.http import trigger_client_event
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from django.template.response import TemplateResponse
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponseRedirect,
+    HttpResponseBadRequest,
+)
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.utils.translation import gettext_lazy as _
@@ -20,11 +38,13 @@ from django.contrib import messages
 
 from render_block import render_block_to_string
 
+
 # Typing pattern recommended by django-stubs:
 # https://github.com/typeddjango/django-stubs#how-can-i-create-a-httprequest-thats-guaranteed-to-have-an-authenticated-user
 class HtmxHttpRequest(HttpRequest):
     htmx: HtmxDetails
     user: User
+
 
 @require_http_methods(["GET", "POST"])
 @loggedin_and_approved
@@ -43,12 +63,18 @@ def create_mentorship(request: HtmxHttpRequest):
     if request.method == "POST":
 
         if request.htmx and action == "validate_add_tasks":
-            return validate_add_tasks(request, template_name, "tasks_formset", context, MentorshipTaskFormSet)
+            return validate_add_tasks(
+                request, template_name, "tasks_formset", context, MentorshipTaskFormSet
+            )
 
         if action == "create":
-            mentorship_form = MentorshipForm(data={**request.POST.dict(), "mentor": mentor.pk,})
+            mentorship_form = MentorshipForm(
+                data={
+                    **request.POST.dict(),
+                    "mentor": mentor.pk,
+                }
+            )
             mentorship_tasks_form = MentorshipTaskFormSet(data=request.POST)
-
 
             if mentorship_form.is_valid() and mentorship_tasks_form.is_valid():
 
@@ -61,7 +87,9 @@ def create_mentorship(request: HtmxHttpRequest):
                     task.save()
 
                 # TODO: Make a redirect to the mentorship list view
-                return HttpResponseRedirect(redirect_to=reverse_lazy("mentor:my_mentorships"))
+                return HttpResponseRedirect(
+                    redirect_to=reverse_lazy("mentor:my_mentorships")
+                )
 
             # Some of the forms are invalid
             context["mentorship_form"] = mentorship_form
@@ -70,7 +98,6 @@ def create_mentorship(request: HtmxHttpRequest):
             # form_html = render_block_to_string(template_name, "forms", context)
 
             return TemplateResponse(request, template_name, context)
-
 
     if request.method == "GET":
 
@@ -113,6 +140,7 @@ def create_mentorship(request: HtmxHttpRequest):
 
         return TemplateResponse(request, template_name, context)
 
+
 @require_http_methods(["GET"])
 @loggedin_and_approved
 def get_mentorship_tasks(request: HtmxHttpRequest, mentorship_pk: int):
@@ -120,14 +148,21 @@ def get_mentorship_tasks(request: HtmxHttpRequest, mentorship_pk: int):
     Returns the tasks of a mentorship so it can be rendered as a modal
     """
 
-    mentorship = get_object_or_404(Mentorship.objects.prefetch_related("tasks"), pk=mentorship_pk)
+    mentorship = get_object_or_404(
+        Mentorship.objects.prefetch_related("tasks"), pk=mentorship_pk
+    )
 
     tasks = mentorship.tasks.all().order_by("name")
 
-    return TemplateResponse(request, template="mentor/mentorship_tasks.html", context={
-        "mentorship": mentorship,
-        "tasks": tasks,
-    })
+    return TemplateResponse(
+        request,
+        template="mentor/mentorship_tasks.html",
+        context={
+            "mentorship": mentorship,
+            "tasks": tasks,
+        },
+    )
+
 
 @require_http_methods(["POST"])
 @loggedin_and_approved
@@ -138,7 +173,9 @@ def make_mentorship_request(request: HtmxHttpRequest, mentorship_pk: int):
 
     mentorship = get_object_or_404(Mentorship, pk=mentorship_pk)
     student = get_object_or_404(Student, user__username=request.user.username)
-    success_message = success_response(request, target_element_id=f"mentorship-{mentorship.pk}-message")
+    success_message = success_response(
+        request, target_element_id=f"mentorship-{mentorship.pk}-message"
+    )
 
     mentorship_request = MentorshipRequest(mentorship=mentorship, student=student)
     mentorship_request.save()
@@ -155,7 +192,7 @@ def make_mentorship_request(request: HtmxHttpRequest, mentorship_pk: int):
     response = TemplateResponse(
         request=request,
         template="mentor/mentorship_card.html",
-        context = context,
+        context=context,
     )
 
     # response = HttpResponse(response_html)
@@ -180,7 +217,11 @@ def message_response(status: int, message_type: str):
         For setting up the the request of the message
         """
 
-        def twice_inner(message: str, response: HttpResponse | None = None, context: dict = {},):
+        def twice_inner(
+            message: str,
+            response: HttpResponse | None = None,
+            context: dict = {},
+        ):
             """
             This function only takes the message
 
@@ -198,7 +239,7 @@ def message_response(status: int, message_type: str):
             message_html = render_to_string(
                 request=request,
                 context=context,
-                template_name="components/messages.html"
+                template_name="components/messages.html",
             )
 
             # Trigger a client side event
@@ -214,10 +255,13 @@ def message_response(status: int, message_type: str):
             return response
 
         return twice_inner
+
     return message_response_inner
+
 
 error_message_response = message_response(HttpResponseBadRequest.status_code, "error")
 success_response = message_response(HttpResponse.status_code, "success")
+
 
 @require_http_methods(["POST"])
 @loggedin_and_approved
@@ -226,14 +270,15 @@ def change_mentorship_status(request, mentorship_req_pk: int):
     A student or a Mentor changes mentorship status
     """
 
-
     mentorship_req = get_object_or_404(MentorshipRequest, pk=mentorship_req_pk)
     mentorship = mentorship_req.mentorship
 
     # Render messages above the mentorship component
     target_element_id = f"mentorship-{mentorship.pk}-message"
 
-    error_response = error_message_response(request, target_element_id=target_element_id)
+    error_response = error_message_response(
+        request, target_element_id=target_element_id
+    )
     success_message = success_response(request, target_element_id=target_element_id)
 
     student_queryset = Student.objects.filter(user=request.user)
@@ -258,7 +303,13 @@ def change_mentorship_status(request, mentorship_req_pk: int):
     except TransitionError:
         # Todo: message transition error
         return error_response(
-            _("Error en el cambio de estado para la acción %(action)s con status %(status)s") % {"action": MentorshipRequest.Events[action].value, "status": MentorshipRequest.State[mentorship_req.status].value }
+            _(
+                "Error en el cambio de estado para la acción %(action)s con status %(status)s"
+            )
+            % {
+                "action": MentorshipRequest.Events[action].value,
+                "status": MentorshipRequest.State[mentorship_req.status].value,
+            }
         )
 
     if is_mentor:
@@ -268,15 +319,11 @@ def change_mentorship_status(request, mentorship_req_pk: int):
         # Validations
         if not mentorship_req.mentorship.mentor == mentor:
             # message: can't change a mentorship that isn't created by you
-            return error_response(
-                _("No puedes cambiar una mentoría que no creaste")
-            )
+            return error_response(_("No puedes cambiar una mentoría que no creaste"))
 
         if action == MentorshipRequest.Events.CANCEL:
 
-            return error_response(
-                _("Mentores no pueden cancelar mentorías")
-            )
+            return error_response(_("Mentores no pueden cancelar mentorías"))
 
         if action == MentorshipRequest.Events.ACCEPT:
             # When a mentor accepts a mentorship request from a student, create as many entries in StudentMentorshipTask as they are defined in the mentorship
@@ -289,55 +336,49 @@ def change_mentorship_status(request, mentorship_req_pk: int):
 
         # Mentor accepts/rejects the mentorship requests in a modal displayed mentor/mentorship_detail.html
         response_html = render_block_to_string(
-            "mentor/student_info_modal.html", "modal_body_footer", {
+            "mentor/student_info_modal.html",
+            "modal_body_footer",
+            {
                 "student": mentorship_req.student,
                 "mentorship_request": mentorship_req,
                 "MentorshipRequest": MentorshipRequest,
-            }
+            },
         )
         # We don't need to do anything with the reject action, the transition method above handles it for us
         success_message_response = HttpResponse(response_html)
 
         # Also, update the mentorship request row table
-        trigger_client_event(
-            response=success_message_response,
-            name="jsSwap", # hx-swap
-            params={
-                "target_element_id": f"mentor_req_row-{mentorship_req.pk}",
-                "position": "outerHTML",
-                "text_html": render_to_string(
-                    request=request,
-                    context={
-                        "mentorship_request": mentorship_req,
-                        # If the request came from the mentorship landing page, show the mentorship name in the table
-                        "with_mentorship_name": reverse("mentor:landing") in request.META.get("HTTP_REFERER", ""),
-                    },
-                    template_name="mentor/mentorship/request_row.html"
-                )
-            },
+        HXSwap(success_message_response).singleSwap(
+            target_element_id=f"mentor_req_row-{mentorship_req.pk}",
+            position="outerHTML",
+            text_html=render_to_string(
+                request=request,
+                context={
+                    "mentorship_request": mentorship_req,
+                    # If the request came from the mentorship landing page, show the mentorship name in the table
+                    "with_mentorship_name": reverse("mentor:landing")
+                    in request.META.get("HTTP_REFERER", ""),
+                },
+                template_name="mentor/mentorship/request_row.html",
+            ),
         )
-
 
     elif is_student:
         student = student_queryset[0]
         if not mentorship_req.student == student:
             # Invalid Brah you didn't make the request
-            return error_response(
-                _("Esta mentoría no la solicitaste tu")
-            )
+            return error_response(_("Esta mentoría no la solicitaste tu"))
 
         if action == MentorshipRequest.Events.REJECT:
             # student cant approve or reject request
-            return error_response(
-                _("Un estudiante no puede rechazar mentorías")
-            )
+            return error_response(_("Un estudiante no puede rechazar mentorías"))
 
         if action == MentorshipRequest.Events.CANCEL:
 
             response = TemplateResponse(
                 request=request,
                 template="mentor/mentorship_card.html",
-                context = {
+                context={
                     "mentorship": mentorship,
                     "mentorship_request": mentorship_req,
                     "is_student": is_student,
@@ -345,7 +386,9 @@ def change_mentorship_status(request, mentorship_req_pk: int):
                 },
             )
 
-            success_message_response = success_message(_("Solicitud de mentoría cancelada"), response=response)
+            success_message_response = success_message(
+                _("Solicitud de mentoría cancelada"), response=response
+            )
 
     else:
         # can't do anything you are neither a student or mentor
