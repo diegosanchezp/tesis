@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load django_vite slippers %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+    {% vite_asset 'js/business_edit_profile.ts' %}
+{% endblock %}
+
+{% block title %}
+Editar perfil - Empresa
+{% endblock title %}
+
+{% block body %}
+
+{% include "components/navbar.html" %}
+
+<main class="page-x-spacing">
+
+    <section id="quicklinks" class="flex gap-x-2 mt-4">
+        <a href="#edit-business-info">
+            {% #button icon_right="bi bi-arrow-right"%}
+                Editar Info de la empresa
+            {% /button %}
+        </a>
+    </section>
+
+    <section id="profile-form-section" class="{% include "student/profile/container_styles.html" %}">
+        {% include "student/profile/h2.html" with text="Perfil" %}
+        {% include "customauth/profile_form.html" %}
+    </section>
+
+    <section id="change-password-section" class="{% include "student/profile/container_styles.html" %}">
+        {% include "student/profile/h2.html" with text="Cambiar contraseña" %}
+        {% include "customauth/change_password.html" %}
+    </section>
+
+    <section id="edit-business-info" class="{% include "student/profile/container_styles.html" %}">
+        {% include "student/profile/h2.html" with text="Info de la Empresa" %}
+
+        {% block business_form %}
+        <form
+            id="business_form"
+            class="flex flex-col gap-y-4 w-full"
+            hx-post=""
+            hx-target="this"
+            hx-swap="outerHTML"
+        >
+            {% include "forms/form.html" with form=business_form %}
+
+            <div class="col-span-full flex justify-center items-center my-2">
+                {% #button icon_left="bi bi-floppy text-white" type="submit" name="action" value="update_business" %}
+                    Guardar
+                {% /button %}
+            </div>
+        </form>
+        {% endblock business_form %}
+
+    </section>
+</main>
+{% endblock %}
