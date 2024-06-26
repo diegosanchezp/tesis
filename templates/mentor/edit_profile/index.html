@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load django_vite slippers %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+    {% vite_asset 'js/mentor_edit_profile.ts' %}
+{% endblock %}
+
+{% block title %}
+Editar perfil - Mentor
+{% endblock title %}
+
+
+{% block body %}
+
+{% include "components/navbar.html" %}
+
+<main class="page-x-spacing">
+
+    <section id="quicklinks" class="flex gap-x-2 mt-4">
+        <a href="#career-form">
+            {% #button icon_right="bi bi-arrow-right"%}
+                Cambiar carrera
+            {% /button %}
+        </a>
+        <a href="#change-professional-exp">
+            {% #button icon_right="bi bi-arrow-right"%}
+                Cambiar experiencia profesional
+            {% /button %}
+        </a>
+    </section>
+
+    <section id="profile-form-section" class="{% include "student/profile/container_styles.html" %}">
+        {% include "student/profile/h2.html" with text="Perfil" %}
+        {% include "customauth/profile_form.html" %}
+    </section>
+
+    <section id="change-password-section" class="{% include "student/profile/container_styles.html" %}">
+        {% include "student/profile/h2.html" with text="Cambiar contraseña" %}
+        {% include "customauth/change_password.html" %}
+    </section>
+
+    {# Render the section to select the academic career #}
+    {% include "main/career/change_career.html" with entity=mentor %}
+
+    <section id="change-professional-exp" class="{% include "student/profile/container_styles.html" %}">
+        {% include "student/profile/h2.html" with text="Cambiar experiencia profesional" %}
+
+        {% block exp_formset %}
+        <form id="experience-formset" hx-post="" hx-target="#experience-formset" hx-swap="outerHTML" {# x-data="mentor_profile_form('{{exp_formset.prefix }}', {{ exp_formset.management_form.INITIAL_FORMS.initial }}, {{ exp_formset.management_form.TOTAL_FORMS.initial }})" #}>
+            {{ exp_formset.management_form }}
+
+            {% for form in exp_formset %}
+                {# Add a horizontal line to separate the forms #}
+                {% if exp_formset.total_form_count > 1 %}
+                    {% if forloop.counter > 1 %}
+                        <div class="col-span-full h-[1px] w-full bg-gray-200"></div>
+                    {% endif %}
+                {% endif %}
+                <div id="{{form.prefix}}" class="grid grid-cols-2 gap-x-2 gap-y-3 p-6">
+                    <div class="flex justify-between col-span-full">
+                        {# Index of the formset #}
+                        <p class="text-sm font-medium text-gray-900">#{{ forloop.counter }}</p>
+                        {# Add a delete btn #}
+                        {% if forloop.counter > 1 %}
+
+                            {% if not forloop.last %}
+                                {% include "forms/render_field.html" with field=form.DELETE %}
+                            {% endif %}
+
+                            {% if forloop.last %}
+                                {% if state == "ADDING_NEW_EXP" %}
+                                    {# @click="removeForm('{{form.prefix}}') #}
+                                    <button type="button" hx-post="" hx-target="#experience-formset" name="action" value="reset_add_formset" ">Borrar</button>
+                                {% else %}
+                                    {% include "forms/render_field.html" with field=form.DELETE %}
+                                {% endif %}
+                            {% endif %}
+
+                        {% endif %}
+                    </div>
+
+                    {# Render fields of the form #}
+                    {% include "forms/render_field.html" with field=form.name container_css_classes="col-span-full" %}
+                    {% include "forms/render_field.html" with field=form.company container_css_classes="col-span-full" %}
+                    {% include "forms/render_field.html" with field=form.init_year %}
+                    {% include "forms/render_field.html" with field=form.end_year %}
+                    {% include "forms/render_field.html" with field=form.current container_css_classes="col-span-full" %}
+                    {% include "forms/render_field.html" with field=form.description container_css_classes="col-span-full" %}
+                    {# Render hidden fields #}
+                    {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            {# Action btns of the formset #}
+            <div class="flex gap-x-2 items-center justify-center col-span-full">
+                {% if state != "ADDING_NEW_EXP" %}
+                    <div>
+                        {% #button icon_left="bi bi-plus" type="submit" name="action" value="add_new_exp" form="experience-formset" %}
+                            Añadir otro
+                        {% /button %}
+                    </div>
+                {% endif %}
+                <div>
+                    {% #button icon_left="bi bi-floppy" type="submit" name="action" value="save_exp" form="experience-formset" %}
+                        Guardar
+                    {% /button %}
+                </div>
+            </div>
+        </form>
+        {% endblock %}
+
+    </section>
+
+</main>
+{% endblock %}

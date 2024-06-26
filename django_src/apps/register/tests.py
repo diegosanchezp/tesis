@@ -738,8 +738,6 @@ class TestCreateMentorExpView(TestCaseWithData):
 
     # ./manage.py test --keepdb django_src.apps.register.tests.TestCreateMentorExpView.test_formset
     def test_formset(self):
-
-
         MentorExperienceFormSet = get_MentorExperienceFormSet(extra=2, max_num=2)
 
         form_prefix = MentorExperienceFormSet().prefix
@@ -899,7 +897,6 @@ class TestCreateMentorExpView(TestCaseWithData):
             }
 
             mentor_form = MentorExperienceForm(data=data, prefix=f"{form_prefix}-0")
-            breakpoint()
             fields = ["name", "company", "description"]
             for field_name in fields:
                 # Check min_length

@@ -43,6 +43,7 @@ def get_career_context(request):
 def update_career_name(entity, hx_util: HXSwap):
     """
     Update the career name in the profile edit UI
+    REMEMBER to call hx_util.triggerSwap() after calling this function
     """
     hx_util.swap(
         target_element_id="career-form",
@@ -54,6 +55,17 @@ def update_career_name(entity, hx_util: HXSwap):
             },
         ),
     )
+
+
+def close_career_modal(request, response):
+    """
+    Closes the career modal and sends a success message
+    """
+    change_career_modal_id = "#career-selector-modal"
+    close_modal(response, change_career_modal_id)
+
+    # Show a success message
+    messages.success(request, _("Carrera cambiada exitosamente"))
 
 
 @require_POST
@@ -69,7 +81,6 @@ def change_career(request):
     if query_form.is_valid():
         profile = query_form.cleaned_data["profile"]
         carreer = query_form.cleaned_data["carreer"]
-        change_career_modal_id = "#career-selector-modal"
 
         if profile == QueryForm.ESTUDIANTE:
             student = Student.objects.get(user__pk=entity_id)
@@ -78,10 +89,7 @@ def change_career(request):
             response = HttpResponse("Carrera cambiada exitosamente")
             hx_util = HXSwap(response)
 
-            close_modal(response, change_career_modal_id)
-
-            # Show a success message
-            messages.success(request, "Carrera cambiada exitosamente")
+            close_career_modal(request, response)
 
             # If there are any specializations in the career, tell the student to select one
             if carreer.carrerspecialization_set.count() > 0:
@@ -115,8 +123,16 @@ def change_career(request):
         if query_form.cleaned_data["profile"] == QueryForm.MENTOR:
             mentor = Mentor.objects.get(user__pk=entity_id)
             mentor.carreer = carreer
+            mentor.save()
+
             response = HttpResponse("Carrera cambiada exitosamente")
-            close_modal(response, change_career_modal_id)
+            hx_util = HXSwap(response)
+
+            update_career_name(entity=mentor, hx_util=hx_util)
+            close_career_modal(request, response)
+            renderMessagesAsToasts(request, response)
+
+            hx_util.triggerSwap()
             return response
 
     response = HttpResponseBadRequest("Error al cambiar la carrera")

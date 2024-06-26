@@ -1,4 +1,4 @@
-import Alpine from "alpinejs"
+import Alpine, { AlpineComponent } from "alpinejs"
 // plugins
 import persist from '@alpinejs/persist'
 // htmx, do not change the order of these imports
@@ -8,7 +8,7 @@ import 'js/htmx';
 import 'htmx.org/dist/ext/alpine-morph.js'
  
 export type myAlpineComponent = {
-    name: string, component: () => any
+    name: string, component: () => AlpineComponent<any>
 }
 
 export type myAlpineStore = {

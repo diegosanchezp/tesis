@@ -34,7 +34,7 @@ Mentor {{ mentor.user.first_name }} {{ mentor.user.last_name }}
                 <h3 class="text-bold text-lg my-4">Te puedo ofrecer ayuda de este tipo</h3>
 
                 {% if request.user.is_mentor %}
-                    <a href="{% url 'mentor:my_mentorships' %}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Ver mis mentorías</a>
+                    <a href="{% url 'mentor:my_mentorships' %}" class="{% include "mentor/links/blue_css.html" %}">Ver mis mentorías</a>
                 {% endif %}
             </div>
         {% else %}
