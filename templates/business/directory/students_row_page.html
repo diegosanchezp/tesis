@@ -23,7 +23,7 @@
             </div>
 
             {# Student intereset themes #}
-            <ul class="flex gap-x-2 justify-center">
+            <ul class="flex flex-wrap gap-y-2 gap-x-2 justify-center max-h-16 overflow-y-auto">
                 {% for interest in student.interests.all %}
                     <li class="rounded-xl bg-slate-600 px-2 text-white">
                         <span>{{ interest.name }}</span>
