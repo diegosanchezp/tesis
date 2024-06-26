@@ -5,6 +5,7 @@ from django.contrib.auth.forms import BaseUserCreationForm
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.query import QuerySet
+from django_src.settings.widget import DATE_INPUT_FORMAT
 
 from django_src.apps.register.models import (
     Carreer,
@@ -77,9 +78,10 @@ class StudentForm(forms.ModelForm):
             "carreer": forms.HiddenInput(),
         }
         help_texts = {
-            "voucher": _("Puedes utilizar tu carnet, kardex, o cualquier documento que compruebe que eres estudiante de la UCV."),
+            "voucher": _(
+                "Puedes utilizar tu carnet, kardex, o cualquier documento que compruebe que eres estudiante de la UCV."
+            ),
         }
-
 
         error_messages = {
             "specialization": {
@@ -108,7 +110,6 @@ class StudentForm(forms.ModelForm):
         self.fields["specialization"].to_field_name = "name"
         self.fields["interests"].to_field_name = "name"
         self.fields["voucher"].widget.attrs.update(form="abc-form")
-
 
     def clean(self):
         cleaned_data = super().clean()
@@ -212,8 +213,11 @@ class MentorExperienceForm(forms.ModelForm):
         self.today = date.today()
 
         self.fields["name"].min_length = 4
+        self.fields["name"].required = True
         self.fields["company"].min_length = 1
+        self.fields["company"].required = True
         self.fields["description"].min_length = 4
+        self.fields["description"].required = True
 
     class Meta:
         model = MentorExperience
@@ -223,8 +227,12 @@ class MentorExperienceForm(forms.ModelForm):
             "description": forms.Textarea(
                 attrs={"rows": 3, "required": True, "minlength": 4}
             ),
-            "init_year": forms.DateInput(attrs={"type": "date", "required": True}),
-            "end_year": forms.DateInput(attrs={"type": "date"}),
+            "init_year": forms.DateInput(
+                format=DATE_INPUT_FORMAT, attrs={"type": "date", "required": True}
+            ),
+            "end_year": forms.DateInput(
+                format=DATE_INPUT_FORMAT, attrs={"type": "date"}
+            ),
         }
         help_texts = {
             "name": _("Ej: Frontend developer"),
@@ -261,6 +269,27 @@ class MentorExperienceForm(forms.ModelForm):
         return cleaned_data
 
 
+def validateExperienceFormset(formset: forms.BaseModelFormSet):
+
+    if any(formset.errors):
+        # Don't bother validating the formset unless each form is valid on its own
+        return
+
+    actual_exp_count = 0
+
+    for form in formset.forms:
+        if formset.can_delete and formset._should_delete_form(form):
+            continue
+        # experience = form.cleaned_data["name"]
+
+        current = form.cleaned_data.get("current")
+        if current:
+            actual_exp_count += 1
+        if actual_exp_count > 3:
+            raise ValidationError(
+                _("No se puede tener más de tres cargos actuales")
+            )
+
 class MentorExperienceBaseFormSet(forms.BaseModelFormSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -271,30 +300,8 @@ class MentorExperienceBaseFormSet(forms.BaseModelFormSet):
         Check that no two experiences have the same name.
         """
         super().clean()
+        validateExperienceFormset(self)
 
-        if any(self.errors):
-            # Don't bother validating the formset unless each form is valid on its own
-            return
-
-        # experiences = set()
-        actual_exp_count = 0
-
-        for form in self.forms:
-            if self.can_delete and self._should_delete_form(form):
-                continue
-            # experience = form.cleaned_data["name"]
-
-            current = form.cleaned_data.get("current")
-            if current:
-                actual_exp_count += 1
-            if actual_exp_count > 3:
-                raise ValidationError(
-                    _("No se puede tener más de tres cargos actuales")
-                )
-
-            # if experience in experiences:
-            #     raise ValidationError(_("No se puede tener dos experiencias con el mismo nombre"))
-            # experiences.add(experience)
 
 
 def get_MentorExperienceFormSet(extra: int = 1, max_num: int | None = None):
@@ -334,7 +341,9 @@ class MentorForm(forms.ModelForm):
             "voucher",
         )
         help_texts = {
-            "voucher": _("Puedes utilizar tu carnet, kardex, o cualquier documento que compruebe que fuiste estudiante de la UCV."),
+            "voucher": _(
+                "Puedes utilizar tu carnet, kardex, o cualquier documento que compruebe que fuiste estudiante de la UCV."
+            ),
         }
 
         # https://docs.djangoproject.com/en/stable/topics/forms/modelforms#overriding-the-default-fields
