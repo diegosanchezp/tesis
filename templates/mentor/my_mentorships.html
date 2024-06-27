@@ -12,7 +12,18 @@ Mis mentorías
 <main class="page-x-spacing">
     {# fixed content #}
 
-    <h1 class="text-3xl my-4">Tus mentorías</h1>
+    <div class="mt-4">
+        {% include "components/breadcrumbs.html" %}
+    </div>
+
+    <div class="flex justify-between my-4">
+        <h1 class="text-3xl">Tus mentorías</h1>
+        <a href="{% url 'mentor:create_mentorship' %}">
+            {% #button icon_left="bi bi-plus text-white" type="button" %}
+                Crear mentoría
+            {% /button %}
+        </a>
+    </div>
 
     {# Mentorship card grid #}
     <section class="grid grid-cols-3 gap-x-4">

@@ -48,7 +48,6 @@ class HtmxHttpRequest(HttpRequest):
 
 @require_http_methods(["GET", "POST"])
 @loggedin_and_approved
-@is_approved
 def create_mentorship(request: HtmxHttpRequest):
     template_name = "mentor/create_mentorship.html"
 
@@ -86,7 +85,7 @@ def create_mentorship(request: HtmxHttpRequest):
                     task.mentorship = mentorship
                     task.save()
 
-                # TODO: Make a redirect to the mentorship list view
+                # Make a redirect to the mentorship list view
                 return HttpResponseRedirect(
                     redirect_to=reverse_lazy("mentor:my_mentorships")
                 )

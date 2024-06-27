@@ -74,6 +74,9 @@ def my_mentorships(request):
         "mentor": mentor,
         "mentorships": mentor.mentorships.order_by("name"),
     }
+    context["breadcrumbs"] = [
+        {"name": "Mis mentorías"},
+    ]
 
     response = TemplateResponse(request, template_name, context)
 
