@@ -15,7 +15,7 @@ from .edit_profile.view import edit_profile_view
 
 app_name = "mentor"
 urlpatterns = [
-    path("landing/", landing_view, name="landing"),
+    path("", landing_view, name="landing"),
     path("profile/", edit_profile_view, name="edit_profile"),
     path("my_mentorships/", my_mentorships, name="my_mentorships"),
     path("<str:username>/", mentor_profile_view.view, name="profile"),

@@ -32,6 +32,9 @@
             <li>
                 <a class="text-white" href="{% pro_carrer_index_link %}">Carreras profesionales</a>
             </li>
+            <li>
+                <a class="text-white" href="{% url 'mentor:my_mentorships' %}">Mis mentorías</a>
+            </li>
         {% endif %}
         {# Business links #}
         {% if request.user.is_business %}
