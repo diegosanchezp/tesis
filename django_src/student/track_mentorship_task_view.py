@@ -1,11 +1,16 @@
+from datetime import datetime
+
 from django.template.response import TemplateResponse
 from django.views.decorators.http import require_http_methods
-from django_src.apps.register.models import Student
-from django_src.mentor.models import Mentorship, StudentMentorshipTask, TransitionError
 from django.shortcuts import get_object_or_404
 from django.http.response import Http404, HttpResponse, HttpResponseBadRequest
+
 from django_src.mentor.utils import loggedin_and_approved
+from django_src.apps.register.models import Student
+from django_src.mentor.models import Mentorship, StudentMentorshipTask, TransitionError, student_mentorship_is_completed, MentorshipHistory
 from .forms import MentorshipTaskEventForm
+from django_src.utils.webui import renderMessagesAsToasts
+from django.contrib import messages
 
 @require_http_methods(["GET"])
 @loggedin_and_approved
@@ -56,6 +61,12 @@ def track_mentorship_task_view(request, mentorship_pk: int, student_pk: int):
 
     return TemplateResponse(request, template=template, context=context)
 
+def send_error_response(request, message: str):
+    messages.error(request, message)
+    response = HttpResponseBadRequest(message)
+    renderMessagesAsToasts(request, response)
+    return response
+
 @require_http_methods(["POST"])
 @loggedin_and_approved
 def change_task_state(request, task_pk: int):
@@ -66,6 +77,7 @@ def change_task_state(request, task_pk: int):
     student_task = get_object_or_404(StudentMentorshipTask, pk=task_pk)
     student = student_task.student
     is_student = request.user.is_student
+    mentorship = student_task.task.mentorship
 
     if not is_student:
         return HttpResponseBadRequest("Solo estudiantes pueden cambiar el status de la mentoría")
@@ -77,15 +89,26 @@ def change_task_state(request, task_pk: int):
 
     event_validator = MentorshipTaskEventForm(data=request.POST)
     if not event_validator.is_valid():
-        return HttpResponseBadRequest("Evento inválido")
+        return send_error_response(
+            request=request, message="Evento inválido"
+        )
 
     event = event_validator.cleaned_data["event"]
 
     try:
         student_task.transition(event)
-    except TransitionError:
-        return HttpResponseBadRequest("Error en el cambio de estado")
+    except TransitionError as exc:
+        message = f"No se puede cambiar la tarea al estado {exc.state}"
+        return send_error_response(request=request, message=message)
 
     student_task.save()
+
+    if student_mentorship_is_completed(student, mentorship):
+        MentorshipHistory.objects.create(
+            student=student,
+            mentorship=mentorship,
+            state=MentorshipHistory.State.COMPLETED,
+            date=datetime.now()
+        )
 
     return HttpResponse("OK")

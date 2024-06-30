@@ -32,6 +32,7 @@ class MentorshipRequestActionForm(forms.Form):
         choices=MentorshipRequest.Events.choices,
         widget=forms.HiddenInput(),
     )
+    with_mentorship_name = forms.BooleanField(required=False, widget=forms.HiddenInput())
 
 
 class MentorshipReqFilterForm(forms.Form):

@@ -54,8 +54,8 @@ Mentoría: {{ mentorship.name }}
             <h2 class="text-3xl my-4">Solicitudes de mentoría</h2>
 
             {% block mentorship_req_table %}
-            <div id="table_form">
-                {% include "mentor/mentorship_req_table.html" %}
+                <div id="table_form" hx-get="?action={{ FILTER_MENTORSHIP_REQUEST }}" hx-swap="outerHTML" hx-target="this" hx-disinherit="*" hx-trigger="update_req_table from:body" >
+                {% include "mentor/mentorship_req_table.html" with with_mentorship_name="False" %}
             </div>
             {% endblock mentorship_req_table %}
         </section>
@@ -63,7 +63,18 @@ Mentoría: {{ mentorship.name }}
 
     <section id="student-info">
         <h2 class="text-2xl mb-4 mt-8">Visión general de estudiantes inscritos</h2>
-        <table class="w-full border-collapse border border-ucv-yellow border-solid rounded-t-lg text-sm text-left rtl:text-right ">
+
+        {% block mentorship_students_table %}
+            <table
+                id="mentorship_students_table"
+                class="w-full border-collapse border border-ucv-yellow border-solid rounded-t-lg text-sm text-left rtl:text-right "
+                hx-get="?action=update_student_table"
+                hx-swap="outerHTML"
+                hx-target="this"
+                hx-disinherit="*"
+                hx-trigger="update_student_table from:body"
+
+            >
             <thead class="text-xs uppercase bg-ucv-yellow ">
                 <tr class="rounded-tl-lg rounded-tr-lg">
                     <th class="py-3 pr-4 pl-2 text-left">
@@ -92,13 +103,20 @@ Mentoría: {{ mentorship.name }}
                         </td>
                         {# nro Tareas compleatadas #}
                         <td>{{ student_info.tasks_completed }}</td>
-                        <td class="py-2">
-                            {# TODO: link to student progress page #}
+                        <td class="py-2 flex gap-x-2">
+                            {# link to student progress page #}
                             <a  href="{% url 'student:track_mentorship_task' mentorship_pk=mentorship.pk student_pk=student_info.student__pk %}">
                             {% #button type="button" %}
                                 Ver progreso
                             {% /button %}
                             </a>
+
+                            {# Delete students #}
+                            <div hx-post="{% url 'mentor:delete_student_mentorship' mentorship_pk=mentorship.pk student_pk=student_info.student__pk %}" hx-target="#mentorship_students_table" hx-swap="outerHTML">
+                                {% #button type="button" variant="red" title="Eliminar al estudiante de la mentoría" %}
+                                    Eliminar
+                                {% /button %}
+                            </div>
                         </td>
                     </tr>
 
@@ -109,6 +127,7 @@ Mentoría: {{ mentorship.name }}
                 {% endfor %}
             </tbody>
         </table>
+        {% endblock mentorship_students_table %}
     </section>
 
 

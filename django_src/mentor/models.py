@@ -11,14 +11,21 @@ def transition(machine: dict, status: models.TextChoices, event: models.TextChoi
         return next_state
     except KeyError:
         raise TransitionError(
-            (
+            message=(
                 f"Error: no transition defined for state: {status}"
                 f"with event: {event}"
-            )
+            ),
+            state=status,
+            event=event,
         ) from KeyError
 
 class TransitionError(Exception):
-    pass
+    state: str
+    event: str
+    def __init__(self, message: str, state: str, event: str) -> None:
+        super().__init__(message)
+        self.state = state
+        self.event = event
 
 class Mentorship(models.Model):
 
@@ -48,6 +55,8 @@ class Mentorship(models.Model):
 
     class Meta:
         unique_together = [["mentor", "name"]]
+        verbose_name = _("Mentoría")
+        verbose_name_plural = _("Mentorías")
 
     def __str__(self) -> str:
         return f"{self.name}"
@@ -86,6 +95,8 @@ class MentorshipTask(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name}"
+
+
 
 class StudentMentorshipTask(models.Model):
     """
@@ -144,6 +155,8 @@ class StudentMentorshipTask(models.Model):
 
     class Meta:
         unique_together = [["student", "task"]]
+        verbose_name = _("Tarea de mentoría de estudiantes")
+        verbose_name_plural = _("Tareas de mentoría de estudiantes")
 
     def __str__(self) -> str:
         return f"{self.student} {self.task.name}"
@@ -152,7 +165,29 @@ class StudentMentorshipTask(models.Model):
         """
         Transition to the next state given an event and the current state
         """
+        # Delete the "Completed" history record, before transitioning to the paused state
+        if event == self.Events.PAUSE and self.state == self.State.COMPLETED:
+            history_q = self.task.mentorship.history.filter(
+                student=self.student,
+                mentorship=self.task.mentorship,
+                state=MentorshipHistory.State.COMPLETED
+            )
+            if history_q.exists():
+                history_q.delete()
+
         self.state = transition(self.machine, status=self.state, event=event)
+
+
+def student_mentorship_is_completed(student, mentorship, task_queryset=None):
+    """
+    Figure out if all tasks are completed
+    """
+    mentorship_task_num = mentorship.tasks.count()
+    if task_queryset is None:
+        task_queryset = StudentMentorshipTask.objects.filter(state=StudentMentorshipTask.State.COMPLETED, student=student)
+    student_completed_tasks = task_queryset.count()
+
+    return mentorship_task_num == student_completed_tasks
 
 class MentorshipRequest(models.Model):
     """
@@ -221,6 +256,8 @@ class MentorshipRequest(models.Model):
 
     class Meta:
         unique_together = [["student", "mentorship"]]
+        verbose_name = _("Solicitud de mentoría")
+        verbose_name_plural = _("Solicitudes de mentoría")
 
     def transition(self, event: Events) -> None:
         try:
@@ -250,3 +287,41 @@ class MentorshipRequest(models.Model):
         """
         if isinstance(self.status, str):
             return self.State[self.status].label
+
+class MentorshipHistory(models.Model):
+    """
+    Models the events of a mentorship for a student
+    """
+    class State(models.TextChoices):
+        ACCEPTED = "ACCEPTED", _("Aceptado")
+        COMPLETED = "COMPLETED", _("Completado")
+
+    student = models.ForeignKey(
+        to="register.Student",
+        on_delete=models.CASCADE,
+        related_name="mentorship_history",
+        verbose_name=_("Estudiante"),
+    )
+
+    mentorship = models.ForeignKey(
+        to="Mentorship",
+        on_delete=models.CASCADE,
+        related_name="history",
+        verbose_name=_("Mentoría"),
+    )
+
+    state = models.CharField(
+        choices=State.choices,
+        default=State.ACCEPTED,
+    )
+
+    date = models.DateTimeField()
+
+    def __str__(self) -> str:
+        return f"{self.student.user.first_name} {self.mentorship} {self.state}"
+
+    class Meta:
+        verbose_name = _("Historial de mentoría")
+        verbose_name_plural = _("Historial de mentorías")
+
+

@@ -7,7 +7,8 @@ from .mentorship_view import (
     change_mentorship_status,
     get_mentorship_tasks,
 )
-from .mentorship_detail_view import mentorship_detail_view, student_info_view
+from .mentorship_detail_view import mentorship_detail_view, student_info_view, delete_student_from_mentorship
+
 from .mentorship_list_view import list_mentorships, my_mentorships
 from .edit_mentorship_view import edit_mentorship_view, delete_task, delete_mentorship
 from .landing_view import landing_view
@@ -58,4 +59,9 @@ urlpatterns = [
         change_mentorship_status,
         name="change_mentorship_status",
     ),
+    path(
+        "mentorship/delete_student/<int:mentorship_pk>/<int:student_pk>",
+        view=delete_student_from_mentorship,
+        name="delete_student_mentorship"
+    )
 ]

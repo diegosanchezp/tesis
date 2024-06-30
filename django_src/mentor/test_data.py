@@ -3,6 +3,7 @@
 from django.db.utils import IntegrityError
 from shscripts.backup import setup_django
 from django_src.test_utils import parse_test_data_args
+from datetime import datetime
 
 from django_src.apps.register.test_data.mentors import MentorData
 from django_src.apps.register.test_data.students import StudentData
@@ -16,9 +17,11 @@ class MentorshipData:
     """
 
     def __init__(self, mentor_data: MentorData, student_data: StudentData):
-        from django_src.mentor.models import MentorshipRequest, MentorshipTask, Mentorship, StudentMentorshipTask
+        from django_src.mentor.models import MentorshipRequest, MentorshipTask, Mentorship, StudentMentorshipTask, MentorshipHistory
         from django_src.apps.main.models import BlogPage, BlogIndex
+
         self.Mentorship = Mentorship
+        self.MentorshipHistory = MentorshipHistory
         self.MentorshipRequest = MentorshipRequest
         self.MentorshipTask = MentorshipTask
         self.StudentMentorshipTask = StudentMentorshipTask
@@ -87,6 +90,13 @@ class MentorshipData:
                 task=task,
             )
             m_task.save()
+
+        self.MentorshipHistory(
+            student=self.student_data.student,
+            mentorship=self.mentorship1,
+            state=self.MentorshipHistory.State.ACCEPTED,
+            date=datetime(year=2024, month=6, day=29, hour=13, minute=32)
+        ).save()
 
     def get(self):
         """

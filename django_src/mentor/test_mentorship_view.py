@@ -3,7 +3,7 @@ from os import environ
 from django.http.response import HttpResponse, HttpResponseForbidden
 from django.test.client import RequestFactory
 
-from .models import Mentorship, MentorshipRequest, StudentMentorshipTask
+from .models import Mentorship, MentorshipHistory, MentorshipRequest, StudentMentorshipTask
 from .forms import MentorshipForm
 from .utils import loggedin_and_approved
 from .test_utils import TestCaseMentorData
@@ -253,6 +253,15 @@ class TestChangeMentorshipStatusView(TestCaseMentorData):
 
         for task in re_mentorship_request.mentorship.tasks.all():
             self.assertTrue(StudentMentorshipTask.objects.filter(student=re_mentorship_request.student, task=task).exists())
+
+        self.assertTrue(
+            MentorshipHistory.objects.filter(
+                mentorship=re_mentorship_request.mentorship,
+                student=re_mentorship_request.student,
+                state=MentorshipHistory.State.ACCEPTED,
+            ).exists(),
+            msg="MentorshipHistory was not created"
+        )
 
     # ./manage.py test --keepdb django_src.mentor.test_mentorship_view.TestChangeMentorshipStatusView.test_change_mentorship_status_invalid
     def test_change_mentorship_status_invalid(self):
