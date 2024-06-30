@@ -1,29 +1,8 @@
+from datetime import datetime
+
 from django.urls.base import reverse, reverse_lazy
-
-from django_src.utils.webui import HXSwap
-from .utils import get_mentor, is_approved, validate_add_tasks, loggedin_and_approved
-from .forms import (
-    MentorshipForm,
-    MentorshipTaskFormSet,
-    MentorshipRequestActionForm,
-    get_MentorshipTaskFormSet,
-)
-from .models import (
-    MentorshipRequest,
-    Mentorship,
-    TransitionError,
-    StudentMentorshipTask,
-    MentorshipTask,
-)
-from django_src.apps.auth.models import User
-from django_src.apps.register.models import Student, Mentor
-from render_block import render_block_to_string
-
-from django_htmx.middleware import HtmxDetails
-from django_htmx.http import trigger_client_event
-
+from django.contrib import messages
 from django.template.loader import render_to_string
-from django.contrib.auth.decorators import login_required
 from django.template.response import TemplateResponse
 from django.http import (
     HttpRequest,
@@ -35,6 +14,31 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.utils.translation import gettext_lazy as _
 from django.contrib import messages
+
+from django_src.utils.webui import HXSwap
+from .utils import get_mentor, validate_add_tasks, loggedin_and_approved
+from .forms import (
+    MentorshipForm,
+    MentorshipTaskFormSet,
+    MentorshipRequestActionForm,
+    get_MentorshipTaskFormSet,
+)
+from .models import (
+    MentorshipHistory,
+    MentorshipRequest,
+    Mentorship,
+    TransitionError,
+    StudentMentorshipTask,
+    MentorshipTask,
+)
+from django_src.apps.auth.models import User
+from django_src.apps.register.models import Student, Mentor
+from django_src.utils.webui import renderMessagesAsToasts
+from render_block import render_block_to_string
+
+from django_htmx.middleware import HtmxDetails
+from django_htmx.http import trigger_client_event
+
 
 from render_block import render_block_to_string
 
@@ -234,22 +238,8 @@ def message_response(status: int, message_type: str):
             if response is None:
                 response = HttpResponse(status=status)
 
-            # Render the message
-            message_html = render_to_string(
-                request=request,
-                context=context,
-                template_name="components/messages.html",
-            )
-
             # Trigger a client side event
-            trigger_client_event(
-                response=response,
-                name=f"render_{message_type}_message",
-                params={
-                    "message_html": message_html,
-                    "target_element_id": target_element_id,
-                },
-            )
+            renderMessagesAsToasts(request, response)
 
             return response
 
@@ -260,7 +250,6 @@ def message_response(status: int, message_type: str):
 
 error_message_response = message_response(HttpResponseBadRequest.status_code, "error")
 success_response = message_response(HttpResponse.status_code, "success")
-
 
 @require_http_methods(["POST"])
 @loggedin_and_approved
@@ -296,6 +285,7 @@ def change_mentorship_status(request, mentorship_req_pk: int):
         return error_response(_("Acción inválida"))
 
     action = action_form.cleaned_data["action"]
+    with_mentorship_name = action_form.cleaned_data["with_mentorship_name"]
 
     try:
         mentorship_req.transition(event=action)
@@ -333,6 +323,13 @@ def change_mentorship_status(request, mentorship_req_pk: int):
                 )
                 m_task.save()
 
+            # Create the mentorship history
+            MentorshipHistory.objects.create(
+                student=mentorship_req.student,
+                mentorship=mentorship,
+                date=datetime.now(),
+            )
+
         # Mentor accepts/rejects the mentorship requests in a modal displayed mentor/mentorship_detail.html
         response_html = render_block_to_string(
             "mentor/student_info_modal.html",
@@ -355,11 +352,16 @@ def change_mentorship_status(request, mentorship_req_pk: int):
                 context={
                     "mentorship_request": mentorship_req,
                     # If the request came from the mentorship landing page, show the mentorship name in the table
-                    "with_mentorship_name": reverse("mentor:landing")
-                    in request.META.get("HTTP_REFERER", ""),
+                    "with_mentorship_name": with_mentorship_name,
                 },
                 template_name="mentor/mentorship/request_row.html",
             ),
+        )
+
+        # Update the table of mentorship requests
+        trigger_client_event(
+            response=success_message_response,
+            name="update_student_table",
         )
 
     elif is_student:
@@ -385,9 +387,16 @@ def change_mentorship_status(request, mentorship_req_pk: int):
                 },
             )
 
+            mentorship_req.delete()
+
             success_message_response = success_message(
                 _("Solicitud de mentoría cancelada"), response=response
             )
+            trigger_client_event(
+                response=success_message_response,
+                name="menthorship_status_changed",
+            )
+            return success_message_response
 
     else:
         # can't do anything you are neither a student or mentor
@@ -402,4 +411,7 @@ def change_mentorship_status(request, mentorship_req_pk: int):
     if not success_message_response:
         return error_response(_("Ocurrió un error inesperado"))
 
+
+
     return success_message_response
+

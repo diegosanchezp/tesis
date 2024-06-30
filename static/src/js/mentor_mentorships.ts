@@ -1,21 +1,10 @@
 import 'flowbite'
 import htmx from 'htmx.org'
 import { Modal, initFlowbite } from 'flowbite';
+import { initHTMXutils } from 'js/utils/htmx'
 import type { ModalOptions, ModalInterface } from 'flowbite';
 
-function renderMessage(evt){
-    // Search for the target element
-    const targetElement = document.getElementById(evt.detail.target_element_id)
-
-    // Insert before begin the success message
-    targetElement?.insertAdjacentHTML("beforebegin", evt.detail.message_html)
-
-    // Init flowbite so new toasts can be dismissed
-    initFlowbite()
-}
-
-document.body.addEventListener("render_success_message", renderMessage)
-document.body.addEventListener("render_error_message", renderMessage)
+initHTMXutils()
 
 /* Get the tasks of a mentorship and put it in a modal */
 window.getTasks = async (taskUrl:string) => {

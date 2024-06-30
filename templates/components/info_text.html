@@ -1,0 +1,11 @@
+{% comment %}
+Required context
+ - text: str
+Optional context:
+ - color: str, color of the text defaults to slate-500
+ - margin: str
+{% endcomment %}
+<p class="flex gap-x-2 {{ margin|default:"my-4" }} text-{{ color|default:"slate-500" }}">
+    <i class="bi bi-info-square-fill"></i>
+    <span>{{ text }}</span>
+</p>

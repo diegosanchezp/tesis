@@ -3,6 +3,7 @@
   context:
   - student: django_src.student.models.Student
   - mentorship_request: django_src.mentorship.models.MentorshipRequest
+  - with_mentorship_name: bool
 {% endcomment %}
 {% load slippers %}
 <div id="student-info-modal-content" class="relative p-4 w-full max-w-2xl max-h-full">
@@ -55,7 +56,8 @@
 
             <!-- Modal footer -->
             {% if mentorship_request.status == "REQUESTED" %}
-            <div class="flex gap-x-2 justify-center items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+            <form class="flex gap-x-2 justify-center items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                <input type="hidden" name="with_mentorship_name" value="{{ with_mentorship_name }}">
                 {% url "mentor:change_mentorship_status" mentorship_req_pk=mentorship_request.pk as change_status_url %}
                 {% #button type="button" name="action" value=MentorshipRequest.Events.ACCEPT hx-post=change_status_url hx-swap="outerHTML" hx-target="#student-info-modal-body-footer" %}
                     Aceptar
@@ -64,7 +66,7 @@
                 {% #button type="button" variant="red" name="action" value=MentorshipRequest.Events.REJECT hx-post=change_status_url hx-swap="outerHTML" hx-target="#student-info-modal-body-footer" %}
                     Rechazar
                 {% /button %}
-            </div>
+            </form>
             {% endif %}
 
             {% if mentorship_request.status == "REJECTED" %}

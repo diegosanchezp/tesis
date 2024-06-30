@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load static django_vite slippers %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+{% endblock extrascripts %}
+
+
+{% block title %}
+Mis mentorías
+{% endblock title %}
+
+{% block body %}
+
+{% include "components/navbar.html" %}
+
+<main class="page-x-spacing">
+    <div class="mt-4">
+        {% include "components/breadcrumbs.html" %}
+    </div>
+
+    <section id="mentorships-in-progress">
+        <h2 class="{% include "student/my_mentorships/h2_title.html" %}">Mentorías en progreso</h2>
+
+        {# Mentorship in progress card #}
+        <div class="grid grid-cols-3 gap-x-4">
+            {% for mentorship_h in mentorships_in_progress %}
+                <div class="{% include "student/my_mentorships/card.html" %}">
+                    {# Title & status #}
+                    <div class="flex justify-between">
+                        <p class="font-bold text-base">{{ mentorship_h.mentorship.name }}</p>
+                        {% if mentorship_h.is_completed %}
+                            <p class="text-green-400">Completada</p>
+                        {% else %}
+                            <p class="text-ucv-yellow-dark">En progreso</p>
+                        {% endif %}
+                    </div>
+
+                    {# Mentor info & tasks status table #}
+                    <div class="flex flex-col gap-y-2 my-4">
+                        {# Mentor info #}
+                        <p><span class="font-bold">Mentor:</span> <a class="{% include "mentor/links/blue_css.html" %}" href="{% url 'mentor:profile' username=mentorship_h.mentorship.mentor.user.username %}">{{ mentorship_h.mentorship.mentor.user.first_name }}</a></p>
+                        {# Start date #}
+                        <p><span class="font-bold">Empezada:</span> {{ mentorship_h.date|date:"d/m/Y" }}</p>
+
+                        {# tasks status table #}
+                        <table>
+                            <thead>
+                                <th class="text-left">Por hacer</th>
+                                <th class="text-left">En progreso</th>
+                                <th class="text-left">Terminadas</th>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-left">{{mentorship_h.task_todo}}</td>
+                                    <td class="text-left">{{mentorship_h.tasks_in_progress }}</td>
+                                    <td class="text-left">{{mentorship_h.tasks_completed }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="flex items-center justify-center">
+                        <a href="{% url 'student:track_mentorship_task' mentorship_pk=mentorship_h.mentorship.id student_pk=student.pk %}">
+                            {% #button type="button" %}
+                                Modificar progreso
+                            {% /button %}
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-span-3 flex flex-col items-center justify-center  drop-shadow-lg bg-slate-50 p-4">
+                    <p class="my-2">No tienes mentorías en progreso</p>
+                    {% include "components/info_text.html" with text='Puedes encontrar mentores visitando las carras profesionales' margin="my-2" %}
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section id="mentorships-requests">
+        <h2 class="{% include "student/my_mentorships/h2_title.html" %}">Solicitudes de mentoría</h2>
+
+        {% block mentorships_requests_list %}
+        <div id="mentorships-requests-list" class="grid grid-cols-3 gap-x-4" hx-get="?action=render_request_list" hx-target="this" hx-swap="outerHTML" hx-trigger="menthorship_status_changed from:body" hx-disinherit="*">
+            {% for m_request in mentorships_requests %}
+                <div class="{% include "student/my_mentorships/card.html" %}">
+
+                    <p class="font-bold text-base">{{ m_request.mentorship.name }}</p>
+                    <div class="my-4">
+                        <p>Mentor: <a class="{% include "mentor/links/blue_css.html" %}" href="{% url 'mentor:mentorias' username=m_request.mentorship.mentor.user.username %}">{{ m_request.mentorship.mentor.user.first_name }}</a></p>
+                        <p>Estado: {{ m_request.get_status_display }}</p>
+                    </div>
+
+                    <div class="flex items-center justify-center">
+                        {% if m_request.status == MentorshipRequest.State.REQUESTED %}
+                        <form hx-post="{% url 'mentor:change_mentorship_status' mentorship_req_pk=m_request.pk %}" hx-trigger="click" hx-swap="none">
+                            {% #button type="button" name="action" value=MentorshipRequest.Events.CANCEL.value variant="red" %}
+                                {{ MentorshipRequest.Events.CANCEL.label }} solicitud
+                            {% /button %}
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-span-3 flex flex-col items-center justify-center  drop-shadow-lg bg-slate-50 p-4">
+                    <p class="my-2">No haz solicitado ninguna mentoría</p>
+                    {% include "components/info_text.html" with text='Para solicitar una mentoría, visita la sección "Mentorías" de un Mentor' margin="my-2" %}
+                </div>
+            {% endfor %}
+        </div>
+        {% endblock mentorships_requests_list %}
+    </section>
+
+    {% comment %}
+
+    <section id="mentorships-completed">
+        <h2 class="{% include "student/my_mentorships/h2_title.html" %}">Mentorías</h2>
+
+        {# Mentorship in progress card #}
+        <div class="grid grid-cols-3 gap-x-4">
+            {% for mentorship_h in mentorships_completed %}
+                <div class="{% include "student/my_mentorships/card.html" %}">
+                    <p class="font-bold text-base">{{ mentorship_h.mentorship.name }}</p>
+
+                    <div class="flex flex-col gap-y-2 my-4">
+                        <p>Mentor: <a class="{% include "mentor/links/blue_css.html" %}" href="{% url 'mentor:profile' username=mentorship_h.mentorship.mentor.user.username %}">{{ mentorship_h.mentorship.mentor.user.first_name }}</a></p>
+                        <p>Empezada {{ mentorship_h.started_date|date:"d/m/Y" }}</p>
+                        {% if mentorship_h.completed_date %}
+                            <p>Terminada {{ mentorship_h.completed_date|date:"d/m/Y" }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center justify-center">
+                        <a href="{% url 'student:track_mentorship_task' mentorship_pk=mentorship_h.mentorship.id student_pk=student.pk %}">
+                            {% #button type="button" %}
+                                Modificar progreso
+                            {% /button %}
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-span-3 flex flex-col items-center justify-center  drop-shadow-lg bg-slate-50 p-4">
+                    <p class="my-4">No tienes mentorías terminadas</p>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endcomment %}
+</main>
+
+{% endblock body %}

@@ -4,12 +4,12 @@
   Row of the brief detail
   context:
     - mentorship_request: mentor.models.MentorshipRequest
-    - with_mentorship_name: bool
+    - with_mentorship_name: jsbool
 {% endcomment %}
   
 {% with student_user=mentorship_request.student.user %}
     <tr id="mentor_req_row-{{ mentorship_request.pk }}">
-        {% if with_mentorship_name %}
+        {% if with_mentorship_name == "True" or with_mentorship_name == True or with_mentorship_name == "true" %}
             <td class="pl-6 text-left">
                 <a class="font-medium text-blue-600 hover:underline" href="{% url 'mentor:mentorship_detail' mentorship_pk=mentorship_request.mentorship.pk  %}">{{ mentorship_request.mentorship.name }}</a>
             </td>
@@ -18,7 +18,7 @@
         <td class="px-2 text-left">{{ mentorship_request.get_readable_status }}</td>
         <td class="pl-2 pt-2 pb-2 flex justify-center">
             <!-- Button for Opening Student Modal toggle -->
-            <div onclick="getStudentInfo('{% url 'mentor:student_info_modal' mentorship_request_pk=mentorship_request.pk %}')">
+            <div onclick="getStudentInfo('{% url 'mentor:student_info_modal' mentorship_request_pk=mentorship_request.pk %}', '{{ with_mentorship_name }}')">
 
                 {% #button type="button" icon_left="bi bi-info-circle"  %}
                     Revisar

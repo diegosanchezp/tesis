@@ -5,16 +5,28 @@ import type { ModalOptions } from 'flowbite';
 
 const paginationContainerId = "pagination_container"
 
+const boolMap = {
+    "true": true,
+    "false": false,
+    "True": true,
+    "False": false,
+}
+
+type BoolMapKeys = keyof typeof boolMap;
 /**
 * Fetches the student info and displays it in a modal
 * @param studentUrl - The URL to fetch the student info from
 */
-export async function getStudentInfo(studentUrl:string) {
+export async function getStudentInfo(studentUrl:string, withMentorshipName: BoolMapKeys) {
     const modalTarget = "#student-info-modal"
 
+    console.log(boolMap[withMentorshipName])
     await htmx.ajax("GET", studentUrl, {
         target: `${modalTarget}`,
         swap: "innerHTML",
+        values: {
+            with_mentorship_name: Boolean(boolMap[withMentorshipName])
+        }
     })
 
     const modalElement = document.querySelector(modalTarget) as HTMLElement

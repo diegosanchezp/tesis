@@ -41,7 +41,7 @@ context:
     </thead>
     <tbody>
         {% for mentorship_request in mentorship_requests %}
-            {% include "mentor/mentorship/request_row.html" with mentorship_request=mentorship_request %}
+            {% include "mentor/mentorship/request_row.html" with mentorship_request=mentorship_request with_mentorship_name=with_mentorship_name %}
         {% empty %}
             <tr>
                 <td colspan="3" class="py-2 pl-6 text-center">No hay solicitudes de mentoría que mostrar</td>

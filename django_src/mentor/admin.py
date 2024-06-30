@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import MentorshipRequest, StudentMentorshipTask
+from .models import MentorshipRequest, StudentMentorshipTask, MentorshipHistory
 
 @admin.register(StudentMentorshipTask)
 class StudentMentorshipTasksAdmin(admin.ModelAdmin):
@@ -14,4 +14,6 @@ class StudentMentorshipTasksAdmin(admin.ModelAdmin):
 class MentorshipRequestAdmin(admin.ModelAdmin):
     list_display = ("student", "mentorship", "status", "date")
 
-
+@admin.register(MentorshipHistory)
+class MentorshipHistoryAdmin(admin.ModelAdmin):
+    list_display = ("student", "mentorship", "state", "date")

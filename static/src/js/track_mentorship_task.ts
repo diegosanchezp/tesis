@@ -1,4 +1,7 @@
 import { getCSRFToken } from "js/utils/index"
+import { initHTMXutils, renderMessagesAsToasts, SwapEvent } from "js/utils/htmx"
+import htmx from "htmx.org"
+
 /**
 Makes sure that the we are working only with a dropzone element
 */
@@ -32,6 +35,8 @@ function setTaskNumString(taskNumElement: HTMLElement, taskNumTextElement: HTMLE
     }
 
 }
+initHTMXutils()
+
 document.addEventListener('DOMContentLoaded', () => {
     const draggableTasks = document.querySelectorAll(".draggable-task")
 
@@ -85,6 +90,15 @@ document.addEventListener('DOMContentLoaded', () => {
             event.preventDefault();
 
 
+
+                // Update the task status on DB
+                const csrftoken = getCSRFToken()
+
+                if(!csrftoken){
+                    console.error("CSRF token not found")
+                    return
+                }
+
             // We check if the target element is a dropzone, otherwise
             // tasks can be dropped inside other tasks elements
             if(isDropzone(event.target)){
@@ -101,7 +115,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 const targetDropzonetaskNumElement = targetDropzone.querySelector(
                     `#${targetDropzoneId}-task-num`
                 )
+
+                // Update the task state on the database
                 const targetDropzoneAction = targetDropzone.dataset.dropzoneAction
+                const taskPk = draggableTask.dataset.taskPk
+
+
+                // const ret = await htmx.ajax("POST", `/student/change_task_state/${taskPk}/`, {
+                //     values: {
+                //         event: targetDropzoneAction
+                //     },
+                //     handler: (response) => {
+                //         if(response['htmx-internal-data'].xhr.status != 200){
+                //             targetDropzone.classList.remove(DRAGENTER_BORDER_STYLE)
+                //             return "bac"
+                //         }
+                //     }
+                // })
+
+                const formData = new FormData();
+                formData.append("event", targetDropzoneAction)
+                // Important add / to the end of url
+                // Because django can do redirect while mantaining the POST data
+                const response = await fetch(`/student/change_task_state/${taskPk}/`, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    },
+                })
+
+                if(response.status !== 200){
+                    // Restore border styles to default
+                    targetDropzone.classList.remove(DRAGENTER_BORDER_STYLE)
+                
+                    // Render django error messages as toasts
+                    const rawTriggerData = response.headers.get("HX-Trigger")
+                    if(!rawTriggerData){
+                        console.error("No HX-Trigger header found")
+                        return
+                    }
+                    const triggerData = JSON.parse(rawTriggerData)
+                    const evt = new CustomEvent<SwapEvent['detail']>("renderMessagesAsToasts", {
+                        detail:{
+                            swaps: triggerData.renderMessagesAsToasts.swaps
+                        },
+                        bubbles: true,
+                    })
+                    document.body.dispatchEvent(evt)
+                    // Early exit so steps below are not executed
+                    return
+                }
 
                 // Get origin dropzone elements
                 const originDropzone = draggableTask.closest(".dropzone")
@@ -112,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const originDropzoneNumElement = originDropzone.querySelector(
                     `#${oringinDropzoneId}-task-num`
                 )
+
 
                 // move dragged element to the selected drop target
                 originDropzoneTaskContainer.removeChild(draggableTask)
@@ -131,28 +196,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     originDropzone.querySelector(`#${oringinDropzoneId}-task-text`) as HTMLElement,
                     "decrement",
                 )
-
-
-                // Update the task status on DB
-                const csrftoken = getCSRFToken()
-
-                if(!csrftoken){
-                    console.error("CSRF token not found")
-                    return
-                }
-                const formData = new FormData();
-                formData.append("event", targetDropzoneAction)
-                // Important add / to the end of url, see
-                // Because django can do redirect while mantaining the POST data
-                const taskPk = draggableTask.dataset.taskPk
-                await fetch(`/student/change_task_state/${taskPk}/`, {
-                    method: "POST",
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': csrftoken
-                    },
-                })
-
             }
         })
     })

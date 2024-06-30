@@ -25,3 +25,4 @@ class TestCaseMentorData(TestCaseWithData):
 
         cls.mentorship_data.create()
         cls.mentorship_data.get()
+        cls.mentorship1 = cls.mentorship_data.mentorship1

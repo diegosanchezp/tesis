@@ -1,5 +1,7 @@
 from os import environ
 
+from django_src.mentor.models import MentorshipRequest, StudentMentorshipTask
+
 from .test_utils import TestCaseMentorData
 from .test_data import MentorshipData
 
@@ -66,4 +68,50 @@ class TestEditMentorshipView(TestCaseMentorData):
 
         self.assertEqual(mentorship1.name, data['name'])
         self.assertIn(mentorship1.name, response_html)
+
+# ./manage.py test --keepdb django_src.mentor.test_edit_mentorship.TestDeleteStudentFromMentorship
+class TestDeleteStudentFromMentorship(TestCaseMentorData):
+
+    def setUp(self):
+        super().setUp()
+
+        self.mentor = self.mentorship1.mentor
+
+        # Login the mentor user
+        self.assertTrue(self.client.login(
+            username=self.mentor.user, password=environ["ADMIN_PASSWORD"],
+        ))
+    # ./manage.py test --keepdb django_src.mentor.test_edit_mentorship.TestDeleteStudentFromMentorship.test_delete_student_from_mentorship
+    def test_delete_student_from_mentorship(self):
+
+        student = self.student
+        response = self.client.post(
+            path=reverse_lazy(
+                "mentor:delete_student_mentorship",
+                kwargs={
+                    "mentorship_pk": self.mentorship1.pk,
+                    "student_pk": student.pk,
+                },
+            ),
+            headers={"HX-Request": "true"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the student doesn't have any tasks
+        self.assertFalse(
+            StudentMentorshipTask.objects.filter(
+                student=self.student, task__mentorship=self.mentorship1
+            ).exists()
+        )
+
+        # Check that the student doesn't have any mentorship history
+        self.assertFalse(
+            self.student.mentorship_history.filter(mentorship=self.mentorship1).exists()
+        )
+
+        # Check that the request is deleted
+        self.assertFalse(
+            MentorshipRequest.objects.filter(mentorship=self.mentorship1, student=student).exists()
+        )
 

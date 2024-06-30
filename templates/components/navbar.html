@@ -42,6 +42,12 @@
                 <a class="text-white" href="{% url 'business:students_directory' %}">Directorio Estudiantes</a>
             </li>
         {% endif %}
+        {# Student links #}
+        {% if request.user.is_student %}
+            <li>
+                <a class="text-white" href="{% url 'student:my_mentorships' %}">Mis Mentorías</a>
+            </li>
+        {% endif %}
     </ul>
 
     <ul class="flex text-white items-center">
