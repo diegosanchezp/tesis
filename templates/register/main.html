@@ -41,7 +41,7 @@
 
         </div>
 
-        <div class="self-center mt-20">
+        <div class="self-center mt-20 mb-6">
             <a x-bind:href="$store.profile.url">
                 {% #button type="button" icon_right="bi bi-arrow-right" x-show="$store.profile.profile" %}
                 <p>
@@ -50,9 +50,11 @@
                 {% /button %}
             </a>
         </div>
+        <div class="self-center mt-6">
+            <p>¿ Ya tienes cuenta ? <a class="font-medium text-blue-600 bg-blue-50 p-2 rounded-lg" href="{% url 'login' %}">Inicia sesión</a></p>
+        </div>
     </form>
     {{ form_urls | json_script:'form_urls' }}
-
 </main>
 {% endblock body %}
 

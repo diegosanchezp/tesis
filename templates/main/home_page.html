@@ -5,37 +5,44 @@
 
 {# wagtail pages always have a page object as context#}
 {% block body %}
-  <main class="px-20">
-    <header class="flex flex-col justify-center items-center">
-      <div class="my-8">
-        {% image page.header_image max-500x500 %}
-      </div>
-      <p>{{page.header_text}}</p>
-      <div class="my-8">
-          <a href="{% url 'register:index' %}">
-              {% #button %}
-                  {{page.header_cta}}
-              {% /button %}
-          </a>
-      </div>
-    </header>
-    {# this for loop is probably an n+1 query #}
-    {# TODO: optimize with select_related #}
-    {% for hero_section in page.hero_sections.all %}
-      {# cycle is used for odd and even iterations #}
-      {# such that when odd images goes to the left and to the right when even#}
-      <article class="flex my-8 {% cycle 'flex-row-reverse' '' %}">
-        <div class="w-1/2 flex  justify-center items-center bg-slate-300 mr-4">
-          {# <img class="block h-auto"> #}
-          {% image hero_section.image max-800x300 %}
-        </div>
+    <nav class="flex px-2 py-2 bg-ucv-blue justify-between items-center">
+    <ul id="navbar-text-links" class="ml-2 w-full flex gap-x-6">
+        <li class="place-self-end w-full mx-2">
+            <a class="block text-white w-full text-right" href="{% url 'login' %}">Iniciar sesión</a>
+        </li>
+    </ul>
+    </nav>
+    <main class="px-20">
+        <header class="flex flex-col justify-center items-center">
+            <div class="my-8">
+                {% image page.header_image max-500x500 %}
+            </div>
+            <p>{{page.header_text}}</p>
+            <div class="my-8">
+                <a href="{% url 'register:index' %}">
+                    {% #button %}
+                    {{page.header_cta}}
+                    {% /button %}
+                </a>
+            </div>
+        </header>
+        {# this for loop is probably an n+1 query #}
+        {# TODO: optimize with select_related #}
+        {% for hero_section in page.hero_sections.all %}
+            {# cycle is used for odd and even iterations #}
+            {# such that when odd images goes to the left and to the right when even#}
+            <article class="flex my-8 {% cycle 'flex-row-reverse' '' %}">
+                <div class="w-1/2 flex  justify-center items-center bg-slate-300 mr-4">
+                    {# <img class="block h-auto"> #}
+                    {% image hero_section.image max-800x300 %}
+                </div>
 
-        {# Title and description section #}
-        <div class="w-1/2 flex flex-col">
-          <h2 class="text-4xl font-extrabold">{{hero_section.title}}</h2>
-          <p class="mt-3">{{hero_section.description}}</p>
-        </div>
-      </article>
-    {% endfor %}
-  </main>
+                {# Title and description section #}
+                <div class="w-1/2 flex flex-col">
+                    <h2 class="text-4xl font-extrabold">{{hero_section.title}}</h2>
+                    <p class="mt-3">{{hero_section.description}}</p>
+                </div>
+            </article>
+        {% endfor %}
+    </main>
 {% endblock body %}

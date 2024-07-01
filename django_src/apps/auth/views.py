@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.template.response import TemplateResponse
 from django_src.mentor.utils import loggedin_and_approved
 from django.views.decorators.http import require_POST
@@ -5,8 +6,11 @@ from django.http import HttpResponseBadRequest
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import views as auth_views
+from django.views.generic.base import RedirectView
+from django.urls import reverse_lazy
 
-from .forms import UserProfileForm
+from .forms import UserProfileForm, LoginForm
 from django_src.utils.webui import renderMessagesAsToasts
 
 
@@ -77,3 +81,34 @@ def change_profile_view(request):
 
     renderMessagesAsToasts(request, response)
     return response
+
+
+class LoginView(auth_views.LoginView):
+    """
+    Extend/Override LoginView
+    """
+
+    template_name = "customauth/login.html"
+    next_page = reverse_lazy("login_proxy")
+    authentication_form = LoginForm
+
+
+class LoginProxyView(LoginRequiredMixin, RedirectView):
+    """
+    View for redirecting succesfull logins of any profile
+    """
+
+    def get_redirect_url(self, *args, **kwargs):
+
+        user = self.request.user
+
+        if user.is_superuser:
+            return reverse_lazy("wagtailadmin_home")
+        if user.is_business:
+            return reverse_lazy("business:landing")
+        if user.is_mentor:
+            return reverse_lazy("mentor:landing")
+        if user.is_student:
+            return reverse_lazy("pro_carreer:student_carreer_match")
+
+        return self.get_redirect_url(*args, **kwargs)

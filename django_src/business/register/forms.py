@@ -63,6 +63,7 @@ class BusinessUserCreationForm(UserCreationForm):
         fields = (
             "first_name",
             "email",
+            "username",
             "profile_pic",
             "password1",
             "password2",

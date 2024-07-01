@@ -250,10 +250,14 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+LOGIN_URL = "/login/"
 WAGTAIL_SITE_NAME = "Red Egresados UCV"
 
 # --- Wagtail Email settings ---
 WAGTAILADMIN_NOTIFICATION_USE_HTML = True
+
+# Wagtail auth settings
+WAGTAIL_FRONTEND_LOGIN_URL = "/login/"
 
 # --- Security settings --- #
 CORS_ALLOW_ALL_ORIGINS = False

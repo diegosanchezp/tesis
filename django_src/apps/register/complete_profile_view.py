@@ -203,7 +203,6 @@ def create_user(
 
     # Create the user
     user = user_form.save(commit=False)
-    user.username = user.email
     user.save()
 
     return user
