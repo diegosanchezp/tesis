@@ -195,6 +195,7 @@ class UserCreationForm(BaseUserCreationForm):
             "profile_pic",
             "first_name",
             "last_name",
+            "username",
             "email",
             "password1",
             "password2",
@@ -286,9 +287,8 @@ def validateExperienceFormset(formset: forms.BaseModelFormSet):
         if current:
             actual_exp_count += 1
         if actual_exp_count > 3:
-            raise ValidationError(
-                _("No se puede tener más de tres cargos actuales")
-            )
+            raise ValidationError(_("No se puede tener más de tres cargos actuales"))
+
 
 class MentorExperienceBaseFormSet(forms.BaseModelFormSet):
     def __init__(self, *args, **kwargs):
@@ -301,7 +301,6 @@ class MentorExperienceBaseFormSet(forms.BaseModelFormSet):
         """
         super().clean()
         validateExperienceFormset(self)
-
 
 
 def get_MentorExperienceFormSet(extra: int = 1, max_num: int | None = None):

@@ -10,7 +10,9 @@ context:
 
 {% with form=form.get_context.form fields=form.get_context.fields hidden_fields=form.get_context.hidden_fields errors=form.get_context.errors %}
 
-    {{ errors }}
+    <div class="text-sm text-red-600">
+        {{ errors }}
+    </div>
 
     {% if errors and not fields %}
         <div>{% for field in hidden_fields %}{{ field }}{% endfor %}</div>

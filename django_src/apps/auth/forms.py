@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from wagtail.admin.forms.auth import LoginForm as WagtailLoginForm
 
 User = get_user_model()
 
@@ -42,3 +43,9 @@ class UserProfileForm(forms.ModelForm):
             raise ValidationError(_("Ya existe un usuario con este correo electrónico"))
 
         return email
+
+
+class LoginForm(WagtailLoginForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["remember"].label = _("Recuerdame")

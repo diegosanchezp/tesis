@@ -11,6 +11,7 @@ from django.views.static import serve
 from django.conf.urls.i18n import i18n_patterns
 from django_src.apps.main.views import forms_demo_view
 from django_src.apps.main.views import PrivateMediaView
+from django_src.apps.auth import views as customauth_views
 
 # Wagtail
 from wagtail.admin import urls as wagtailadmin_urls
@@ -36,9 +37,11 @@ urlpatterns = i18n_patterns(
     path("student/", include("django_src.student.urls", namespace="student")),
     path("business/", include("django_src.business.urls", namespace="business")),
     path("interests/", include("django_src.interests.urls", namespace="interests")),
+    path("login/", customauth_views.LoginView.as_view(), name="login"),
+    path("login-proxy/", customauth_views.LoginProxyView.as_view(), name="login_proxy"),
     path(
         "logout/",
-        auth_views.LogoutView.as_view(next_page=reverse_lazy("wagtailadmin_home")),
+        auth_views.LogoutView.as_view(next_page=reverse_lazy("login")),
         name="logout",
     ),
     path("customauth/", include("django_src.apps.auth.urls", namespace="customauth")),

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load django_vite slippers static %}
+
+{% block title %}
+    Iniciar sesión
+{% endblock %}
+
+{% block body %}
+
+{% if user.is_authenticated %}
+    {% include "components/navbar.html" %}
+{% endif %}
+
+<header class="bg-gradient-to-t from-white to-ucv-yellow pb-18 flex flex-col items-center justify-center">
+    <img src="{% static 'logo_egresados_ucv.jpg' %}" alt="Logo de la Asociación" class="w-40 h-40 mx-auto mt-2" />
+    <h2 class="my-4 text-xl">Iniciar sesión</h2>
+
+    {% if next %}
+        {% if user.is_authenticated %}
+            <p>Tu cuenta no tiene acceso para ver esta página. Por favor ingresa con una cuenta que tenga acceso</p>
+        {% else %}
+            <p class="text-orange-800">Por favor inicia sesión para ver esta página.</p>
+        {% endif %}
+    {% endif %}
+</header>
+<main class="flex justify-center items-center">
+    <form method="post" action="{% url 'login' %}" class="{% include "student/profile/container_styles.html" %} flex flex-col gap-y-2 min-w-80 max-w-96">
+        {% csrf_token %}
+
+        {% include "forms/form.html" %}
+
+        {% if messages %}
+            {% include "components/messages.html" %}
+        {% endif %}
+        <div class="flex justify-center items-center">
+        {% #button icon_right="bi bi-arrow-right" type="submit" %}
+            Ingresar
+        {% /button %}
+        </div>
+
+        <input type="hidden" name="next" value="{{ next }}">
+    </form>
+</main>
+{% endblock body %}
