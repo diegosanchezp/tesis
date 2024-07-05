@@ -1,0 +1,133 @@
+{% extends "customwagtail/base.html" %}
+
+{% load django_vite slippers %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+{% endblock %}
+
+{% block body %}
+    <main class="page-x-spacing my-5">
+
+    <h1 class="text-2xl mb-4">Gestionar temas de interés</h1>
+    {% block table_and_form %}
+    <div id="table_and_form" class="grid grid-cols-2 gap-x-4" hx-swap-oob="true">
+        {# TABLE #}
+        {% block theme_table %}
+        <div id="theme-table" class="border rounded-lg border-slate-200 py-6 px-6">
+            {# FORM: table filters #}
+            <form class="flex gap-x-2 mb-2" id="{{ filter_form.id }}"
+                hx-get=""
+                hx-target="#theme-table"
+                hx-swap="outerHTML"
+                hx-on:submit="history.replaceState(null, null, location.pathname);"
+                >
+                <div>
+                    {% include "forms/render_field.html" with field=filter_form.name %}
+                </div>
+                <div class="self-end">
+                    {% #button type="submit" icon_left="bi bi-search" title="Filtrar y buscar" name="action" value="refresh_table" %}
+                    {% /button %}
+                </div>
+            </form>
+            <div class="mt-4">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="text-left">Nombre</th>
+                            <th class="text-left">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for theme in interest_themes %}
+                            {% block theme_row %}
+                            {# HX attributes are located here so that they can be inherited #}
+                            <tr id="theme-row-{{ theme.id }}" hx-target="#theme-row-{{ theme.id }}" hx-swap="outerHTML">
+                                {# Name #}
+                                <td class="pr-6 min-w-40">
+                                    {% if state == "update" %}
+                                        <input type="hidden" name="id" value="{{ theme.id }}" form="{{ form.id }}">
+                                        {% include "forms/form.html" with form=form %}
+                                    {% endif %}
+                                    {% if state == "read" %}
+                                        {{ theme.name }}
+                                    {% endif %}
+                                </td>
+                                {# Acción #}
+                                <td>
+                                    <div class="min-w-40 flex gap-x-2 self-end">
+                                        {% if state == "create" %}
+                                            {% #button icon_right="bi bi-floppy" type="button" title="Guardar" %}
+                                            {% /button %}
+                                            {% #button icon_right="bi bi-x" type="button" title="Cancelar" %}
+                                            {% /button %}
+                                        {% endif %}
+                                        {% if state == "read" %}
+                                            <form id="" hx-get="">
+                                                <input type="hidden" name="id" value="{{ theme.id }}">
+                                                {% #button icon_right="bi bi-pencil-square" type="submit" name="action" value="get_edit_row" title="Editar" %}
+                                                {% /button %}
+                                            </form>
+                                            <form hx-post="" hx-target="#theme-table" hx-swap="outerHTML">
+                                                <input type="hidden" name="id" value="{{ theme.id }}">
+                                                {% #button icon_right="bi bi-trash" type="submit" variant="red" title="Eliminar" name="action" value="delete_interest_theme" %}
+                                                {% /button %}
+                                            </form>
+                                        {% endif %}
+                                        {% if state == "update" %}
+                                            <form id="{{ form.id }}" hx-post="">
+                                                {% #button icon_right="bi bi-floppy" type="submit" title="Guardar" name="action" value="update_interest_theme" %}
+                                                {% /button %}
+                                            </form>
+                                            <form hx-get="" hx-trigger="click">
+                                                <input type="hidden" name="id" value="{{ theme.id }}">
+                                                {% #button icon_right="bi bi-x" type="button" title="Cancelar" name="action" value="restore_row" %}
+                                                {% /button %}
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endblock theme_row %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="3" class="pl-6 pr-6">
+                                    {% if filter_form.is_valid %}
+                                        No hay temas de interés con el nombre "{{ filter_form.cleaned_data.name }}", intenta con otro nombre
+                                    {% else %}
+                                        No hay temas de interés, crea uno
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {# Table pagination #}
+                <div id="pagination_container" class="flex justify-center" >
+                    {% include "components/pagination.html" with page_obj=interest_themes search_query_params=filter_queryparams hx_attrs='hx-boost="true" hx-target="#theme-table" hx-swap="outerHTML"' prevent_hxboost_scroll="True" %}
+                </div>
+            </div>
+        </div>
+        {% endblock theme_table %}
+
+        {# FORM: Create interest theme #}
+        <div class="py-3">
+            {% block create_theme_form %}
+            <form id="create-theme-form" hx-post="" hx-target="this" hx-swap="outerHTML">
+                <h3 class="text-lg">Crear tema de interés</h3>
+                <div class="mb-2">
+                    {% include "forms/form.html" with form=create_interest_theme_form %}
+                </div>
+                <div class="flex justify-center items-center">
+                {% #button icon_left="bi bi-floppy" type="submit" title="Guardar" name="action" value="create_interest_theme" %}
+                    Crear
+                {% /button %}
+                </div>
+            </form>
+            {% endblock create_theme_form %}
+        </div>
+    </div>
+    {% endblock table_and_form %}
+
+    </main>
+{% endblock body %}

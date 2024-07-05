@@ -1,14 +1,37 @@
 from django.http.request import HttpRequest
-from django.urls import reverse
-from wagtail.admin import widgets as wagtailadmin_widgets
+from django.urls import path, reverse_lazy
 
 from wagtail import hooks
+from wagtail.admin.menu import MenuItem
 from wagtail.models import Page, BaseViewRestriction
 from wagtail.images.models import Image
 from wagtail.documents.models import Document
 
 from django_src.apps.register.models import Mentor
 from django_src.business.models import Business
+
+from django.urls import path
+
+from django_src.customwagtail.interest_themes.view import crud_interest
+
+
+@hooks.register("register_admin_urls")
+def register_admin_urls():
+    return [
+        path(
+            "crud_interest_themes", view=crud_interest, name="cms_interest_themes_crud"
+        ),
+    ]
+
+
+menu_interest_themes = MenuItem(
+    label="Temas de interés", url=reverse_lazy("cms_interest_themes_crud")
+)
+
+
+@hooks.register("register_admin_menu_item")
+def register_menus():
+    return menu_interest_themes
 
 
 @hooks.register("construct_explorer_page_queryset")
