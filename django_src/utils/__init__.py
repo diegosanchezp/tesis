@@ -1,3 +1,7 @@
+from django import forms
+from django.http.request import QueryDict
+
+
 def get_page_number(request):
     """
     Gets the page number from the request object.
@@ -26,3 +30,15 @@ def remove_index_publish_permission(page_permission_tester, user):
         page_permission_tester.permissions.remove("publish")
 
     return page_permission_tester
+
+
+def formdata_to_querystring(form, extra: dict = {}):
+
+    query_dict = QueryDict(mutable=True)
+    if not form.is_valid():
+        return ""
+    for key, value in form.cleaned_data.items():
+        if value:
+            query_dict[key] = value
+    query_dict.update(extra)
+    return query_dict.urlencode()
