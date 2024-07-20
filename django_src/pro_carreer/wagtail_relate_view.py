@@ -7,7 +7,9 @@ from django.db.utils import IntegrityError
 from django_src.apps.register.models import (
     CarrerSpecialization, InterestTheme, ThemeSpecProCarreer
 )
+from django.contrib import messages
 
+from django_src.utils.webui import renderMessagesAsToasts
 from .models import ( ProfessionalCarreer )
 from .forms import ( ActionForm, ThemeSpecRelateForm, RelateActions, DeleteThemeSpecRelateForm )
 
@@ -20,7 +22,8 @@ def get_default_context(request, pro_career: ProfessionalCarreer):
 
     context = {
         "pro_career": pro_career,
-        "RelateActions": RelateActions
+        "RelateActions": RelateActions,
+        "actions": RelateActions,
     }
 
     return context
@@ -38,6 +41,7 @@ def create_spec_relation(request, pro_career: ProfessionalCarreer, model_type: s
     theme_spec_form = ThemeSpecRelateForm(model=model, data=request.POST)
 
     context["theme_spec_form"] = theme_spec_form
+    context["model_type"] = model_type
 
     if theme_spec_form.is_valid():
 
@@ -49,19 +53,26 @@ def create_spec_relation(request, pro_career: ProfessionalCarreer, model_type: s
                 weight=weight, pro_career=pro_career,
             )
             context["theme_spec"] = theme_spec_procareer
+            messages.success(request, f"Relación creada exitosamente")
+
         except IntegrityError:
             error_msg = "Ya está creada la relación con " # Leave trailing space at the end
             # If theme_specialization is of type CarrerSpecialization
             if isinstance(theme_specialization, CarrerSpecialization):
                 error_msg += f"la especialización {theme_specialization.name}, elige otra"
+                messages.error(request, message=error_msg)
             else:
                 error_msg += f"el tema de interés {theme_specialization.name}, elige otro"
+                messages.error(request, message=error_msg)
 
             theme_spec_form.add_error(None, error_msg)
             # go to render form
 
         # render form
-        return TemplateResponse(request, "pro_carreer/spec_procareer_match.html", context)
+        response = TemplateResponse(request, "pro_carreer/spec_procareer_match.html", context)
+        renderMessagesAsToasts(request, response)
+        return response
+
 
     # todo return html with the form errors rendereed for invalid case
 
@@ -81,11 +92,17 @@ def delete_themespec(request, pro_career: ProfessionalCarreer, model_type: str):
         weighted_spec.delete()
 
         # Since we are deleting we dont need to html
-        return HttpResponse("ok")
+        response = HttpResponse("ok")
+        messages.error(request, f"{weighted_spec.content_object.name} eliminada exitosamente")
+        renderMessagesAsToasts(request, response)
+        return response
+
 
     # Invalid case, I guess, I should render the invalid form message ?
-    return HttpResponse("Not found", status=404)
-    # pro_career is assumed  
+    response = HttpResponse("Not found", status=404)
+    renderMessagesAsToasts(request, response)
+    return response
+    # pro_career is assumed
 
 
     # try:
