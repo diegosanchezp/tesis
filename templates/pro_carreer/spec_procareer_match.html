@@ -1,10 +1,14 @@
 {% load slippers %}
 
 {% comment %}
-  - theme_spec_form, theme_theme_spec they come from the context
-  when this template is rendered as a htmx partial
+  theme_spec_form
+  theme_spec
+  insert_placeholder
+  model_type
+  actions
 
-  other variables come from the parameters
+  come from the context of `templates/pro_carreer/spec_theme_table.html`
+
 {% endcomment %}
 <tr id="weighted-{{model_type}}-{{theme_spec.content_object.id}}" class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
 
@@ -17,9 +21,15 @@
                 <input type="hidden" name="weighted_spec" value="{{ theme_spec.id }}">
                 <input type="hidden" name="theme_spec" value="{{ theme_spec.content_object.id }}">
                 <input type="hidden" name="model_type" value="{{ model_type }}">
-
-                {% #button icon_right="bi bi-dash" type="submit" title="Eliminar" name="action" value=actions.DELETE_THEME_SPEC %}
-                {% /button %}
+                <button
+                    type="submit"
+                    title="Eliminar"
+                    name="action"
+                    value="{{ actions.DELETE_THEME_SPEC }}"
+                    class='{% include "components/button_class.html" with size="normal" %}'
+                >
+                    <i class="bi bi-dash"></i>
+                </button>
             </form>
         </td>
     {% else %}
