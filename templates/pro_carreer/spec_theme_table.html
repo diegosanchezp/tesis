@@ -40,20 +40,6 @@
             </td>
             <td class="flex items-center justify-center px-2">
                 <input type="hidden" name="model_type" value="{{form.model_type}}" form="{{ form_id }}">
-                {% comment %}
-                <button
-                    type="submit"
-                    class='{% include "components/button_class.html" with size="normal" %}'
-                    name="action"
-                    value="{{ RelateActions.RELATE_THEME_SPEC }}"
-                    form="{{ form_id }}"
-                >
-                    <div class="flex gap-2">
-                        <i class="bi bi-plus"></i>
-                        <span>Crear</span>
-                    </div>
-                </button>
-                {% endcomment %}
 
                 <input type="hidden" name="action" value="{{ RelateActions.RELATE_THEME_SPEC }}" form="{{ form_id }}">
                 {% #button icon_left="bi bi-plus" type="submit" form=form_id %}
