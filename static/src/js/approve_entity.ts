@@ -3,12 +3,8 @@ import 'flowbite'
 import { Modal } from 'flowbite';
 import type { ModalOptions } from 'flowbite';
 import htmx from 'htmx.org'
-import { initHTMXutils } from 'js/utils/htmx'
 
 const form_id = "approvals-form"
-
-// Init events listeners for RPC communication beteween the server and the browser
-initHTMXutils()
 
 document.addEventListener("htmx:afterRequest",(evt)=>{
     if(evt.detail.target.id === form_id){

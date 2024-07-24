@@ -50,6 +50,7 @@ class RegisterApprovalEvents(models.TextChoices):
 
     REJECT = "REJECT", _("Rechazar")
     APPROVE = "APPROVE", _("Aprobar")
+    RESET = "RESET", _("Poner en espera")
 
 
 class RegisterApprovals(models.Model):
@@ -125,6 +126,10 @@ approval_state_machine = {
     },
     RegisterApprovalStates.REJECTED: {
         RegisterApprovalEvents.APPROVE: RegisterApprovalStates.APPROVED,
+        RegisterApprovalEvents.RESET: RegisterApprovalStates.WAITING,
+    },
+    RegisterApprovalStates.APPROVED: {
+        RegisterApprovalEvents.RESET: RegisterApprovalStates.WAITING,
     },
 }
 
