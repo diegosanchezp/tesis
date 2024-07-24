@@ -22,7 +22,7 @@ from wagtail.admin.utils import get_admin_base_url
 from render_block import render_block_to_string
 from django_htmx.http import trigger_client_event
 
-from django_src.utils.webui import HXSwap
+from django_src.utils.webui import HXSwap, renderMessagesAsToasts
 
 from .forms import ApprovalsFilterForm, ApprovalModalitys
 from .models import (
@@ -138,6 +138,14 @@ def filter_users(request):
         # Todo figure out howt to get page number when a filter is applied
         **paginate_queryset(request, approvals),
     }
+
+    if approvals.count() == 0:
+        try:
+            invalid_status = RegisterApprovalStates[filter_form.cleaned_data["status"]]
+            context["invalid_status"] =  invalid_status.label
+        except KeyError:
+            context["invalid_status"] = filter_form.cleaned_data["status"]
+
 
     return context
 
@@ -355,6 +363,7 @@ def approvals_view(request):
             if action in [
                 RegisterApprovalEvents.APPROVE,
                 RegisterApprovalEvents.REJECT,
+                RegisterApprovalEvents.RESET,
             ]:
                 context.update(**approve_reject_users(request))
 
@@ -366,6 +375,7 @@ def approvals_view(request):
             template_name, "approvals_table", request_context
         )
         htmx_reponse = HttpResponse(form_html)
+        renderMessagesAsToasts(request, htmx_reponse)
 
         # Tell the frontend to update the modal actions based on the state
         if approvals_form_is_valid and modality == ApprovalModalitys.MODAL:

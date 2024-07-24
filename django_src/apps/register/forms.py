@@ -434,7 +434,7 @@ class ApprovalsFilterForm(forms.Form):
 
         approval_errors = []
 
-        if action in [RegisterApprovalEvents.APPROVE, RegisterApprovalEvents.REJECT]:
+        if action in [RegisterApprovalEvents.APPROVE, RegisterApprovalEvents.REJECT, RegisterApprovalEvents.RESET]:
 
             if not approvals:
                 return cleaned_data
@@ -448,7 +448,7 @@ class ApprovalsFilterForm(forms.Form):
                     approval_errors.append(
                         ValidationError(
                             _(
-                                "Acción %(accion)s, es inválida para el estado %(state)s de %(user)s"
+                                "Acción '%(accion)s', es inválida para el estado '%(state)s' de '%(user)s'"
                             ),
                             params={
                                 "accion": RegisterApprovalEvents[action].label,
