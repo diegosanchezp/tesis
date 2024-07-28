@@ -20,7 +20,6 @@ from django.conf import settings
 from wagtail.admin.mail import send_mail
 from wagtail.admin.utils import get_admin_base_url
 from render_block import render_block_to_string
-from django_htmx.http import trigger_client_event
 
 from django_src.utils.webui import HXSwap, renderMessagesAsToasts
 
@@ -151,9 +150,9 @@ def filter_users(request):
 
 
 def get_absolute_login_url():
-    wagtail_base_url = get_admin_base_url()
-    login_page_url = reverse("wagtailcore_login")
-    return urljoin(wagtail_base_url, login_page_url)
+    base_url: str = settings.BASE_URL
+    login_page_url = reverse("login")
+    return urljoin(base_url, login_page_url)
 
 
 def get_send_approval_email_context(

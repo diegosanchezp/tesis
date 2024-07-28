@@ -50,6 +50,9 @@ PRIVATE_MEDIA_ROOT = os.path.join(BASE_DIR, "private_media")
 # Gunicorn worker will have cached templates, so disable them in development
 TEMPLATES[0]["OPTIONS"]["loaders"] = default_loaders
 
+# BASE_URL is used links in email content when sending emails
+BASE_URL = f"https://{env('HOST_NAME')}:8000"
+
 # WAGTAILADMIN_BASE_URL required for notification emails
 WAGTAILADMIN_BASE_URL = f"https://{env('HOST_NAME')}:8000"
 WAGTAILADMIN_NOTIFICATION_FROM_EMAIL = "noreply@egresados.org"
