@@ -29,6 +29,7 @@ def get_queryset(request):
 
     # Determine the content type of the theme spec
 
+    student_match_procarreers = ProfessionalCarreer.objects.none()
     # Case when the student has interests
     if student.interests.count() > 0:
         themespec_content_type = ContentType.objects.get_for_model(InterestTheme)
@@ -54,7 +55,9 @@ def get_queryset(request):
     # Get all professional carreers that match with the student interests
     # distinct() is used to avoid duplicates because of the order_by
 
-    return student_match_procarreers.order_by("-weighted_themespecs__weight").distinct()
+
+    ret = student_match_procarreers.order_by("title").distinct("title")
+    return ret
 
 def student_is_approved(func):
     """
@@ -80,7 +83,7 @@ def student_is_approved(func):
 
 
 @require_GET
-@login_required(login_url="/")
+@login_required()
 @student_is_approved
 def view(request):
     """
@@ -94,10 +97,8 @@ def view(request):
         return HttpResponseForbidden("You are not approved yet")
 
     pro_careers: QuerySet[ProfessionalCarreer] = get_queryset(request)
-    graph_data = get_graph_data(request)
 
     context["pro_careers"] = pro_careers
-    context["graph_data"] = graph_data
 
     # We are visiting the page for the first time
     # if request.method == "GET" and not request.htmx:
@@ -238,7 +239,7 @@ def get_graph_data(request):
     return elements
 
 @require_GET
-@login_required(login_url="/")
+@login_required()
 @student_is_approved
 def graph_view(request):
 
