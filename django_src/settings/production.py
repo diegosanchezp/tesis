@@ -48,6 +48,7 @@ SECURE_SSL_REDIRECT = True
 # X_FRAME_OPTIONS = "SAMEORIGIN"
 
 # TODO: test
+BASE_URL = f"https://{os.getenv('HOST_NAME')}"
 WAGTAILADMIN_BASE_URL = f"https://{os.getenv('HOST_NAME')}"
 WAGTAILADMIN_NOTIFICATION_FROM_EMAIL = os.getenv("WAGTAILADMIN_NOTIFICATION_FROM_EMAIL")
 # The support email for requests / questions

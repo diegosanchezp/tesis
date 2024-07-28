@@ -1,0 +1,6 @@
+{% extends "wagtailadmin/userbar/base.html" %}
+{% load static %}
+
+{% block branding_logo %}
+    <img src="{% static 'logo_egresados_ucv.jpg' %}" alt="Logo egresados" width="180" height="180" />
+{% endblock %}
