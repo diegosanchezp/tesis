@@ -100,3 +100,17 @@ def show_my_pages_only(pages, request):
     ):
         return pages
     return pages.filter(owner=request.user)
+
+@hooks.register("construct_main_menu")
+def hide_menus_for_users(request, menu_items):
+    """
+    Hide CMS menus that should only be available for admins and other types of superusers
+    """
+
+    if request.user.is_superuser or request.user.is_staff:
+        pass
+    else:
+        menu_items[:] = [
+            item for item in menu_items if item.label != menu_interest_themes.label
+        ]
+
