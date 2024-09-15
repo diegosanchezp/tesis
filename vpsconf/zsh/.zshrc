@@ -19,5 +19,8 @@ _comp_options+=(globdots)		# Include hidden files.
 # Load zsh-syntax-highlighting; should be last.
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh 2>/dev/null
 
+# Setting TERM Fixes adding whitespaces to the prompt when pressing backspace key
+export TERM=xterm-256color
+
 # Load aliases
 [ -f "$HOME/.aliasrc" ] && source "$HOME/.aliasrc"
