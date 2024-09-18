@@ -10,6 +10,7 @@ volumes:
   certbot_certs: {}
   certbot_libs: {}
 
+# REPOPATH is the absolute path to the repository
 services:
   django:
     image: ${DOCKER_IMAGE}
@@ -30,8 +31,8 @@ services:
 
     env_file:
       # This files must be created when deploying
-      - ../../envs/production/django
-      - ../../envs/production/postgres
+      - ${REPOPATH}/envs/production/django
+      - ${REPOPATH}/envs/production/postgres
   postgres:
     image: postgres:14.4
     container_name: postgres_prod
@@ -40,7 +41,7 @@ services:
       - postgres_data_backups:/backups:z
     env_file:
       # For local testing uncomment these
-      - ../../envs/production/postgres
+      - ${REPOPATH}/envs/production/postgres
   nginx:
     image: nginx:1.25.1
     container_name: nginx_prod
@@ -52,7 +53,7 @@ services:
     volumes:
       # Copy nginx configuration to container
       - type: bind
-        source: ../../nginx/nginx.conf
+        source: ${REPOPATH}/nginx/nginx.conf
         target: /etc/nginx/nginx.conf
 
       - type: volume
