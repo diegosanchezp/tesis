@@ -15,6 +15,7 @@ Set the required environment variables for the docker host
 export COMPOSE_FILE=docker/production/docker-compose.yml:docker/production/docker.localprod.yml
 export DOCKER_IMAGE=ghcr.io/diegosanchezp/django_egresados:latest
 export DOCKER_BUILDKIT=1
+export REPOPATH="../.."
 
 # Also these can be stored on a file: envs/production/host
 load_env envs/production/host
@@ -105,4 +106,5 @@ docker compose run --rm \
 ```bash
 docker compose logs -f nginx django
 ```
-
+Visit
+https://localhost

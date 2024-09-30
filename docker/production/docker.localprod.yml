@@ -1,7 +1,45 @@
 # this files overrides extends docker-compose.yml
 # see docs/testing_prod_locally_procedure.md
+# https://docs.docker.com/compose/multiple-compose-files/merge/
+
+volumes:
+  localstack_s3: {}
 services:
+  postgres:
+    # map the postgres container to the local port so pgadmin can connect
+    ports:
+      - "5432:5432"
+  s3:
+    # https://docs.localstack.cloud/user-guide/aws/s3/#s3-docker-image
+    image: localstack/localstack:s3-latest
+    container_name: localstack_s3
+    ports:
+      - "4566:4566"            # LocalStack Gateway
+    environment:
+      - DEBUG=${DEBUG:-0}
+      - HOSTNAME=0.0.0.0
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+      - CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+      - NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
+    volumes:
+      - type: volume
+        source: localstack_s3
+        target: /var/lib/localstack
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+      - type: bind
+        source: ../../mkcert/127.0.0.1.crt
+        target: /etc/ssl/certs/ca-certificates.crt
+      - type: bind
+        source: ../../localstack/init/boot.d
+        target: /etc/localstack/init/boot.d
+
+
+
   django:
+    depends_on:
+      - s3
     volumes:
       # If any of the python source files are changed,
       # the production image will not need to be rebuilt
