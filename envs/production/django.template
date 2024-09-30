@@ -11,8 +11,8 @@ DJANGO_SETTINGS_MODULE=django_src.settings.production
 
 # See django_src/apps/auth/migrations/0002_setup_admin.py
 # Random passwords can be generated with gpg `--gen-random --armor 1 16`
-ADMIN_USERNAME=""
-ADMIN_PASSWORD=""
+ADMIN_USERNAME=
+ADMIN_PASSWORD=
 
 
 # This can stay empty for now
