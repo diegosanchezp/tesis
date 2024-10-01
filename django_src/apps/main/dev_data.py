@@ -59,7 +59,7 @@ def dev_pages(apps: Apps):
     with transaction.atomic():
         img_phone_mockup, created = Image.objects.get_or_create(
             title="phone-mockup",
-            file="original_images/phone-mockup_wP3cGMj.png",
+            file="original_images/phone-mockup.png",
             uploaded_by_user=admin,
         )
 
