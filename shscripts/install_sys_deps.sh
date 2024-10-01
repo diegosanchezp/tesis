@@ -59,8 +59,8 @@ cp "$ROOT_DIR"/envs/production/postgres.template "$ROOT_DIR"/envs/production/pos
 
 # from django.core.management.utils import get_random_secret_key
 # get_random_secret_key()
-load_env env/production/host
-
+docker compose run --rm django \
+  bash -c "echo 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())' | python"
 # Generate http certs
 
 sudo --preserve-env docker pull "$DOCKER_IMAGE"
