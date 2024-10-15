@@ -1,0 +1,19 @@
+{% extends "components/tabs/base.html" %}
+
+{% comment %}
+  current_tab: str, the tab that's beign selected on this page
+{% endcomment %}
+{% block list_items %}
+    <li class="me-2">
+        <a
+            href="{% url 'student:jobs_offers' %}"
+            class="{% include "components/tabs/get_linkstyles.html" with tab_name="ofertas-trabajo" %}">
+            Ofertas de trabajo
+        </a>
+        <a
+            href="{% url 'student:jobs_offers' %}?tab=ofertas-aplicadas""
+            class="{% include "components/tabs/get_linkstyles.html" with tab_name="ofertas-aplicadas" %}">
+            Ofertas aplicadas
+        </a>
+    </li>
+{% endblock %}

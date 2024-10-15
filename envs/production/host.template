@@ -1,3 +1,10 @@
 COMPOSE_FILE=docker/production/docker-compose.yml
+
+# The image name that will be used to run the application
+# used in docker/production/docker-compose.yml and
 DOCKER_IMAGE=
 ENVIRONMENT=production
+
+# absolute path to the repository
+# used in docker/production/docker-compose.yml
+REPOPATH=

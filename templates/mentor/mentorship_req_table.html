@@ -10,7 +10,7 @@ context:
 {% endcomment %}
 
 {# table filters #}
-<form id="table_filters" class="flex gap-x-4 pt-4 pr-4 justify-end" hx-get="" hx-trigger="submit" hx-swap="outerHTML" hx-target="#table_form">
+<form id="mentorship_req_table_filters" class="table_filters flex gap-x-4 pt-4 pr-4 justify-end" hx-get="" hx-trigger="submit" hx-swap="outerHTML" hx-target="#mentorship_req_table">
     {% include "forms/render_field.html" with field=filter_form.student_name %}
     {% include "forms/render_field.html" with field=filter_form.state %}
     <div class="self-end">
@@ -50,6 +50,6 @@ context:
     </tbody>
 </table>
 {# pagination #}
-<div id="pagination_container" class="flex justify-center" {# hx-get="" hx-trigger="click" hx-swap="outerHTML" hx-target="mentorship_req_table" #}>
+<div id="mentorship_req_table_pagination_container" class="pagination_container flex justify-center" {# hx-get="" hx-trigger="click" hx-swap="outerHTML" hx-target="mentorship_req_table" #}>
     {% include "components/pagination.html" with page_obj=mentorship_requests search_query_params="action=filter_mentorship_request&"%}
 </div>

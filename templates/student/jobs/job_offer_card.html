@@ -1,0 +1,65 @@
+{% load wagtailcore_tags %}
+{% comment %}
+  joboffer: django_src.business.models.JobOffer
+{% endcomment %}
+
+<div id="job-offer-{{joboffer.pk}}" class="rounded border border-ucv-blue drop-shadow-lg bg-slate-50 p-4 hover:border-ucv-yellow-dark">
+    <a href="{% pageurl joboffer %}" class="font-bold text-base">{{ joboffer.title }}</a>
+
+    {# Business Author #}
+    <a
+        {% if joboffer.owner.business.web_page %}href="{{ joboffer.owner.business.web_page }}"{% endif %}
+        class="text-sm mb-4 block {% if joboffer.owner.business.web_page %} hover:text-ucv-blue {% endif %}"
+    >
+        <span>{{ joboffer.owner.first_name }}</span>
+        <span>{{ joboffer.owner.last_name }}</span>
+    </a>
+
+    {# Job workplace: Remote, On site, ... #}
+    <div id="workplace" class="p-0.5 border rounded border-ucv-yellow-dark bg-ucv-yellow text-ucv-yellow-dark flex flex-col justify-center items-center">
+        <span class="uppercase">{{ joboffer.get_workplace_display }}</span>
+    </div>
+
+    {# Interests #}
+    <ul class="flex gap-x-2 my-2">
+        {% for interest in joboffer.interests.all %}
+            <li class="rounded-md bg-slate-600 py-0.5 px-1 text-white">
+                <span class="text-sm">{{ interest.interest.name }}</span>
+            </li>
+        {% endfor %}
+    </ul>
+
+
+    {# Action buttons #}
+    <div class="flex items-center gap-x-2 justify-center">
+        <a href="{% pageurl joboffer %}">
+            {% #button type="button" %}
+                Ver
+            {% /button %}
+        </a>
+
+        {# I want to apply to this job #}
+        {# if already applied then show "desaplicar" button #}
+        {% if joboffer.applied %}
+
+            <form hx-post="" hx-target="#job-offer-{{ joboffer.pk }}" hx-swap="outerHTML">
+                <input type="hidden" name="action" value="unapply_to_job">
+                <input type="hidden" name="job_offer" value={{ joboffer.pk }}>
+                {% #button type="submit" variant="red" %}
+                    Des-Aplicar
+                {% /button %}
+            </form>
+
+        {% else %}
+           {% if request.user.is_student %}
+               <form hx-post="" hx-target="#job-offer-{{ joboffer.pk }}" hx-swap="outerHTML">
+                   <input type="hidden" name="action" value="apply_to_job">
+                   <input type="hidden" name="job" value={{ joboffer.pk }}>
+                   {% #button type="submit" %}
+                   Aplicar
+                   {% /button %}
+               </form>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>

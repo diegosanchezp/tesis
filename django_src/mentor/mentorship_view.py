@@ -31,23 +31,14 @@ from .models import (
     StudentMentorshipTask,
     MentorshipTask,
 )
-from django_src.apps.auth.models import User
+from django_src.types import HtmxHttpRequest
 from django_src.apps.register.models import Student, Mentor
 from django_src.utils.webui import renderMessagesAsToasts
 from render_block import render_block_to_string
 
-from django_htmx.middleware import HtmxDetails
 from django_htmx.http import trigger_client_event
 
-
 from render_block import render_block_to_string
-
-
-# Typing pattern recommended by django-stubs:
-# https://github.com/typeddjango/django-stubs#how-can-i-create-a-httprequest-thats-guaranteed-to-have-an-authenticated-user
-class HtmxHttpRequest(HttpRequest):
-    htmx: HtmxDetails
-    user: User
 
 
 @require_http_methods(["GET", "POST"])

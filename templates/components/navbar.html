@@ -47,6 +47,9 @@
             <li>
                 <a class="text-white" href="{% url 'student:my_mentorships' %}">Mis Mentorías</a>
             </li>
+            <li>
+                <a class="text-white" href="{% url 'student:jobs_offers' %}">Ofertas de trabajo</a>
+            </li>
         {% endif %}
     </ul>
 
@@ -92,7 +95,7 @@
                 class="{% include "components/navbar/link_css.html" %}"
                 href="
                     {% spaceless %}
-                    {# TODO #}
+
                     {% if request.user.is_mentor %}
                         {% url 'mentor:edit_profile' %}
                     {% endif %}

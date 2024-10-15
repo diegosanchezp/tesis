@@ -46,8 +46,12 @@ SECURE_SSL_REDIRECT = True
 
 # # Wagtail preview uses iframes
 # X_FRAME_OPTIONS = "SAMEORIGIN"
+EMAIL_HOST=os.environ.get("EMAIL_HOST")
+EMAIL_HOST_USER=os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD=os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 
-# TODO: test
 BASE_URL = f"https://{os.getenv('HOST_NAME')}"
 WAGTAILADMIN_BASE_URL = f"https://{os.getenv('HOST_NAME')}"
 WAGTAILADMIN_NOTIFICATION_FROM_EMAIL = os.getenv("WAGTAILADMIN_NOTIFICATION_FROM_EMAIL")
@@ -117,3 +121,7 @@ AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME")
 # the URLs to the files. Set https as default.
 # https://github.com/jschneier/django-storages/blob/10d1929de5e0318dbd63d715db4bebc9a42257b5/storages/backends/s3boto3.py#L217
 AWS_S3_URL_PROTOCOL = env("AWS_S3_URL_PROTOCOL")
+
+# --- For local prod testing ---
+# Custom S3 URL to use when connecting to S3, including scheme.
+AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")

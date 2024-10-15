@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from django_src.student.models import StudentJobOffer
+
 from .models import (
     Faculty,
     Carreer,
@@ -17,6 +19,14 @@ from .models import (
 @admin.register(InterestTheme)
 class InterestThemeAdmin(admin.ModelAdmin):
     pass
+
+class StudentJobOfferInline(admin.StackedInline):
+    model = Student.applied_jobs.through
+    extra = 1
+
+@admin.register(StudentJobOffer)
+class StudentJobOfferAdmin(admin.ModelAdmin):
+    exclude = ["applied_jobs"]
 
 class CarreerInline(admin.StackedInline):
     model = Carreer
@@ -40,7 +50,7 @@ class CarrerSpecializationAdmin(admin.ModelAdmin):
 @admin.register(Faculty)
 class FacultyAdmin(admin.ModelAdmin):
     inlines = [
-        CarreerInline
+        CarreerInline,
     ]
 
 class StudentInterestInline(admin.StackedInline):
@@ -51,7 +61,7 @@ class StudentInterestInline(admin.StackedInline):
 class StudentAdmin(admin.ModelAdmin):
 
     fields = ["specialization", "user", "carreer", "voucher"]
-    inlines = [StudentInterestInline]
+    inlines = [StudentInterestInline, StudentJobOfferInline]
 
     list_display = ("first_name","last_name","email",)
 

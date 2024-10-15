@@ -25,9 +25,6 @@
                 class="{% if current_tab == "Experiencias" %}{{selected_classes}}{% else %}{{ unselect_classes }}{% endif %}" {% if current_tab == "Info" %}aria-current="page"{% endif %}>Experiencias</a>
             </li>
 
-            <li class="me-2">
-                <a href="{% pageurl page %}?tab=recursos" class="{% if current_tab == "Recursos" %}{{selected_classes}}{% else %}{{ unselect_classes }}{% endif %}" {% if current_tab == "Info" %}aria-current="page"{% endif %}>Recursos</a>
-            </li>
         </ul>
     </div>
 {% endwith %}

@@ -59,7 +59,7 @@ def dev_pages(apps: Apps):
     with transaction.atomic():
         img_phone_mockup, created = Image.objects.get_or_create(
             title="phone-mockup",
-            file="original_images/phone-mockup_wP3cGMj.png",
+            file="original_images/phone-mockup.png",
             uploaded_by_user=admin,
         )
 
@@ -204,8 +204,11 @@ def reset_dev_pages(apps):
 #
 
 
+@transaction.atomic
 def upload_dev_data():
     interest_themes_data = InterestThemeData()
+    interest_themes_data.create()
+    interest_themes_data.get()
 
     carreer_list = create_carreers(interest_themes_data)
 
@@ -218,7 +221,6 @@ def upload_dev_data():
         business_data=business_data, interest_themes_data=interest_themes_data
     )
 
-    interest_themes_data.create()
     interest_themes_data.get()
     student_data.create()
     pro_career_list = ProCarreerData()
