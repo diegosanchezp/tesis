@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load django_vite slippers wagtailcore_tags %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+{% endblock %}
+
+{% block title %}
+Trabajos
+{% endblock title %}
+
+{% block body %}
+
+{% include "components/navbar.html" %}
+
+<main class="page-x-spacing mt-4">
+
+    {# Breadcrumb #}
+    <div class="my-2">
+        {% include "student/jobs/tabs.html" %}
+    </div>
+    <div class="flex justify-end w-100">
+        <form id="jobsearch_form" class="flex gap-x-2" hx-trigger="submit" hx-get="" hx-target="#job_offer_list" hx-swap="outerHTML">
+            {% include "forms/render_field.html" with field=jobsearch_form.title %}
+            <input type="hidden" name="action" value="render_job_applications">
+            <div class="self-end">
+                {% #button type="submit" icon_left="bi bi-search" title="Filtrar y buscar" name="action" value="render_job_applications" %}
+                {% /button %}
+            </div>
+        </form>
+    </div>
+
+    {% block job_offer_list %}
+    <section id="job_offer_list" class="grid grid-cols-4 gap-x-4">
+        {% for joboffer in jobs %}
+            {# Job offer card #}
+            {% include "student/jobs/job_offer_card.html" %}
+        {% empty %}
+            <div class="col-span-4 flex flex-col items-center justify-center  drop-shadow-lg bg-slate-50 p-4">
+                <p class="my-4">
+                    {% if current_tab == "ofertas-aplicadas" and not search_applied %}
+                        No has aplicado a ninguna oferta de trabajo
+                    {% elif current_tab == "ofertas-aplicadas" and search_applied %}
+                        No haz aplicado a la oferta de trabajo buscada
+                    {% elif search_applied %}
+                        No se ha encontrado la oferta de trabajo buscada
+                    {% else %}
+                        No hay ofertas de trabajo creadas
+                    {% endif %}
+                </p>
+            </div>
+        {% endfor %}
+
+        {# pagination #}
+        {% with hx_attrs='hx-trigger="click" hx-swap="outerHTML" hx-target="#job_offer_list" hx-boost="true"' %}
+            <div id="pagination_container" class="flex justify-center col-span-4">
+                {% include "components/pagination.html" with page_obj=jobs %}
+            </div>
+        {% endwith %}
+    </section>
+    {% endblock job_offer_list %}
+</main>
+{% endblock body %}

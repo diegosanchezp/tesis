@@ -1,0 +1,8 @@
+{% comment %}
+  current_tab: str, the tab that's beign selected on this page
+{% endcomment %}
+<div class="{% block container_styles %}text-base font-medium text-center text-gray-500 border-b border-gray-200 my-4{% endblock %}">
+    <ul class="{% block list_styles %}flex flex-wrap -mb-px {% endblock %}">
+        {% block list_items %}{% endblock %}
+    </ul>
+</div>

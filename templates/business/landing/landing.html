@@ -10,6 +10,7 @@
 
 {% block extrascripts %}
     {% vite_asset 'js/htmx.ts' %}
+    {% vite_asset 'js/business_landing.ts' %}
 {% endblock %}
 
 {% block title %}
@@ -82,8 +83,77 @@
             </div>
             {% endif %}
         </section>
+
+        <section id="job-offer-applications">
+
+            <!-- Container of the career selector modal -->
+            <div id="modal-job-application-detail" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-40 bg-gray-900 bg-opacity-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+            </div>
+
+            {# Title #}
+            <h2 class="text-2xl font-bold mb-4">Aplicaciones de estudiantes</h2>
+
+            {# Table #}
+            {% block job_applications_table %}
+            <div class="border rounded-lg border-slate-200"  id="joboffer_applications_table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="pt-6 pl-6 text-left">Nombre oferta</th>
+                            <th class="pl-6 pr-6 pt-6 text-left">Estudiante</th>
+                            <th class="pl-6 pr-6 pt-6 text-left">Fecha</th>
+                            <th class="pl-6 pr-6 pt-6 text-left">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for application in job_applications %}
+                            <tr>
+                                <td class="pl-6 pb-6">
+                                    <a class="text-ucv-blue hover:underline"
+                                       href="{% pageurl application.job %}">
+                                        {{ application.job.title }}
+                                    </a>
+                                </td>
+
+                                <td class="pl-6 pb-6">
+                                    <p>
+                                        {{ application.student.user.first_name }} {{ application.student.user.last_name }}
+                                    </p>
+                                </td>
+
+                                <td class="pl-6 pb-6">
+                                    {{ application.date|date:"d/m/Y P" }}
+                                </td>
+
+                                <td class="pl-6 pr-6 pb-6 flex justify-center gap-x-2">
+                                    <div onclick="getJobApplicationModal({{ application.student.pk }}, {{ application.job.pk }})">
+                                        {% #button icon_right="bi bi-info-lg" type="button" title="Ver" %}
+                                        {% /button %}
+                                    </div>
+                                </td>
+
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="3" class="py-2 pl-6">
+                                    <div class="flex gap-x-2 justify-center items-center">
+                                        <p>No hay estudiantes que hayan aplicado a una de tus ofertas laborales</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="pagination_container flex justify-center">
+                    {% include "components/pagination.html" with page_obj=job_applications search_query_params="action=render_job_applications_table&"%}
+                </div>
+
+            </div>
+            {% endblock job_applications_table %}
+        </section>
+
         <section id="students-directory">
-            <h2 class="text-2xl font-bold mb-4 ">Directorio de Egresados</h2>
+            <h2 class="text-2xl font-bold mb-4">Directorio de Egresados</h2>
             <div class="bg-gradient-to-t from-white border border-ucv-yellow-dark rounded-lg to-ucv-yellow py-8 px-2 flex flex-col justify-center items-center">
                 <p class="font-semibold mb-4">Contacta Egresados y Estudiantes recien graduados.</p>
                 <a href="{% url 'business:students_directory' %}">
@@ -96,6 +166,7 @@
 
     </div>
 
+    {# Second column: events and news #}
     <section id="feeds">
         {% url 'events_feed' as events_feed_url %}
         {% include "main/event_news_feed.html" with id=EVENT_SECTION pages=events page_index=events_index title="Próximos eventos" load_more_url=events_feed_url page_number=events_page_number page_obj=events_paginator %}

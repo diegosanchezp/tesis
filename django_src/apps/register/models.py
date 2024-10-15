@@ -184,6 +184,14 @@ class Student(models.Model):
         blank=True,
     )
 
+    applied_jobs = models.ManyToManyField(
+        to="business.JobOffer",
+        blank=True,
+        verbose_name=_("Trabajos aplicados"),
+        through="student.StudentJobOffer",
+        related_name="students",
+    )
+
     objects = ApprovalsManager()
 
     class Meta:

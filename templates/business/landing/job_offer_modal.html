@@ -1,0 +1,45 @@
+{% extends "components/modal/modal.html" %}
+
+{% block modal_id %}modal-job-application-detail{% endblock %}
+{% block title %}Aplicación de Oferta de trabajo{% endblock %}
+
+{% block body %}
+
+<section class="flex flex-col mx-4" >
+    <div class="text-center">
+        <h3 class="font-semibold text-lg">Oferta de trabajo</h3>
+        <p> {{ job_application.job.title }}</p>
+    </div>
+
+    <div id="student-section" class="my-4">
+        <h3 class="font-semibold text-lg">Estudiante</h3>
+
+        {# Student card #}
+        <div id="student-info" class="flex flex-col justify-center items-center p-2 border rounded border-slate-400 min-h-[12rem]">
+            {# Student info #}
+            <div class="flex flex-col justify-center items-center mb-3">
+                {% include "pro_carreer/mentor_avatar.html" with user=job_application.student.user %}
+
+                <p class="font-bold text-base text-center mt-2">{{ job_application.student.user.first_name }} {{ job_application.student.user.last_name }}</p>
+                <p class="">{{ job_application.student.user.email }}</p>
+
+                <p>{{ job_application.student.specialization.name }}</p>
+
+                <p class="font-bold">{{ job_application.student.carreer.name }}</p>
+            </div>
+
+            {# Student intereset themes #}
+            <ul class="flex flex-wrap gap-y-2 gap-x-2 justify-center max-h-16 overflow-y-auto">
+                {% for interest in job_application.student.interests.all %}
+                    <li class="rounded-xl bg-slate-600 px-2 text-white">
+                        <span>{{ interest.name }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+</section>
+ 
+
+{% endblock body %}

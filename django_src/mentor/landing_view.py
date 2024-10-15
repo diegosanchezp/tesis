@@ -101,7 +101,7 @@ def paginate_mentorship_request(mentorship_requests, page_number: int):
 
     # Paginate the queryset
     paginator = Paginator(
-        object_list=mentorship_requests, per_page=12
+        object_list=mentorship_requests, per_page=1
     )  # Change to Show 12 mentorship requests.
     paginated_m_requests = paginator.get_page(page_number)
 
@@ -117,12 +117,7 @@ def render_mentorship_req_table(template_name: str, context: dict):
 
     html = render_block_to_string(template_name=template_name, block_name="mentorship_req_table", context=context)
     response = HttpResponse(html)
-    # Tell the client to re-attach htmx pagination handler
-    trigger_client_event(
-        response=response,
-        name="reAttachPagination",
-        after="swap", # very important
-    )
+
     return response
 
 def paginate_blogs(blogs_queryset, page_number: int):
