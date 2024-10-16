@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load django_vite slippers %}
+
+
+{% block title %}
+Oops permiso denegado
+{% endblock title %}
+
+{% block body %}
+    {% include "components/navbar.html" %}
+
+    <main class="page-x-spacing bg-gradient-to-t from-white to-ucv-yellow">
+        <section class="flex justify-center items-center h-screen">
+            <h1 class="text-2xl">Oops no tienes los permisos necesarios para acceder a esta página</h1>
+        </section>
+    </main>
+
+{% endblock %}
+
