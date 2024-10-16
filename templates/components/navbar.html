@@ -41,6 +41,9 @@
             <li>
                 <a class="text-white" href="{% url 'business:students_directory' %}">Directorio Estudiantes</a>
             </li>
+            <li>
+                <a class="text-white" href="{% url 'business:mentors_directory' %}">Directorio Mentores</a>
+            </li>
         {% endif %}
         {# Student links #}
         {% if request.user.is_student %}
