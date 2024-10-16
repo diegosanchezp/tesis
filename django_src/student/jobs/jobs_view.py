@@ -68,7 +68,7 @@ def jobs_view(request: HtmxHttpRequest):
         jobs_queryset = jobs_queryset.annotate(applied=models.Exists(subquery))
 
         # Paginate
-        per_page = 1
+        per_page = 30
         page_number = get_page_number(request)
         jobs = page_object_list(request, jobs_queryset, per_page=per_page)
         context["jobs"] = jobs
