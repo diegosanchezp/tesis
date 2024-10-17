@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load django_vite slippers %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+{% endblock %}
+
+{% block title %}
+Directorio de egresados
+{% endblock title %}
+
+{% block body %}
+    {% include "components/navbar.html" %}
+    {# Header title #}
+    <section class="py-8 px-4 bg-gradient-to-t from-white to-ucv-yellow">
+        <h2 class="text-3xl text-center"><a href="{{ this_view_url }}">Directorio de Mentores de la UCV</a></h2>
+    </section>
+
+    <main class="page-x-spacing">
+        {# Student Filters #}
+        <section id="filters" class="flex flex-col gap-y-2 justify-center items-center">
+            <div>
+                <p class="font-bold mb-2">Filtrar por:</p>
+                <form id="filter-form" class="flex flex-col gap-y-2 justify-center items-center" hx-get="" hx-trigger="submit" hx-swap="outerHTML" hx-target="#mentors_list">
+                    <div id="filter-inputs" class="flex gap-x-2">
+                        {% include "forms/render_field.html" with field=filter_form.career %}
+                        {% include "forms/render_field.html" with field=filter_form.name_last_name %}
+                        {% include "forms/render_field.html" with field=filter_form.email %}
+                    </div>
+                    <div class="flex gap-x-2">
+                        {% #button type="reset" variant="red" form="filter-form" %}Resetear{% /button %}
+                        {% #button type="submit" name="action" value=Actions.FILTER_MENTORS %}Buscar{% /button %}
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        {# Carrer and students container #}
+        {% block mentors_list %}
+        <section id="mentors_list">
+            <div class="grid grid-cols-4 gap-x-4 my-4">
+                {% for mentor in mentors %}
+                    <div class="flex flex-col justify-center items-center p-2 border rounded border-slate-400 min-h-[12rem] hover:border-ucv-yellow-dark">
+                        {# Mentor info #}
+                        <div class="flex flex-col justify-center items-center mb-3">
+                            {% include "pro_carreer/mentor_avatar.html" with user=mentor.user %}
+
+                            <a href="{% url 'mentor:profile' username=mentor.user %}" class="font-bold text-lg text-center mt-2 hover:underline decoration-1 underline-offset-2 decoration-black">{{ mentor.user.first_name }} {{ mentor.user.last_name }}</a>
+                            <p class="">{{ mentor.user.email }}</p>
+                        </div>
+                    </div>
+                {% empty %}
+                    {% if action_form.cleaned_data.action == Actions.FILTER_MENTORS %}
+                        <p class="text-center mt-8 mb-1 font-bold text-2xl">No se encontraron resultados</p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {# pagination #}
+            {% with hx_attrs='hx-trigger="click" hx-swap="outerHTML" hx-target="#mentors_list" hx-boost="true"' %}
+                <div id="pagination_container" class="flex justify-center col-span-4">
+                    {% include "components/pagination.html" with page_obj=mentors %}
+                </div>
+            {% endwith %}
+        </section>
+        {% endblock mentors_list %}
+    </main>
+{% endblock body %}

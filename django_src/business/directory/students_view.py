@@ -3,6 +3,7 @@ from django.template.response import TemplateResponse
 from django.db.models import Q, Prefetch, Count, Sum
 from django.urls import reverse
 from render_block import render_block_to_string
+from django.views.decorators.http import require_GET
 
 from django_src.apps.register.models import (
     Carreer,
@@ -52,13 +53,15 @@ def filter_students(
     if specialization:
         students_queryset = students_queryset.filter(specialization=specialization)
 
+
+    # distinct remove duplicates
     return {
         "career_queryset": career_queryset.prefetch_related(
-            Prefetch("students", queryset=students_queryset)
+            Prefetch("students", queryset=students_queryset.distinct())
         ),
         # Apply the filter to the students queryset so it doesn't returns all of the students
         # useful for agregations
-        "students_queryset": students_queryset.filter(carreer__in=career_queryset),
+        "students_queryset": students_queryset.filter(carreer__in=career_queryset).distinct('id'),
     }
 
 
@@ -70,6 +73,7 @@ def paginate_students(page_number: int, carreer: Carreer):
     return page
 
 
+@require_GET
 @loggedin_and_approved
 def students_directory_view(request):
     """ """
@@ -93,11 +97,9 @@ def students_directory_view(request):
         # Is this required ?
         "search_query_params": "",
     }
-    if not action_form.is_valid():
-        # TODO: handle error
-        pass
-
-    action = action_form.cleaned_data.get("action")
+    action = None
+    if action_form.is_valid():
+        action = action_form.cleaned_data.get("action")
 
     # Gets more interests themes for the filter form
     if action == Actions.RENDER_INTERESTS:
@@ -127,6 +129,8 @@ def students_directory_view(request):
         carreers = filtered_sets["career_queryset"]
         students = filtered_sets["students_queryset"]
         carreers = carreers.annotate(students_num=Count("students"))
+
+        print(filtered_sets["students_queryset"])
         context["carreers"] = carreers
 
         # Add the number of students as a new column
@@ -162,7 +166,7 @@ def students_directory_view(request):
 
         # We add the pretech here, because the filter_students function adds it's own prefetch, if the conditional above is true
         carreers = carreers.prefetch_related(
-            Prefetch("students", queryset=get_student_queryset())
+            Prefetch("students", queryset=get_student_queryset().distinct())
         )
 
         # Add the number of students as a new column

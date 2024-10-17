@@ -9,7 +9,7 @@
 
 {% endcomment %}
 
-?page={{ page_num }}{% if search_query_params %} &{{search_query_params}} {% endif %}
+?page={{ page_num }}{% if search_query_params %}&{{search_query_params}}{% endif %}
 
 {% if second_search_query_params %}&{{second_search_query_params}}{% endif %}
 {% if prevent_hxboost_scroll %}#{% endif %}
