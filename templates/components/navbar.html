@@ -72,7 +72,21 @@
     <div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
       <p class="mb-px">{{ request.user.first_name }} {{ request.user.last_name }}</p>
       <p class="font-medium truncate">{{ request.user.email }}</p>
+      {# User type #}
+      <p class="text-xs my-1 text-gray-500">
+          {% if request.user.is_mentor %}
+          Mentor
+          {% elif request.user.is_business %}
+          Empresa
+          {% elif request.user.is_student %}
+          Estudiante
+          {% elif request.user.is_superuser %}
+          Administrador
+          {% else %}
+          {% endif %}
+      </p>
     </div>
+
 
     {# Avatar links #}
     <ul class="py-2 text-sm text-gray-800" aria-labelledby="avatarButton">
