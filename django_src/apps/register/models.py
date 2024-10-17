@@ -275,6 +275,8 @@ class Mentor(models.Model):
         blank=True,
     )
 
+    objects = ApprovalsManager()
+
     class Meta:
         verbose_name = _("Mentor")
         verbose_name_plural = _("Mentores")
