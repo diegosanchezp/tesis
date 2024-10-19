@@ -101,7 +101,7 @@ def paginate_mentorship_request(mentorship_requests, page_number: int):
 
     # Paginate the queryset
     paginator = Paginator(
-        object_list=mentorship_requests, per_page=1
+        object_list=mentorship_requests, per_page=12
     )  # Change to Show 12 mentorship requests.
     paginated_m_requests = paginator.get_page(page_number)
 
