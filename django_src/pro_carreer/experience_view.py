@@ -4,14 +4,18 @@ from django.template.response import TemplateResponse
 from django.db.models import Count, Q, FloatField, Value
 from django.core.paginator import Paginator
 from django.urls.base import reverse_lazy
-from .models import ProfessionalCarreer, ProCarreerExperience
-from .forms import ProCareerExpForm
 from django.shortcuts import get_object_or_404
-from django_src.mentor.utils import loggedin_and_approved
+from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 
-from django_src.apps.register.models import Mentor
 from django_htmx.http import trigger_client_event
 from render_block import render_block_to_string
+
+from .models import ProfessionalCarreer, ProCarreerExperience
+from .forms import ProCareerExpForm
+from django_src.mentor.utils import loggedin_and_approved
+from django_src.apps.register.models import Mentor
+from django_src.utils.webui import renderMessagesAsToasts
 
 def get_distribution(pro_career: ProfessionalCarreer):
     """
@@ -180,6 +184,7 @@ def edit_exp(request, pk_pro_career_exp: int):
 
     # Save to db
     form.save()
+    messages.success(request, _("Edición exitosa"))
 
     context = {
         "mentor_experience": pro_career_exp,
@@ -190,6 +195,7 @@ def edit_exp(request, pk_pro_career_exp: int):
     response = TemplateResponse(request, "pro_carreer/mentor_exp.html", context)
 
     trigger_render_distribution(response)
+    renderMessagesAsToasts(request, response)
 
     return response
 
@@ -201,11 +207,14 @@ def delete_exp(request, pk_pro_career_exp: int):
     pro_career_exp = get_object_or_404(klass=ProCarreerExperience, pk=pk_pro_career_exp)
 
     pro_career_exp.delete()
+    messages.success(request,_("Experiencia borrada"))
+    response = HttpResponse(status=200)
+    renderMessagesAsToasts(request,response)
 
-    return HttpResponse(status=200)
+    return response
 
 @loggedin_and_approved
-def view(request, page: ProfessionalCarreer):
+def view(request, page: ProfessionalCarreer, page_ctx):
     """
     Experience view for a professional career
     """
@@ -222,11 +231,12 @@ def view(request, page: ProfessionalCarreer):
     context = {
         "page": page, # Wagtail page object
         "distribution": get_distribution(page),
+        "state": "viewing",
         "breadcrumbs": [
             {"name": "Carreras profesionales", "href": href},
             {"name": page.title },
         ],
-    }
+    } | page_ctx
 
     context.update(get_experiences(request, page))
     context.update(paginate_queryset(request, context["experiences"]))

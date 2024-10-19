@@ -90,13 +90,18 @@ startAlpine({
 })
 
 document.addEventListener("DOMContentLoaded", ()=>{
-    const add_exp_ad = document.getElementById("advertisement-add-exp")
-    const add_exp_btn = document.getElementById("add-exp-btn")
-    if(add_exp_btn && add_exp_ad){
-        add_exp_btn.addEventListener("click", (e)=>{
-            add_exp_ad.remove()
-        })
-    }
+
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        const add_exp_ad = document.getElementById("advertisement-add-exp")
+        const add_exp_btn = document.getElementById("add-exp-btn")
+
+        // Remove the advertisement after the experience form has been put into the DOM
+        if(event.detail.elt.id === "my-exp-editing" ){
+            if(add_exp_btn && add_exp_ad){
+                add_exp_ad.remove()
+            }
+        }
+    });
 })
 document.addEventListener("htmx:afterRequest",(evt)=>{
     const target_id = evt.detail.target.id

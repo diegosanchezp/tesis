@@ -16,7 +16,7 @@
 {# Main container #}
 <form 
     {% if state == "viewing" %}id="{{ mentor.user.username }}-exp"{%else%}id="my-exp-editing"{% endif %}
-    hx-target="this" hx-swap="outerHTML">
+    hx-target="this" hx-swap="outerHTML" hx-trigger="submit" hx-post="">
     {# Profile #}
     <div class="flex place-content-between" >
         <div class="flex items-center gap-4" title="Ver perfil">
@@ -29,65 +29,63 @@
                 <a href="{{ mentor.get_absolute_url }}" class="font-bold">{{ mentor.user.first_name }} {{ mentor.user.last_name }}</a>
                 <div class="flex gap-x-2 items-baseline">
                     <p>
-                        Ejerció esta carrera desde
+                        <span>Ejerció esta carrera</span>
+                        <span class="{% if state == "editing" or state == "adding" %}underline decoration-1 underline-offset-2 decoration-ucv-yellow-dark{% endif %}">desde</span>
 
-                        {% if form %}
+                        {% if state == "editing" or state == "adding" %}
                             {# todo input #}
                             <div class="flex flex-col gap-y-2">
-                                {{ form.init_year }}
-                                {% include "pro_carreer/form_error.html" with field=form.init_year %}
+                                {% include "forms/render_field.html" with field=form.init_year %}
+                                {# {% include "pro_carreer/form_error.html" with field=form.init_year %} #}
                             </div>
-                        {% else %}
+                        {% endif %}
+                        {% if state == "viewing" %}
                             <div class="flex gap-y-2">
                                 {{ mentor_experience.init_year.year }}
                             </div>
                         {% endif %}
-                        hasta
-                        {% if form %}
+
+                        <span class="{% if state == "editing" or state == "adding" %}underline decoration-1 underline-offset-2 decoration-ucv-yellow-dark{% endif %}">hasta</span>
+
+                        {% if state == "editing" or state == "adding" %}
                             <div class="flex gap-y-2 flex-col">
-                                {{ form.end_year }}
-                                {% include "pro_carreer/form_error.html" with field=form.end_year %}
+                                {% include "forms/render_field.html" with field=form.end_year %}
+                                {# {% include "pro_carreer/form_error.html" with field=form.end_year %} #}
                             </div>
-                        {% else %}
+                        {% endif %}
+
+                        {% if state == "viewing" %}
                             {{mentor_experience.end_year.year}}</p>
                         {% endif %}
-                    {% if form %}
+                    {% if state == "editing" or state == "adding" %}
                             {# todo input #}
                             <span>@ </span>
                             <div class="flex flex-col gap-y-2">
-                                {{ form.company }}
-                                {% include "pro_carreer/form_error.html" with field=form.company %}
+                                {% include "forms/render_field.html" with field=form.company %}
+                                {# {% include "pro_carreer/form_error.html" with field=form.company %} #}
                             </div>
-                    {% else %}
+                    {% endif %}
+                    {% if state == "viewing" %}
                         <p class="border border-solid border-black rounded p-1">@{{mentor_experience.company}}</p>
                     {% endif %}
                 </div>
             </div>
         </div>
-        {% if state == "viewing" %}
-            {% #button icon_left="bi bi-pen text-white" type="button" hx-get=mentor_experience.edit_querystring name="action" value="render_exp_form"  %}
-                Editar
-            {% /button %}
+        {% if state == "viewing" and mentor_experience.mentor.user == request.user %}
+            <div hx-get="{{ mentor_experience.edit_querystring }}&action=render_exp_form">
+                {% #button icon_left="bi bi-pen text-white" type="button" %}
+                    Editar
+                {% /button %}
+            </div>
         {% endif %}
 
         {% if form %}
-            <div class="flex">
-            {% if state == "adding" %}
-                {% #button icon_left="bi bi-floppy text-white" type="submit" hx-post=" " name="action" value="add_exp"  %}
-                    Guardar
-                {% /button %}
-            {% else %}
-                {# Default state: editing #}
-                <input type="hidden" name="pk" value="{{ mentor_experience.pk }}">
-                <div>
-                {% #button icon_left="bi bi-floppy text-white" type="submit" hx-post=" " name="action" value="edit_exp"  %}
-                    Guardar
-                {% /button %}
-                {% #button icon_left="bi bi-trash text-white" type="submit" hx-post=" " hx-swap="delete" name="action" value="delete_exp" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center me-2 ml-2" %}
-                    Borrar
-                {% /button %}
-                </div>
-            {% endif %}
+            <div>
+                {% if state == "adding" %}
+                    {% #button icon_left="bi bi-floppy text-white" type="submit" name="action" value="add_exp"  %}
+                        Guardar
+                    {% /button %}
+                {% endif %}
             </div>
         {% endif %}
     </div>
@@ -153,6 +151,19 @@
             {{ mentor_experience.experience }}
         {% endif %}
     </p>
+
+    {% if state == "editing" %}
+        {# Default state: editing #}
+        <input type="hidden" name="pk" value="{{ mentor_experience.pk }}">
+        <div class="flex gap-y-2 mt-2">
+            {% #button icon_left="bi bi-floppy text-white" type="submit" name="action" value="edit_exp"  %}
+                Guardar
+            {% /button %}
+            {% #button icon_left="bi bi-trash text-white" type="submit" hx-swap="delete" name="action" value="delete_exp" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center me-2 ml-2" %}
+            Borrar
+            {% /button %}
+        </div>
+    {% endif %}
 
     <hr class="bg-gray-200 my-4">
 </form>

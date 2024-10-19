@@ -1,6 +1,7 @@
 from django_src.apps.register.models import (
     CarrerSpecialization, InterestTheme, ThemeSpecProCarreer
 )
+from django_src.settings.widget import DATE_INPUT_FORMAT
 
 from .models import ProCarreerExperience, get_rating_range_selected, get_rating_range_unselected
 
@@ -98,8 +99,8 @@ class ProCareerExpForm(forms.ModelForm):
                     "required": True,
                 }
             ),
-            "init_year": forms.DateInput(attrs={"type": "date", "required": True}),
-            "end_year": forms.DateInput(attrs={"type": "date", "required": True}),
+            "init_year": forms.DateInput(attrs={"type": "date", "required": True}, format=DATE_INPUT_FORMAT),
+            "end_year": forms.DateInput(attrs={"type": "date", "required": True}, format=DATE_INPUT_FORMAT),
         }
         exclude = [
             "pro_carreer", "mentor",

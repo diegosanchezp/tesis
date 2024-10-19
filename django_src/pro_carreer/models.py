@@ -128,6 +128,7 @@ class ProfessionalCarreer(Page):
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         context["mentors"] = Mentor.objects.filter(my_career_experiences__pro_carreer=self)
+        context["EXP_TAB"] = EXP_TAB
         context["breadcrumbs"] = [
             {"name": "Carreras profesionales", "href": self.get_parent().get_url()},
             {"name": self.title },
@@ -160,8 +161,10 @@ class ProfessionalCarreer(Page):
                         )
                     else:
                         return HttpResponseBadRequest(content="Invalid action")
+            return HttpResponseBadRequest("Action not found")
 
         if request.method == "GET":
+
             tab_name = "experiencias"
 
             if "tab" in request.GET:
@@ -181,7 +184,7 @@ class ProfessionalCarreer(Page):
                                 return experience_view.render_distribution(request, pro_career=self)
 
 
-                    return experience_view.view(request, page=self)
+                    return experience_view.view(request, page=self, page_ctx=self.get_context(request))
         return response
 
 def get_rating_range_selected(rating: int):
