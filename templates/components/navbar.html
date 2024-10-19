@@ -1,3 +1,4 @@
+{% load static %}
 {% comment %}
   required context:
   - request
@@ -7,7 +8,9 @@
 
 {# Links that show in the blue bar #}
 <nav class="flex px-2 py-2 bg-ucv-blue justify-between items-center">
-    <i class="bi bi-list text-white text-3xl self-center mr-6"></i>
+    <a class="mr-3" href="/">
+        <img src="{% static 'logo_egresados_ucv.jpg' %}" alt="Logo de la Asociación" class="w-7 h-7">
+    </a>
     <ul id="navbar-text-links" class="ml-2 w-full flex gap-x-6">
         {# Home Link #}
         <li>
