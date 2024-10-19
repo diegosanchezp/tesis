@@ -56,17 +56,20 @@
 
             <!-- Modal footer -->
             {% if mentorship_request.status == "REQUESTED" %}
-            <form class="flex gap-x-2 justify-center items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-                <input type="hidden" name="with_mentorship_name" value="{{ with_mentorship_name }}">
-                {% url "mentor:change_mentorship_status" mentorship_req_pk=mentorship_request.pk as change_status_url %}
-                {% #button type="button" name="action" value=MentorshipRequest.Events.ACCEPT hx-post=change_status_url hx-swap="outerHTML" hx-target="#student-info-modal-body-footer" %}
-                    Aceptar
-                {% /button %}
 
-                {% #button type="button" variant="red" name="action" value=MentorshipRequest.Events.REJECT hx-post=change_status_url hx-swap="outerHTML" hx-target="#student-info-modal-body-footer" %}
-                    Rechazar
-                {% /button %}
-            </form>
+                {% url "mentor:change_mentorship_status" mentorship_req_pk=mentorship_request.pk as change_status_url %}
+                <form class="flex gap-x-2 justify-center items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600" hx-post="{{ change_status_url }}" hx-swap="outerHTML" hx-target="#student-info-modal-body-footer">
+                    <input type="hidden" name="with_mentorship_name" value="{{ with_mentorship_name }}">
+                    <div >
+                        {% #button type="submit" name="action" value=MentorshipRequest.Events.ACCEPT  %}
+                            Aceptar
+                        {% /button %}
+                    </div>
+
+                    {% #button type="submit" variant="red" name="action" value=MentorshipRequest.Events.REJECT %}
+                        Rechazar
+                    {% /button %}
+                </form>
             {% endif %}
 
             {% if mentorship_request.status == "REJECTED" %}
