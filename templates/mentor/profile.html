@@ -18,7 +18,7 @@ Mentor {{ mentor.user.first_name }} {{ mentor.user.last_name }}
         {# timeline experience #}
 
         <section id="timeline" class="flex flex-col w-3/4 gap-x-4">
-            {% if request.user.is_mentor %}
+            {% if request.user.is_mentor and request.user == mentor.user %}
                 <a
                     href="{% url 'mentor:edit_profile' %}#change-professional-exp"
                     class="text-right {% include "mentor/links/blue_css.html" %}">

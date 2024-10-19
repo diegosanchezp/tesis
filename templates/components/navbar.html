@@ -40,6 +40,9 @@
             <li>
                 <a class="text-white" href="{% url 'mentor:my_mentorships' %}">Mis mentorías</a>
             </li>
+            <li>
+                <a class="text-white" href="{% url 'wagtailadmin_explore_root' %}">Mis blogs</a>
+            </li>
         {% endif %}
         {# Business links #}
         {% if request.user.is_business %}

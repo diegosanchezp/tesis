@@ -13,6 +13,16 @@ Blogs mentor {{ mentor.user.first_name }} {{ mentor.user.last_name }}
     {% include "mentor/mentor_header.html" %}
     {% #mentor_tabs user=mentor.user current_tab="blogs" %}{% /mentor_tabs %}
 
+
+    {% if request.user.is_mentor and request.user == mentor.user %}
+    <div class="m-2 flex justify-end max-w-[1920px] px-20">
+        <a
+            href="{% url 'wagtailadmin_explore_root' %}"
+            class="text-right {% include "mentor/links/blue_css.html" %}">
+            Gestionar blogs
+        </a>
+    </div>
+    {% endif %}
     {# Blogs section #}
     <section class="grid grid-cols-4 gap-x-4 px-20 max-w-[1920px] mx-auto mt-8">
         {% for blog in blogs %}
