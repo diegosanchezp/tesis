@@ -44,7 +44,7 @@ def paginate_job_applications(applications, page_number: int):
 
     # Paginate the queryset
     paginator = Paginator(
-        object_list=applications, per_page=1
+        object_list=applications, per_page=10
     )  # Change to Show 10 mentorship requests.
 
     return paginator.get_page(page_number)
