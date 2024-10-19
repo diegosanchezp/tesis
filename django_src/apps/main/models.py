@@ -17,7 +17,7 @@ from wagtail.admin.panels import (
 )
 
 from django_src.apps.register.approvals_view import get_page_number
-from django_src.utils import remove_index_publish_permission
+from django_src.utils import remove_index_publish_permission, get_home_page_link
 
 MAX_TITLE_LENGHT = 100
 
@@ -114,7 +114,12 @@ class HomePage(Page):
         "business.JobOfferIndex",
     ]
 
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
 
+        context["home_page_link"] = get_home_page_link(request.user)
+
+        return context
 class BlogIndex(Page):
     """
     A page to list all the BlogPages

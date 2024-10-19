@@ -7,8 +7,14 @@
 {% block body %}
     <nav class="flex px-2 py-2 bg-ucv-blue justify-between items-center">
     <ul id="navbar-text-links" class="ml-2 w-full flex gap-x-6">
+        {# Quick link to go back to landing pages #}
+        {% if home_page_link %}
+            <li>
+                <a href="{{ home_page_link }}" class="text-white">Home</a>
+            </li>
+        {% endif %}
         <li class="place-self-end w-full mx-2">
-            <a class="block text-white w-full text-right" href="{% url 'login' %}">Iniciar sesión</a>
+            <a class="block text-white text-right" href="{% url 'login' %}">Iniciar sesión</a>
         </li>
     </ul>
     </nav>

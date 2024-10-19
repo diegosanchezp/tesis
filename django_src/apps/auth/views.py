@@ -12,6 +12,7 @@ from django.urls import reverse_lazy
 
 from .forms import UserProfileForm, LoginForm
 from django_src.utils.webui import renderMessagesAsToasts
+from django_src.utils import get_home_page_link
 
 
 def get_profile_forms(user, data=None, files=None):
@@ -102,13 +103,8 @@ class LoginProxyView(LoginRequiredMixin, RedirectView):
 
         user = self.request.user
 
-        if user.is_superuser:
-            return reverse_lazy("wagtailadmin_home")
-        if user.is_business:
-            return reverse_lazy("business:landing")
-        if user.is_mentor:
-            return reverse_lazy("mentor:landing")
-        if user.is_student:
-            return reverse_lazy("pro_carreer:student_carreer_match")
+        if home_page_link := get_home_page_link(user):
+            return home_page_link
 
         return self.get_redirect_url(*args, **kwargs)
+

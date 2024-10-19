@@ -9,7 +9,7 @@
 {# Links that show in the blue bar #}
 <nav class="flex px-2 py-2 bg-ucv-blue justify-between items-center">
     <a class="mr-3" href="/">
-        <img src="{% static 'logo_egresados_ucv.jpg' %}" alt="Logo de la Asociación" class="w-7 h-7">
+        <img src="{% static 'logo_egresados_ucv.jpg' %}" alt="Logo de la Asociación" class="w-7 h-7 text-white">
     </a>
     <ul id="navbar-text-links" class="ml-2 w-full flex gap-x-6">
         {# Home Link #}
@@ -25,6 +25,8 @@
                     {% url "mentor:landing" %}
                 {% elif request.user.is_business %}
                     {% url "business:landing" %}
+                {% elif request.user.is_superuser %}
+                    {% url "wagtailadmin_home" %}
                 {% endif %}">
                 Home
             </a>

@@ -1,4 +1,4 @@
-from django import forms
+from django.urls import reverse_lazy
 from django.http.request import QueryDict
 
 
@@ -42,3 +42,15 @@ def formdata_to_querystring(form, extra: dict = {}):
             query_dict[key] = value
     query_dict.update(extra)
     return query_dict.urlencode()
+
+def get_home_page_link(user):
+    if not user.is_authenticated:
+        return 
+    if user.is_superuser:
+        return reverse_lazy("wagtailadmin_home")
+    if user.is_business:
+        return reverse_lazy("business:landing")
+    if user.is_mentor:
+        return reverse_lazy("mentor:landing")
+    if user.is_student:
+        return reverse_lazy("pro_carreer:student_carreer_match")
