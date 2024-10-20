@@ -1,4 +1,3 @@
-from django.db.models.aggregates import Count
 from django.db.models.query_utils import Q
 from django.db import models
 from django.http.response import HttpResponse
@@ -6,6 +5,7 @@ from django.template.response import TemplateResponse
 from django.shortcuts import get_object_or_404
 from render_block.base import render_block_to_string
 
+from django_src.mentor.utils import loggedin_and_approved
 from django_src.apps.register.models import Student
 from django_src.mentor.models import MentorshipHistory, MentorshipRequest, StudentMentorshipTask
 from django.views.decorators.http import require_http_methods
@@ -68,6 +68,7 @@ def render_request_list(request, mentorships_requests):
 
 
 @require_http_methods(["GET"])
+@loggedin_and_approved
 def student_mentorships_view(request):
     template_name = my_mentorships_template
 
@@ -78,6 +79,7 @@ def student_mentorships_view(request):
         student=student,
         state=MentorshipHistory.State.ACCEPTED,
     )
+
     mentorships_requests = get_mentorship_requests(student)
 
     context = {

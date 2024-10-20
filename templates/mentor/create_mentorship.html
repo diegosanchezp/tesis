@@ -46,8 +46,8 @@ Crear mentoría
                                     {% include "forms/render_field.html" %}
                                 </div>
                                 {% if forloop.parentloop.last %}
-                                    <div>
-                                        {% #button type="submit" name="action" value="validate_add_tasks" icon_left="bi bi-plus" hx-post=" " hx-target="#mentorship_tasks_form" hx-swap="innerHTML" %}
+                                    <div hx-get="" hx-target="#mentorship_tasks_form" hx-swap="innerHTML" hx-vals='{"action": "validate_add_tasks"}' hx-include="#mentorship-form">
+                                        {% #button type="button" name="action" value="validate_add_tasks" icon_left="bi bi-plus" %}
                                         Añadir otra tarea
                                         {% /button %}
                                     </div>

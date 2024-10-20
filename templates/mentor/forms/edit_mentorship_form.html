@@ -21,9 +21,11 @@ Context:
             Guardar
         {% /button %}
 
-        {% #button type="button" name="action" value="render_mentorship_info" hx-get=" " hx-target="#mentorship-info" hx-swap="outerHTML" %}
-            Cancelar edición
-        {% /button %}
+        <div hx-get="" hx-vals='{"action": "render_mentorship_info"}' hx-target="#mentorship-info" hx-swap="outerHTML">
+            {% #button type="button" name="action" value="render_mentorship_info" %}
+                Cancelar edición
+            {% /button %}
+        </div>
     </div>
 
     <div id="edit_mentorship_tasks_form">
@@ -32,6 +34,7 @@ Context:
             <ol class="list-decimal list-inside">
                 {% for form in mentorship_tasks_form %}
                     {% with form=form.get_context.form fields=form.get_context.fields hidden_fields=form.get_context.hidden_fields errors=form.get_context.errors %}
+                        {% for field in hidden_fields %}{{ field }}{% endfor %}
                         {% for field, errors in fields %}
                             <li class="flex gap-x-4 items-end mb-2 items-end">
                                 <div class="grow">
@@ -50,9 +53,11 @@ Context:
                                 {% if forloop.parentloop.last %}
                                     <div>
                                         {% url 'mentor:edit_mentorship' mentorship_pk=mentorship.pk as hx_post %}
-                                        {% #button type="button" name="action" value="validate_add_tasks" icon_left="bi bi-plus" hx-post=hx_post hx-target="#edit_mentorship_tasks_form" hx-swap="innerHTML" %}
-                                            Añadir otra tarea
-                                        {% /button %}
+                                        <div hx-post="{{ hx_post }}" hx-target="#edit_mentorship_tasks_form" hx-swap="innerHTML" hx-vals='{"action": "validate_add_tasks"}' hx-include="#mentorship-info" >
+                                            {% #button type="button" name="action" value="validate_add_tasks" icon_left="bi bi-plus"  %}
+                                                Añadir otra tarea
+                                            {% /button %}
+                                        </div>
                                     </div>
                                 {% endif %}
                             </li>

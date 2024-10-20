@@ -30,9 +30,11 @@ Mentoría: {{ mentorship.name }}
 
                 <div class="flex gap-x-2">
                     {% url 'mentor:edit_mentorship' mentorship_pk=mentorship.pk as hx_get %}
-                        {% #button type="submit" title="Editar esta mentoría" name="action" value="get_edit_form" hx-get=hx_get hx-swap="innerHTML" hx-target="#mentorship-info" %}
+                    <div hx-get="{{ hx_get }}" hx-swap="innerHTML" hx-target="#mentorship-info" hx-vals='{"action": "get_edit_form"}' >
+                        {% #button type="submit" title="Editar esta mentoría" name="action" value="get_edit_form" %}
                             Editar
                         {% /button %}
+                    </div>
                     <div data-modal-target="delete-modal" data-modal-toggle="delete-modal">
                         {% #button type="button" title="Eliminar esta mentoría" variant="red" %}
                             Eliminar
@@ -54,7 +56,7 @@ Mentoría: {{ mentorship.name }}
             <h2 class="text-3xl my-4">Solicitudes de mentoría</h2>
 
             {% block mentorship_req_table %}
-                <div id="table_form" hx-get="?action={{ FILTER_MENTORSHIP_REQUEST }}" hx-swap="outerHTML" hx-target="this" hx-disinherit="*" hx-trigger="update_req_table from:body" >
+                <div id="mentorship_req_table" hx-get="?action={{ FILTER_MENTORSHIP_REQUEST }}" hx-swap="outerHTML" hx-target="this" hx-disinherit="*" hx-trigger="update_req_table from:body" >
                 {% include "mentor/mentorship_req_table.html" with with_mentorship_name="False" %}
             </div>
             {% endblock mentorship_req_table %}
