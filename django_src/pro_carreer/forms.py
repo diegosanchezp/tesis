@@ -100,7 +100,7 @@ class ProCareerExpForm(forms.ModelForm):
                 }
             ),
             "init_year": forms.DateInput(attrs={"type": "date", "required": True}, format=DATE_INPUT_FORMAT),
-            "end_year": forms.DateInput(attrs={"type": "date", "required": True}, format=DATE_INPUT_FORMAT),
+            "end_year": forms.DateInput(attrs={"type": "date", "required": False}, format=DATE_INPUT_FORMAT),
         }
         exclude = [
             "pro_carreer", "mentor",
