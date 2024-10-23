@@ -1,6 +1,7 @@
 from django.urls import reverse_lazy
 from django.http.request import QueryDict
-
+from django.contrib import messages
+from django.forms import BaseForm
 
 def get_page_number(request):
     """
@@ -54,3 +55,15 @@ def get_home_page_link(user):
         return reverse_lazy("mentor:landing")
     if user.is_student:
         return reverse_lazy("pro_carreer:student_carreer_match")
+
+def render_field_errors_as_messages(request, form: BaseForm, field_name: str):
+    """
+    Renders the errors of a field as toast messages
+    """
+    if not form.errors:
+        return
+
+    if field_name in form.errors:
+        for error_msg in form.errors[field_name]:
+            messages.error(request,message=error_msg)
+

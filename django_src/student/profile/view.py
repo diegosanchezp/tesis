@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 
+from django_src.utils import render_field_errors_as_messages
 from django_src.apps.register.models import Student, Carreer, StudentInterest
 from django_src.mentor.utils import loggedin_and_approved
 from django_src.student.profile.forms import (
@@ -208,7 +209,10 @@ def add_interest_to_student(request):
 
         return response
 
-    return HttpResponseBadRequest("Error adding interests.")
+    response = HttpResponseBadRequest("Error adding interests.")
+    render_field_errors_as_messages(request, form=interest_add_form, field_name='interests')
+    renderMessagesAsToasts(request,response)
+    return response
 
 
 @require_GET

@@ -1,6 +1,6 @@
 from django import forms
 from django_src.apps.register.models import Student, Carreer, InterestTheme
-
+from django.utils.translation import gettext_lazy as _
 
 def get_add_interest_queryset(student):
     return InterestTheme.objects.exclude(student=student).order_by("name")
@@ -77,3 +77,8 @@ class AddInterestForm(forms.ModelForm):
         fields = [
             "interests",
         ]
+        error_messages = {
+            'interests': {
+                'required': _('Por favor selecciona uno o más interes'),
+            },
+        }
