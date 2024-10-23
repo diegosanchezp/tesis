@@ -1,3 +1,4 @@
+from enum import Enum
 import logging
 from pathlib import Path
 import argparse
@@ -6,10 +7,7 @@ import argparse
 from django import db
 from django.core.management import call_command
 from django.conf import settings
-import psycopg2
-from psycopg2 import errors
-import environ
-
+from shscripts.drop_db import drop_database
 from django_src.apps.main.dev_data import upload_dev_data
 # This lines have to come before the below import otherwise it will
 # throw import error
@@ -21,72 +19,6 @@ from django_src.apps.main.dev_data import upload_dev_data
 # python -m shscripts.reset_db
 from shscripts.backup import backup, setup, get_fixture_folder
 
-def create_connection(env: environ.Env):
-    """
-    Creates a psycopg2 connection object
-    """
-
-    # Establish a connection to database
-    connection = psycopg2.connect(
-        host=env("POSTGRES_HOST"),
-        user=env("POSTGRES_USER"),
-        password=env("POSTGRES_PASSWORD"),
-        port=env("POSTGRES_PORT"),
-        # Connect to template, otherwise db cant be dropped
-        dbname="template1",
-    )
-
-    return connection
-
-
-def drop_database(env: environ.Env):
-    """
-    Drop the whole database
-    """
-
-    # Create a connection to the database
-    connection = create_connection(env)
-
-    # A few commands (e.g. CREATE DATABASE, VACUUM, CALL on stored procedures using transaction control…) require to be run outside any transaction: in order to be able to run these commands from Psycopg, the connection must be in autocommit mode
-    connection.autocommit = True
-
-    cursor = connection.cursor()
-
-    cursor.execute(f"DROP DATABASE IF EXISTS {env('POSTGRES_DB')}")
-
-    # Create database and database user
-    cursor.execute(f"CREATE DATABASE {env('POSTGRES_DB')};")
-
-    # === Begin transaction ===
-    try:
-        cursor.execute(
-            f"CREATE USER {env('POSTGRES_USER')} WITH PASSWORD '${env('POSTGRES_PASSWORD')}';"  # noqa: E501
-        )
-    except errors.DuplicateObject:
-        # We don't want to stop the program
-        pass
-
-    cursor.execute(
-        f"ALTER ROLE {env('POSTGRES_USER')} set client_encoding to 'utf8';"  # noqa: E501
-    )
-    cursor.execute(
-        f"ALTER ROLE {env('POSTGRES_USER')} SET default_transaction_isolation TO 'read committed';"  # noqa: E501
-    )
-    cursor.execute(
-        f"ALTER ROLE {env('POSTGRES_USER')} SET timezone TO 'America/Caracas';"  # noqa: E501
-    )
-    cursor.execute(
-        f"GRANT ALL PRIVILEGES ON DATABASE {env('POSTGRES_DB')} TO {env('POSTGRES_USER')};"  # noqa: E501
-    )
-    cursor.execute(f"ALTER USER {env('POSTGRES_USER')} CREATEDB;")
-
-    # === End transaction ===
-    connection.commit()
-
-    # Close db connection
-    cursor.close()
-    connection.close()
-    logging.info(msg="DATABASE successfully dropped")
 
 
 def loaddata(BASE_DIR):
@@ -107,20 +39,47 @@ def loaddata(BASE_DIR):
     fixture_str = ", ".join(fixtures)
     logging.info(msg=f"fixtures {fixture_str} uploaded to the database")
 
+class UploadAction(Enum):
+    UPLOAD_DEV_DATA = "upload_dev_data"
+    LOADDATA = "loaddata"
 
-def upload_data():
+class SkipStep(Enum):
+    MIGRATE = "migrate"
+    DROP_DATABASE = "drop_database"
+    UPLOAD_DATA = "upload_data"
+    BACKUP = "backup"
+
+steps_description = {
+    "backup": {
+        "description": "Make a backup of some of the tables",
+    },
+    "drop_database": {
+        "description": "Delete the database",
+    },
+    "migrate": {
+        "description": "Apply migrations, a.k.a create database tables",
+    },
+    "upload_data": {
+        "description": "Insert data into the tables",
+    },
+}
+
+def upload_data(BASE_DIR, action: UploadAction):
     """
     Put here all of the functions that use ORM models
     for uploading data
     """
 
-    if settings.DEBUG:
+    # For development mode use the testing fixtures
+    if settings.DEBUG or action == UploadAction.UPLOAD_DEV_DATA.value:
         upload_dev_data()
-    else:
+    elif not settings.DEBUG or action == UploadAction.LOADDATA.value:
         # For now, only Load data fixtures to the database if we are resseting the production database
         loaddata(BASE_DIR)
+    else:
+        logging.info("Not uploading anything to the database")
 
-if __name__ == "__main__":
+def main():
 
     BASE_DIR = Path(__file__).resolve().parent.parent  # Parent Directory of this file
 
@@ -132,27 +91,45 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--dont_backup",
-        help="Disable the database backup (use with caution)",
-        action="store_true",
+        "--upload-action",
+        choices=[action.value for action in UploadAction],
+        help="When the database is reseted, perform one the listed action"
     )
+
+    # Add skipping options
+    SKIP_PREFIX = "skip"
+    for step_name, step_data in steps_description.items():
+        parser.add_argument(
+            f"--{SKIP_PREFIX}-{step_name}",
+            help=f"Skip {step_data['description']}",
+            action="store_true",
+        )
+
 
     args = parser.parse_args()
 
-    if not args.dont_backup:
-        # backup the database
+    # backup the database first before dropping it
+    if not getattr(args,f"{SKIP_PREFIX}_backup"):
         backup(BASE_DIR)
 
+
     # Drop the database
+    if not getattr(args,f"{SKIP_PREFIX}_drop_database"):
+        # Close all database connections oppened by django
+        # so the database can be dropped
+        db.connections.close_all()
+        drop_database(env)
 
-    # Close all database connections oppened by django
-    # so the database can be dropped
-    db.connections.close_all()
-
-    drop_database(env)
 
     # Apply migrations
-    call_command("migrate", verbosity=1)
-    logging.info("Database schema restored")
+    if not getattr(args,f"{SKIP_PREFIX}_migrate"):
+        call_command("migrate", verbosity=1)
+        logging.info("Database schema restored")
 
-    upload_data()
+
+    # Insert data into tables
+    if not getattr(args,f"{SKIP_PREFIX}_upload_data"):
+        upload_data(BASE_DIR, args.upload_action)
+
+if __name__ == "__main__":
+    main()

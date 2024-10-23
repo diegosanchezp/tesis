@@ -65,7 +65,41 @@ docker compose run --rm django \
     python manage.py migrate --settings django_src.settings.production
 ```
 
-Upload testing fixtures to database
+Visit the website
+
+https://localhost
+
+## Upload Testing data
+Upload the same data that it is used to test while development
+
+Spawn a container
+
+```bash
+docker run --rm \
+--network production_default \
+--mount 'type=bind,source=./shscripts,destination=/app/shscripts' \
+--mount 'type=bind,source=./media,destination=/app/media' \
+--env-file ./envs/production/postgres \
+--env-file ./envs/production/django \
+--interactive --tty \
+"$DOCKER_IMAGE" \
+bash
+```
+
+Then execute these scripts
+
+You might wan't to use --skip-backup if no important data is present in the postgres container
+
+```bash
+python -m shscripts.reset_db --skip-upload_data
+```
+
+Then upload the development data
+```bash
+DJANGO_SETTINGS_MODULE=django_src.settings.development python -m django_src.apps.main.dev_data upload
+```
+
+(DEPRECATED: don't use) Upload testing fixtures to database
 
 ```bash
 docker compose run --rm django python manage.py loaddata fixtures/admin.json fixtures/wagtail_pages.json
