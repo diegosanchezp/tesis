@@ -55,13 +55,18 @@ export function hxSwap(evt: SwapEvent){
 /** Renders django messages as flowbite toasts */
 export function renderMessagesAsToasts(evt: SwapEvent){
 
-    // Create a div element that serves as a placeholder for the toasts
-    // This will be useful for the hxSwap call above
-    const div = document.createElement('div')
-    div.setAttribute("id", "toast_area")
-
-    // Insert it into the body as the first child element
-    document.body.insertBefore(div, document.body.firstChild)
+    let toast_container = document.getElementById('toast_area')
+    
+    // If the container doesn't exists, then create it,
+    // because htmx needs and element to place the html sent by the server
+    if(!toast_container){
+        // Create a div element that serves as a placeholder for the toasts
+        // This will be useful for the hxSwap call above
+        toast_container = document.createElement('div')
+        toast_container.setAttribute("id", "toast_area")
+        // Insert it into the body as the first child element
+        document.body.insertBefore(toast_container, document.body.firstChild)
+    }
 
     // Replace the div with the django messages html
     hxSwap(evt)
