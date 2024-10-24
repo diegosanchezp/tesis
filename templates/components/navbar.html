@@ -132,6 +132,9 @@
                     {% if request.user.is_student %}
                         {% url 'student:profile' %}
                     {% endif %}
+                    {% if request.user.is_superuser %}
+                        {% url 'wagtailadmin_account' %}
+                    {% endif %}
                     {% endspaceless %}
                 "
             >

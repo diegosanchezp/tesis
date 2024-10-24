@@ -5,7 +5,7 @@
 {% endcomment %}
 
 {% if user.profile_pic %}
-    <div class="w-12 h-12"
+    <button class="w-12 h-12"
          {% if with_dropdown %}
              data-dropdown-toggle="userDropdown" data-dropdown-placement="bottom-start"
          {% endif %}
@@ -15,14 +15,14 @@
             src="{{user.profile_pic.url}}"
             alt="profile picture"
             >
-    </div>
+    </button>
 {% else %}
-<div
+<button
     class="flex items-center justify-center w-12 h-12 rounded-full border-2 border-solid border-{{border_color|default:"black"}}"
      {% if with_dropdown %}
          data-dropdown-toggle="userDropdown" data-dropdown-placement="bottom-start"
      {% endif %}
     >
       <i class="bi bi-person-fill text-3xl"></i>
-  </div>
+  </button>
 {% endif %}
