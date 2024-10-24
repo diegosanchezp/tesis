@@ -11,6 +11,7 @@
        id="{{ user_form.profile_pic.id_for_label }}"
        name="{{user_form.profile_pic.html_name}}"
        {% if user_form.profile_pic.field.required %} required {% endif %}
+       accept=".jpg, .jpeg, .png"
        form="profile-form"
     >
     <div id="profile_pic_errors" hx-swap-oob="true">
@@ -21,6 +22,7 @@
 <form
     id="profile-form"
     class="flex flex-col gap-y-4"
+    enctype="multipart/form-data"
     hx-post="{% url 'customauth:change_profile' %}"
     hx-target="#profile-form"
     hx-swap-oob="true"

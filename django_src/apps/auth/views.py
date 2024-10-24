@@ -69,9 +69,7 @@ def change_profile_view(request):
     }
 
     if not request.htmx:
-        response = HttpResponseBadRequest("Request not made with htmx")
-        messages.error(request, _("La solicitud no fue hecha con htmx"))
-        renderMessagesAsToasts(request, response)
+        response = HttpResponseBadRequest(_("La solicitud no fue hecha con htmx"))
         return response
 
     response = TemplateResponse(request, template=template_name, context=context)
@@ -79,6 +77,11 @@ def change_profile_view(request):
     if user_form.has_changed() and user_form.is_valid():
         messages.success(request, _("¡Perfil actualizado!"))
         user_form.save()
+    if not user_form.is_valid():
+        messages.error(request,message=_("Error validando los datos del perfil"))
+    if not user_form.has_changed():
+        messages.info(request, message=_("No se detectaron cambios en el formulario de perfil"))
+
 
     renderMessagesAsToasts(request, response)
     return response
