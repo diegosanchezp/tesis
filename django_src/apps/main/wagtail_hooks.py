@@ -1,5 +1,6 @@
 from django.http.request import HttpRequest
 from django.urls import path, reverse_lazy
+from django.db import models
 
 from wagtail import hooks
 from wagtail.admin.menu import MenuItem
@@ -45,6 +46,13 @@ def filter_user_pages(parent_page: Page, pages, request: HttpRequest):
         or Business.objects.filter(user=request.user).exists()
     ):
         return pages
+
+    # Mentor can see blogs and professional careers
+    if request.user.is_mentor:
+        if parent_page.slug == 'root_home':
+            return pages.filter(models.Q(content_type__model="procarreerindex") | models.Q(content_type__model="blogindex"))
+        if parent_page.content_type.model == "procarreerindex":
+            return pages
 
     return pages.filter(owner=request.user)
 

@@ -53,15 +53,6 @@ Página principal - Mentor
                 <div id="student-info-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
                 </div>
             </section>
-            {# Other links #}
-            <section id="other-links">
-                <h2 class="text-2xl font-bold mb-4">Otros enlaces</h2>
-                <ul class="flex flex-col gap-y-2">
-                    <li>
-                        <a href="{% pro_carrer_index_link %}" class="hover:underline decoration-4 underline-offset-8 decoration-ucv-yellow-dark">Añadir experiencia a carrera profesional</a>
-                    </li>
-                </ul>
-            </section>
             {# Blogs table #}
             <section id="blogs-table">
                 <h2 class="text-2xl font-bold mb-4">Mis blogs</h2>
@@ -113,7 +104,18 @@ Página principal - Mentor
                         {% include "business/landing/btn_ver_todas.html" with add_url=add_blog_url btn_text="Añadir blog" %}
                     </div>
                 {% endif %}
-
+            </section>
+            {# Other links #}
+            <section id="other-links">
+                <h2 class="text-2xl font-bold mb-4">Otros enlaces</h2>
+                <ul class="flex flex-col gap-y-2">
+                    <li>
+                        <a href="{% pro_carrer_index_link %}" class="hover:underline decoration-4 underline-offset-8 decoration-ucv-yellow-dark">Añadir experiencia a carrera profesional</a>
+                    </li>
+                    <li>
+                        <a href="{{ add_career_url }}" class="hover:underline decoration-4 underline-offset-8 decoration-ucv-yellow-dark">Añadir carrera profesional</a>
+                    </li>
+                </ul>
             </section>
         </div>
 
@@ -127,6 +129,5 @@ Página principal - Mentor
         </section>
 
     </div>
-
 </main>
 {% endblock body %}

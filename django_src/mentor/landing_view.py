@@ -7,11 +7,13 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
 
+from django_src.pro_carreer.models import ProCarreerIndex
+
 from .utils import get_mentor, loggedin_and_approved
 from .models import MentorshipRequest
 from .forms import MentorshipReqFilterForm
 
-from django_src.settings.wagtail_pages import blogs_index_path
+from django_src.settings.wagtail_pages import blogs_index_path, pro_carreer_index_path
 from django_src.apps.register.models import Mentor
 from django_src.apps.main.models import EventsIndex, NewsIndex, BlogPage, BlogIndex
 from django_src.apps.register.approvals_view import get_page_number
@@ -143,6 +145,7 @@ def landing_view(request):
     news_index = NewsIndex.objects.first()
     page_number = get_page_number(request)
     blogs_index = BlogIndex.objects.get(path=blogs_index_path)
+    pro_career_index = ProCarreerIndex.objects.get(path=pro_carreer_index_path)
     myblogs_queryset = BlogPage.objects.filter(owner=mentor.user).order_by("-last_published_at")
     myblogs_paginated = paginate_blogs(myblogs_queryset, page_number=1)
 
@@ -157,6 +160,9 @@ def landing_view(request):
         "mentor": mentor,
         "myblogs": myblogs_paginated,
         "blogs_count": myblogs_paginated.object_list.count(),
+        "add_career_url": reverse(
+            "wagtailadmin_pages:add_subpage", kwargs={"parent_page_id": pro_career_index.pk}
+        ),
         # The url to add a blog, redirects to the wagtail cms
         "add_blog_url": reverse(
             "wagtailadmin_pages:add_subpage", kwargs={"parent_page_id": blogs_index.id}
