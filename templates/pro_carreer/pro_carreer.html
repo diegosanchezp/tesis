@@ -7,10 +7,20 @@
 {% include "components/navbar.html" %}
 
 <main class="px-20 max-w-[1920px] mx-auto">
-
       {% include "pro_carreer/detail_breadcrumbs.html" with page=page %}
 
       {% #pro_career_tabs page=page current_tab="Info" %}{% /pro_career_tabs %}
+
+      {% if request.user.is_mentor or request.user.is_superuser or request.user.is_staff %}
+          <div class="flex justify-end gap-x-2">
+              {% include "components/info_help.html" with id="help_edit" help_text='Si consigues algún error, edita la pagina' %}
+              <a href="{% url 'wagtailadmin_pages:edit' page_id=page.id %}">
+                  {% #button icon_left="bi bi-pencil-square" type="button" title="Editar" %}
+                    Editar
+                  {% /button %}
+              </a>
+          </div>
+      {% endif %}
 
       {# Content #}
 
@@ -48,7 +58,6 @@
               {% endfor %}
           </aside>
       </div>
-
 </main>
 {% endblock body %}
 

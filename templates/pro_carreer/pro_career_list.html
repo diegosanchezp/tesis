@@ -23,9 +23,17 @@ Carreras Profesionales
 
     <h1 class="text-2xl font-bold my-4">Carreras profesionales</h1>
     {% if is_mentor %}
+        <div class="flex justify-between">
         <div class="flex gap-x-4 mb-4">
             <i class="bi bi-info-circle-fill text-ucv-yellow-dark"></i>
             <p>¡Escoge abajo una carrera y añade tu expericiencia profesional!</p>
+        </div>
+        <p>
+            <span>¿ No ves tu carrera ?</span>
+            <a class="{% include "mentor/links/blue_css.html" %}" href="{{ add_career_url }}">
+                Añádela
+            </a>
+        </p>
         </div>
     {% endif %}
 

@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.http.response import HttpResponseBadRequest
 from django.core.paginator import Paginator
+from django.urls import reverse
 
 
 from django.utils.translation import gettext_lazy as _
@@ -24,6 +25,8 @@ from wagtail.admin.panels import (
 )
 from django_src.apps.register.models import Mentor
 from django_src.apps.register.approvals_view import get_page_number
+from django_src.customwagtail.permission_tester import ProCareerPermissionTester
+from django_src.utils import remove_index_publish_permission
 
 EXP_TAB = "experiencias"
 class ProCarreerIndex(Page):
@@ -36,6 +39,10 @@ class ProCarreerIndex(Page):
     # no app label specified in subpage_types, because ProfessionalCarreer is in the same app
     # only professional carreers can be added as a subpage
     subpage_types = ['ProfessionalCarreer']
+
+    class Meta:
+        verbose_name = _("Indice de carreras profesionales")
+        verbose_name_plural = _("Indices de carreras profesionales")
 
     def serve(self, request):
         # Add suppor for pagination to this index page
@@ -51,6 +58,9 @@ class ProCarreerIndex(Page):
         # Paginate the professional carreers
         page_number = get_page_number(request)
         context["pro_careers"] = self.paginate(pro_careers=pro_careers, page_number=page_number)
+        context["add_career_url"] = reverse(
+            "wagtailadmin_pages:add_subpage", kwargs={"parent_page_id": self.pk}
+        )
 
         # Setup breadcrumbs
         context["breadcrumbs"] = [
@@ -67,6 +77,16 @@ class ProCarreerIndex(Page):
         pro_careers = paginator.page(number=page_number)
 
         return pro_careers
+
+    def permissions_for_user(self, user):
+        """
+        Override this method to remove the publish permission from certain users
+        on this Pro Career index page
+        """
+
+        page_permission_tester = super().permissions_for_user(user)
+        return remove_index_publish_permission(page_permission_tester, user)
+
 
 # Create your models here.
 class ProfessionalCarreer(Page):
@@ -187,6 +207,15 @@ class ProfessionalCarreer(Page):
                     return experience_view.view(request, page=self, page_ctx=self.get_context(request))
         return response
 
+    def permissions_for_user(self, user):
+        """
+        Override this method to remove the publish permission from certain users
+        on this blog index page
+        """
+
+        page_permission_tester = ProCareerPermissionTester(user, self)
+        return page_permission_tester
+
 def get_rating_range_selected(rating: int):
     """
     Get a range object for the selected stars
@@ -252,7 +281,8 @@ class ProCarreerExperience(models.Model):
 
     class Meta:
         unique_together = [["pro_carreer", "mentor"]]
-
+        verbose_name = _("Experiencia de Carrera Profesional")
+        verbose_name_plural = _("Experiencias de Carreras Profesionales")
     def __str__(self) -> str:
         return f"{self.mentor} {self.rating}"
 

@@ -2,7 +2,7 @@ from django.urls import reverse_lazy
 from django.http.request import QueryDict
 from django.contrib import messages
 from django.forms import BaseForm
-
+from wagtail.models import PagePermissionTester
 def get_page_number(request):
     """
     Gets the page number from the request object.
@@ -17,7 +17,7 @@ def get_page_number(request):
     return page_number
 
 
-def remove_index_publish_permission(page_permission_tester, user):
+def remove_index_publish_permission(page_permission_tester: PagePermissionTester, user):
     """
     Removes the publish permission from a wagtail page that is considered an index.
     """
@@ -25,10 +25,15 @@ def remove_index_publish_permission(page_permission_tester, user):
     if not getattr(page_permission_tester, "permissions", False):
         return page_permission_tester
 
+    # For Mentors and Businesses, remove the publish permission for any page
     if (
         user.is_mentor or user.is_business
     ) and "publish" in page_permission_tester.permissions:
         page_permission_tester.permissions.remove("publish")
+
+    if user.is_mentor and page_permission_tester.page.slug == "profesiones" and "unpublish" in page_permission_tester.permissions and "change" in page_permission_tester.permissions:
+        page_permission_tester.permissions.remove("unpublish")
+        page_permission_tester.permissions.remove("change")
 
     return page_permission_tester
 

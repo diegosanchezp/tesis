@@ -27,3 +27,33 @@ class MyPagePermissionTester(PagePermissionTester):
             return False
 
         return self.user.is_superuser or ("publish" in self.permissions)
+
+
+class ProCareerPermissionTester(PagePermissionTester):
+    """
+    Set CMS permissions per user type on Pro Careers Page
+    """
+    def can_delete(self, *args, **kwargs):
+        # Mentors can not delete Professional Careers
+        if self.user.is_mentor:
+            return False
+        return super().can_delete(*args, **kwargs)
+
+    def can_copy(self, *args, **kwargs):
+        # Mentors can not copy Professional Careers
+        if self.user.is_mentor:
+            return False
+        return super().can_delete(*args, **kwargs)
+
+    def can_unpublish(self, *args, **kwargs):
+        
+        # Mentors can not unpublish Professional Careers
+        if self.user.is_mentor:
+            return False
+        return super().can_unpublish(*args, **kwargs)
+
+    def can_publish(self, *args, **kwargs):
+        # Mentors can not copy Professional Careers
+        if self.user.is_mentor:
+            return False
+        return super().can_unpublish(*args, **kwargs)

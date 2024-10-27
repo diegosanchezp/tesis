@@ -21,8 +21,9 @@ def page_listing_buttons(page, user, next_url=None):
     pro_career_type = ContentType.objects.get_for_model(ProfessionalCarreer)
 
     if page.content_type == pro_career_type:
-        yield wagtailadmin_widgets.PageListingButton(
-            _('Relacionar tema o especialización'),
-            reverse_lazy('relate_theme_spec', kwargs={"pk_pro_career": page.pk}),
-            priority=10
-        )
+        if user.is_superuser:
+            yield wagtailadmin_widgets.PageListingButton(
+                _('Relacionar tema o especialización'),
+                reverse_lazy('relate_theme_spec', kwargs={"pk_pro_career": page.pk}),
+                priority=10
+            )
