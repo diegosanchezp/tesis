@@ -102,6 +102,8 @@ class LoginProxyView(LoginRequiredMixin, RedirectView):
     View for redirecting succesfull logins of any profile
     """
 
+    url = "/"
+
     def get_redirect_url(self, *args, **kwargs):
 
         user = self.request.user
@@ -109,5 +111,5 @@ class LoginProxyView(LoginRequiredMixin, RedirectView):
         if home_page_link := get_home_page_link(user):
             return home_page_link
 
-        return self.get_redirect_url(*args, **kwargs)
+        return super().get_redirect_url(*args, **kwargs)
 
