@@ -1,3 +1,4 @@
+# Pages
 home_page_path = "00010002"
 blogs_index_path = f"{home_page_path}0001"
 pro_carreer_index_path = f"{home_page_path}0002"
@@ -5,5 +6,9 @@ news_index_path = f"{home_page_path}0003"
 events_index_path = f"{home_page_path}0004"
 jobs_index_path = f"{home_page_path}0005"
 
+# Collections
+professor_collection_path = "00010002"
+
 EMPRESAS_GROUP_NAME = "Empresas"
 MENTORS_GROUP_NAME = "Mentores"
+PROFESSORS_GROUP_NAME = "Profesores"

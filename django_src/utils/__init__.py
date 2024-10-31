@@ -50,16 +50,20 @@ def formdata_to_querystring(form, extra: dict = {}):
     return query_dict.urlencode()
 
 def get_home_page_link(user):
+
+    cms_home = reverse_lazy("wagtailadmin_home")
     if not user.is_authenticated:
         return 
     if user.is_superuser:
-        return reverse_lazy("wagtailadmin_home")
+        return cms_home
     if user.is_business:
         return reverse_lazy("business:landing")
     if user.is_mentor:
         return reverse_lazy("mentor:landing")
     if user.is_student:
         return reverse_lazy("pro_carreer:student_carreer_match")
+    if user.is_professor:
+        return cms_home
 
 def render_field_errors_as_messages(request, form: BaseForm, field_name: str):
     """

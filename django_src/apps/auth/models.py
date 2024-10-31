@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django_src.apps.register.models import Mentor, Student
 from django_src.business.models import Business
-
+from django_src.professor.models import Professor
 # If you’re starting a new project, it’s highly recommended to set up a custom user model, even if the default User model is sufficient for you
 # https://docs.djangoproject.com/en/stable/topics/auth/customizing/#using-a-custom-user-model-when-starting-a-project
 
@@ -31,3 +31,9 @@ class User(AbstractUser):
         business_queryset = Business.objects.filter(user=self)
         is_business = business_queryset.exists()
         return is_business
+
+    @property
+    def is_professor(self):
+        professor_queryset = Professor.objects.filter(user=self)
+        is_professor = professor_queryset.exists()
+        return is_professor
