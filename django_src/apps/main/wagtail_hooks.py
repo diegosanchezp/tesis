@@ -12,9 +12,10 @@ from django_src.apps.register.models import Mentor
 from django_src.business.models import Business
 
 from django.urls import path
+from django.utils.translation import gettext_lazy as _
 
 from django_src.customwagtail.interest_themes.view import crud_interest
-
+from django_src.apps.auth.views import LoginProxyView
 
 @hooks.register("register_admin_urls")
 def register_admin_urls():
@@ -22,17 +23,29 @@ def register_admin_urls():
         path(
             "crud_interest_themes", view=crud_interest, name="cms_interest_themes_crud"
         ),
+        path("root_home", view=LoginProxyView.as_view(), name="root_home"),
     ]
 
 
 menu_interest_themes = MenuItem(
-    label="Temas de interés", url=reverse_lazy("cms_interest_themes_crud")
+    label="Temas de interés", url=reverse_lazy("cms_interest_themes_crud"),
+    icon_name="italic",
+)
+
+menu_home_item = MenuItem(
+    label=_("Home"), url=reverse_lazy("root_home"),
+    icon_name="home",
+    order=0,
 )
 
 
 @hooks.register("register_admin_menu_item")
 def register_menus():
     return menu_interest_themes
+
+@hooks.register("register_admin_menu_item")
+def register_menu_home_item():
+    return menu_home_item
 
 
 @hooks.register("construct_explorer_page_queryset")

@@ -1,0 +1,11 @@
+{% extends "wagtailadmin/admin_base.html" %}
+
+{% load static %}
+
+{# https://docs.wagtail.org/en/stable/advanced_topics/customisation/admin_templates.html#branding-favicon #}
+{% block branding_favicon %}
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" />
+{% endblock %}
+
+{# https://docs.wagtail.org/en/stable/advanced_topics/customisation/admin_templates.html#branding-title #}
+{% block branding_title %}Asociación Egresados CMS{% endblock %}

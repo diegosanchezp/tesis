@@ -12,11 +12,11 @@ def register_admin_urls():
     ]
 
 
-menu_aprobaciones = MenuItem(label="Aprobaciones", url=reverse_lazy("approvals"))
+menu_aprobaciones = MenuItem(label="Aprobaciones", url=reverse_lazy("approvals"), icon_name="tasks")
 
 
 @hooks.register("register_admin_menu_item")
-def register_calendar_menu_item():
+def register_menu_aprobaciones():
     return menu_aprobaciones
 
 

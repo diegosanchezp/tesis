@@ -1,5 +1,6 @@
 {% load django_vite %}
 {% load django_htmx %}
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -32,6 +33,7 @@
     </title>
     {# ==== Cascading Style Sheets ==== #}
 
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" />
 
     {% block icons %}
         {# Bootstrap icons #}
@@ -61,7 +63,6 @@
     {% endblock %}
 
     {% block extrascripts %}{% endblock %}
-
   </head>
 
   <body>
