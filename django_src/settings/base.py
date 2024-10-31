@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django_src.business.apps.BusinessConfig",
     "django_src.interests.apps.InterestsConfig",
     "django_src.customwagtail.apps.CustomWagtailConfig",
+    "django_src.professor.apps.ProfessorConfig",
     # ---- Third party ----
     # API REST
     "rest_framework",

@@ -447,8 +447,9 @@ class EventPage(Page):
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         parent = self.get_parent()
+        context["events_list_page_url"] = parent.get_url(request=request)
         context["breadcrumbs"] = [
-            {"name": "Eventos", "href": parent.get_url(request=request)},
+            {"name": "Eventos", "href": context["events_list_page_url"]},
             {"name": truncatechars(self.title, MAX_TITLE_LENGHT)},
         ]
         return context
@@ -491,6 +492,7 @@ class EventsIndex(Page):
 
         page_number = get_page_number(request)
         context = super().get_context(request, *args, **kwargs)
+        context["events_list_page_url"] = self.get_url(request=request)
         context["breadcrumbs"] = [
             {"name": "Eventos"},
         ]

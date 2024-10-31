@@ -53,6 +53,7 @@
                 <a class="text-white" href="{% url 'business:mentors_directory' %}">Directorio Mentores</a>
             </li>
         {% endif %}
+
         {# Student links #}
         {% if request.user.is_student %}
             <li>
@@ -60,6 +61,12 @@
             </li>
             <li>
                 <a class="text-white" href="{% url 'student:jobs_offers' %}">Ofertas de trabajo</a>
+            </li>
+        {% endif %}
+        {# Profesor links #}
+        {% if request.user.is_professor %}
+            <li>
+                <a class="text-white" href="{% if events_list_page_url %}{{ events_list_page_url }}{% endif %}">Eventos</a>
             </li>
         {% endif %}
     </ul>
@@ -98,7 +105,7 @@
 
     {# Avatar links #}
     <ul class="py-2 text-sm text-gray-800" aria-labelledby="avatarButton">
-        {% if request.user.is_superuser or request.user.is_business or request.user.is_mentor %}
+        {% if request.user.is_superuser or request.user.is_business or request.user.is_mentor or request.user.is_professor %}
         <li>
             <a href="{% url 'wagtailadmin_home' %}" class="{% include "components/navbar/link_css.html" %}">
                 CMS
@@ -132,9 +139,11 @@
                     {% if request.user.is_student %}
                         {% url 'student:profile' %}
                     {% endif %}
-                    {% if request.user.is_superuser %}
+
+                    {% if request.user.is_superuser or request.user.is_professor %}
                         {% url 'wagtailadmin_account' %}
                     {% endif %}
+
                     {% endspaceless %}
                 "
             >
