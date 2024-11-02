@@ -31,9 +31,11 @@ def remove_index_publish_permission(page_permission_tester: PagePermissionTester
     ) and "publish" in page_permission_tester.permissions:
         page_permission_tester.permissions.remove("publish")
 
-    if user.is_mentor and page_permission_tester.page.slug == "profesiones" and "unpublish" in page_permission_tester.permissions and "change" in page_permission_tester.permissions:
-        page_permission_tester.permissions.remove("unpublish")
-        page_permission_tester.permissions.remove("change")
+    if user.is_mentor and page_permission_tester.page.slug == "profesiones":
+        if "unpublish" in page_permission_tester.permissions:
+            page_permission_tester.permissions.remove("unpublish")
+        if "change" in page_permission_tester.permissions:
+            page_permission_tester.permissions.remove("change")
 
     return page_permission_tester
 
