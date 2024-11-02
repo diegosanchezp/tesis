@@ -29,6 +29,7 @@ from django_src.pro_carreer.test_data import (
 from django_src.business.test_data.joboffer import JobsOfferData
 from django_src.business.test_data.businesses import BusinessData
 from django_src.apps.register.test_data.interest_themes import InterestThemeData
+from django_src.professor.test_data import ProfessorData
 
 from shscripts.backup import setup_django
 
@@ -220,6 +221,7 @@ def upload_dev_data():
     job_offer_data = JobsOfferData(
         business_data=business_data, interest_themes_data=interest_themes_data
     )
+    professor_data = ProfessorData()
 
     interest_themes_data.get()
     student_data.create()
@@ -240,6 +242,7 @@ def upload_dev_data():
     events_data = EventsData()
     news_data.create()
     events_data.create()
+    professor_data.create()
 
 
 def reset():
@@ -248,15 +251,16 @@ def reset():
     mentor_data = MentorData()
     news_data = NewsData()
     events_data = EventsData()
+    professor_data = ProfessorData()
 
     student_data.delete()
-    delete_pro_carreers()
     mentor_data.delete()
     mentorship_data.delete()
     reset_dev_pages(apps)
     delete_pro_interes_themes()
     news_data.delete()
     events_data.delete()
+    professor_data.delete()
 
     # The bad thing about deleting the images is that it deletes them from the file system
     # reset_dev_pages(apps)
