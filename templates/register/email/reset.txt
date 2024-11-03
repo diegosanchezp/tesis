@@ -1,0 +1,6 @@
+Hola {{ user.first_name }}.
+
+Tu solicitud de registro realizada el {{ approval.date|date:"d/m/Y" }} ha sido re-establecida al estado de Espera, para ser evaluada nuevamente.
+
+Esté atento a la notificación de comprobación o rechazo, que llegará vía email.
+

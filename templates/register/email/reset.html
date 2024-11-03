@@ -1,0 +1,13 @@
+{% extends "register/email/base.html" %}
+
+{% block content %}
+
+<p>Hola {{ user.first_name }}.</p>
+
+<p>
+    Tu solicitud de registro realizada el {{ approval.date|date:"d/m/Y" }} <span style="font-weight: bold">ha sido re-establecida al estado de Espera</span>, para ser evaluada nuevamente.
+</p>
+
+<p>Esté atento a la notificación de comprobación o rechazo, que llegará vía email.</p>
+
+{% endblock content %}

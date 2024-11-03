@@ -60,6 +60,14 @@ def is_approved(func):
 
         if approval.state == RegisterApprovalStates.APPROVED:
             return func(request, *args, **kwargs)
+        elif approval.state == RegisterApprovalStates.REJECTED:
+            return HttpResponseForbidden(
+                _("Tu solicitud de registro ha sido negada")
+            )
+        elif approval.state == RegisterApprovalStates.WAITING:
+            return HttpResponseForbidden(
+                _("Tu solicitud de registro no ha sido aprobada, espera recibir el correo de aprobación.")
+            )
         else:
             return HttpResponseForbidden(
                 _("Tu solicitud de registro no ha sido aprobada")

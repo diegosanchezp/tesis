@@ -16,11 +16,13 @@ from django.core.paginator import Paginator
 from django.template import RequestContext
 from django.urls import reverse
 from django.conf import settings
+from django.contrib.auth.models import Group
 
 from wagtail.admin.mail import send_mail
 from wagtail.admin.utils import get_admin_base_url
 from render_block import render_block_to_string
 
+from django_src.settings.wagtail_pages import MENTORS_GROUP_NAME, EMPRESAS_GROUP_NAME
 from django_src.utils.webui import HXSwap, renderMessagesAsToasts
 
 from .forms import ApprovalsFilterForm, ApprovalModalitys
@@ -225,6 +227,14 @@ def send_aprove_reject_email(approval: RegisterApprovals):
             context={"email": settings.SUPPORT_EMAIL},
         )
 
+    if approval.state == RegisterApprovalStates.WAITING:
+        send_aproval_email(
+            approval,
+            email_subject="Tu solicitud de registro esta siendo re-evaluada",
+            template_text="register/email/reset.txt",
+            template_html="register/email/reset.html",
+            context={"email": settings.SUPPORT_EMAIL},
+        )
 
 def approve_reject_users(request):
     """
@@ -254,6 +264,16 @@ def approve_reject_users(request):
             approval.admin = request.user
             approval.date = datetime.now()
             approval.save()
+
+            # Allow access to the CMS by adding it their respective groups
+            if next_state == RegisterApprovalStates.APPROVED:
+                if approval.user.is_mentor:
+                    mentors_group = Group.objects.get(name=MENTORS_GROUP_NAME)
+                    approval.user.groups.add(mentors_group)
+                if approval.user.is_business:
+                    business_group = Group.objects.get(name=EMPRESAS_GROUP_NAME)
+                    approval.user.groups.add(business_group)
+
             # Send email
             send_aprove_reject_email(approval)
 

@@ -23,10 +23,27 @@ Required context
         </div>
         <!-- Modal body -->
         <div class="p-4 md:p-5 space-y-4">
-            <div class="flex gap-x-2 items-baseline">
-                <i class="bi bi-person text-xl"></i>
-                <p id="user_name" class="">{{ user_approval.user.first_name }} {{ user_approval.user.last_name }}</p>
+            <div>
+                <div class="flex flex-col justify-center items-center mb-3">
+                    {% include "pro_carreer/mentor_avatar.html" with user=user_approval.user %}
+
+                    <p class="font-bold text-base text-center mt-2">{{ user_approval.user.first_name }} {{ user_approval.user.last_name }}</p>
+                    <p class=""><span>Usuario: </span>{{ user_approval.user.get_username }}</p>
+                    <p class="">{{ user_approval.user.email }}</p>
+
+                    <p class="font-bold">
+                        {% if user_approval.user_type.model == 'mentor' %}
+                            {{ user_approval.user.mentor.carreer.name }}
+                        {% endif %}
+                        {% if user_approval.user_type.model == 'student' %}
+                            {{ user_approval.user.student.carreer.name }}
+                        {% endif %}
+                    </p>
+                    <p>{{ user_approval.specialization.name }}</p>
+                </div>
             </div>
+
+            <p class="font-semibold text-lg mb-2">Comprobante anexado</p>
             <div id="file_viewer" class="flex items-center justify-center">
                 {% with file_type=user_approval.voucher_file_type voucher_url=user_approval.voucher.url user=user_approval.user %}
                     {% if file_type == "pdf" %}
