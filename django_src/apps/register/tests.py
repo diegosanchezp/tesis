@@ -12,11 +12,12 @@ from django import forms
 
 from django.urls.base import reverse_lazy
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, RequestFactory
 
 
 from django_src.apps.register.models import (
     Student,
-    Mentor, MentorExperience,
+    Mentor,
     Faculty, Carreer,
     InterestTheme,
     RegisterApprovals, RegisterApprovalStates,
@@ -30,9 +31,7 @@ from .views import SelectCarreraView, SelectCarrerSpecialization, SelecThemeView
 from .add_mentor_exp_view import add_mentor_exp_view, get_POST_context_data, get_GET_context_data, actions as exp_actions
 from .forms import MentorExperienceForm, QueryForm, MentorForm
 import django_src.apps.register.complete_profile_view as profile_view
-from django.test import TestCase, RequestFactory
 
-from django.http.response import HttpResponseNotAllowed
 from django.urls import reverse
 from django_htmx.http import HttpResponseClientRedirect
 
@@ -341,6 +340,7 @@ class CompleteStudentProfileViewTest(TestCase):
         self.matematicas.interest_themes.add(*self.mates_interest_set)
         self.base_data = {
             "email": "diego@mail.com",
+            "username": "diego",
             "first_name": "Diego",
             "last_name": "Sánchez",
             "profile": "estudiante",
@@ -462,7 +462,7 @@ class CompleteStudentProfileViewTest(TestCase):
         # Test that the voucher was saved
         student = Student.objects.get(user__email=user_form_valid.cleaned_data['email'])
 
-        self.assertEqual(student.user.username, student.user.email)
+        self.assertEqual(student.user.username, user_form_valid.cleaned_data['username'])
 
         voucher_path = Path(student.voucher.path)
         self.assertTrue(voucher_path.exists())
@@ -1152,6 +1152,7 @@ class TestCompleteMentorProfileView(TestCaseWithData):
             # User data
             "email": "diego@gmail.com",
             "first_name": "Diego",
+            "username": "diego",
             "last_name": "Sánchez",
             "profile_pic": SimpleUploadedFile(
                 name="profile_pic.jpg",
@@ -1217,7 +1218,8 @@ class TestCompleteMentorProfileView(TestCaseWithData):
 
         self.assertEqual(mentor.experiences.count(), data["form-TOTAL_FORMS"])
 
-        self.assertEqual(mentor.user.username, mentor.user.email)
+        # Check that the username was set correctly
+        self.assertEqual(mentor.user.username, data['username'])
 
         voucher_path = Path(mentor.voucher.path)
         self.assertTrue(voucher_path.exists())

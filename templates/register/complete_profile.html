@@ -89,11 +89,16 @@
             {# Render all of the form fields of the user_form excluding those that are hidden #}
             {% for field in user_form %}
                 {% if not field.is_hidden and field != user_form.profile_pic %}
-                
+
                     {% if field == user_form.password1 %}
-                        {% include "forms/render_field.html" with container_css_classes="col-start-1" %}
+                        {# Wrap render_field in a div so the grid doesn't considers it a direct children #}
+                        <div>
+                            {% include "forms/render_field.html" with container_css_classes="col-start-1" %}
+                        </div>
                     {% else %}
-                        {% include "forms/render_field.html" %}
+                        <div>
+                            {% include "forms/render_field.html" %}
+                        </div>
                     {% endif %}
                 {% endif %}
             {% endfor %}
@@ -127,7 +132,9 @@
             {# Entity form fields #}
             {% for field in entity_form.visible_fields %}
                 {% if field != entity_form.voucher %}
-                    {% include "forms/render_field.html" %}
+                    <div>
+                        {% include "forms/render_field.html" %}
+                    </div>
 
                 {% comment %}
                     <div class="flex flex-col">
@@ -160,7 +167,7 @@
                 {% else %}
                     {# Use htmx to fill in the input values #}
                     {% if field == entity_form.interests %}
-                        {# Render all of the interest themes of the student, must be django form complient #}
+                        {# Render all of the interest themes of the student, must be django form compatible #}
                         <template x-for="interest in interests">
                             <input type="hidden" name="{{ field.name }}" x-bind:value="interest">
                         </template>
