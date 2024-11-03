@@ -12,7 +12,9 @@
 {% endif %}
 
 <header class="bg-gradient-to-t from-white to-ucv-yellow pb-18 flex flex-col items-center justify-center">
-    <img src="{% static 'logo_egresados_ucv.jpg' %}" alt="Logo de la Asociación" class="w-40 h-40 mx-auto mt-2" />
+    <a href="/">
+        <img src="{% static 'logo_egresados_ucv.jpg' %}" alt="Logo de la Asociación" class="w-40 h-40 mx-auto mt-2" />
+    </a>
     <h2 class="my-4 text-xl">Iniciar sesión</h2>
 
     {% if next %}
@@ -36,6 +38,9 @@
         {% #button icon_right="bi bi-arrow-right" type="submit" %}
             Ingresar
         {% /button %}
+        </div>
+        <div class="mt-3 text-center">
+            <p>¿ No tienes cuenta ? <a class="{% include 'mentor/links/blue_css.html' %} bg-blue-50 p-2 rounded-lg" href="{% url 'register:index' %}">Registrate</a></p>
         </div>
 
         <input type="hidden" name="next" value="{{ next }}">
