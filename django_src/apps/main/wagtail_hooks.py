@@ -28,8 +28,9 @@ def register_admin_urls():
 
 
 menu_interest_themes = MenuItem(
-    label="Temas de interés", url=reverse_lazy("cms_interest_themes_crud"),
+    label=_("Temas de interés"), url=reverse_lazy("cms_interest_themes_crud"),
     icon_name="italic",
+    order=2,
 )
 
 menu_home_item = MenuItem(

@@ -1,5 +1,6 @@
 from .approvals_view import approvals_view
 
+from django.utils.translation import gettext_lazy as _
 from django.urls import path, reverse_lazy
 from wagtail import hooks
 from wagtail.admin.menu import MenuItem
@@ -12,7 +13,7 @@ def register_admin_urls():
     ]
 
 
-menu_aprobaciones = MenuItem(label="Aprobaciones", url=reverse_lazy("approvals"), icon_name="tasks")
+menu_aprobaciones = MenuItem(label=_("Aprobaciones"), url=reverse_lazy("approvals"), icon_name="tasks", order=1)
 
 
 @hooks.register("register_admin_menu_item")
