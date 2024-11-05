@@ -93,8 +93,8 @@ Mis mentorías
 
                     <div class="flex items-center justify-center">
                         {% if m_request.status == MentorshipRequest.State.REQUESTED %}
-                        <form hx-post="{% url 'mentor:change_mentorship_status' mentorship_req_pk=m_request.pk %}" hx-trigger="click" hx-swap="none">
-                            {% #button type="button" name="action" value=MentorshipRequest.Events.CANCEL.value variant="red" %}
+                        <form hx-post="{% url 'mentor:change_mentorship_status' mentorship_req_pk=m_request.pk %}" hx-trigger="click" hx-swap="none" hx-vals='{"action": "{{ MentorshipRequest.Events.CANCEL.value}}"}'>
+                            {% #button type="submit" name="action" value=MentorshipRequest.Events.CANCEL.value variant="red" %}
                                 {{ MentorshipRequest.Events.CANCEL.label }} solicitud
                             {% /button %}
                         </form>
