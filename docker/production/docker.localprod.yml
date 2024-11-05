@@ -3,11 +3,17 @@
 services:
   django:
     volumes:
-      # If any of the python source files are changed,
-      # the production image will not need to be rebuilt
+      # If any of the python or html template source files are changed,
+      # the production image will not need to be rebuilt.
       - type: bind
         source: ../../django_src
         target: /app/django_src
+      - type: bind
+        source: ../../templates
+        target: /app/templates
+      - type: bind
+        source: ../../static/img
+        target: /app/static/img
   nginx:
     volumes:
       #Use this for local https testing
