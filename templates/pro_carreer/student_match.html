@@ -24,19 +24,24 @@ Home Estudiante
             {% for profession in pro_careers %}
                 {% include "pro_carreer/pro_career_card.html" %}
             {% empty %}
-                <div class="shadow-md rounded bg-white p-4">
-                    <p>No hay carreras profesionales relacionadas que se ajusten a tus intereses.</p>
-                    <p>¡Observa el <a class="text-blue-600" href="{% url "pro_carreer:student_graph_match"%} ">mapa interactivo</a> para encontrar más!</p>
+                <div class="shadow-md rounded bg-white p-4 col-span-2">
+                    <p>No hay carreras profesionales relacionadas que se ajusten a tus intereses o especialización.</p>
+                    <p class="mt-4">Para encontrar más, puedes:</p>
+                    <ol class="list-decimal list-inside">
+                        <li>Observar el <a class="text-blue-600" href="{% url "pro_carreer:student_graph_match"%} ">mapa interactivo</a>.</li>
+                        <li><a class="{% include "mentor/links/blue_css.html" %}" href="{% url 'student:profile' %}#change-specialization">Añadir una especialización</a> a tu carrera.</li>
+                        <li><a class="{% include "mentor/links/blue_css.html" %}" href="{% url 'student:profile' %}#change-interests">Añadir temas de interés</a> a tu perfil.</li>
+                    </ol>
                 </div>
             {% endfor %}
 
             {# Tips #}
-            <div class="flex flex-col justify-center items-center h-fit py-4 px-4 bg-ucv-yellow-dark text-white rounded">
-                <h3 class="text-lg mt-2 font-bold">Tips generales para tu carrera profesional</h3>
-                <p>Escrito por Egresados con experiencia profesional.</p>
-                <div class="mt-2">
-                    {% #button icon_left="bi bi-info-circle text-white"%}Ver más{% /button %}
-                </div>
+            <div class="flex flex-col justify-center items-center h-fit py-4 px-4 bg-ucv-yellow-dark text-white rounded col-start-3">
+                <h3 class="text-lg mt-2 font-bold">Tips generales</h3>
+                <ul class="list-disc list-inside">
+                    <li>Encuentra y contacta con <span class="underline decoration-white">mentores</span> en el detalle de una carrera profesional.</li>
+                    <li>Puedes <span class="underline decoration-white">aumentar</span> el número de carreras profesionales recomendadas, añadiendo una <a class="px-1 py-0.5 text-white bg-blue-700" href="{% url 'student:profile' %}#change-specialization">especialización</a> o <a class="px-1 py-0.5 text-white bg-blue-700" href="{% url 'student:profile' %}#change-interests">temas de interés</a>.</li>
+                </ul>
             </div>
         </section>
     </section>
