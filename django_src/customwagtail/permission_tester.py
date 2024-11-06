@@ -43,7 +43,7 @@ class ProCareerPermissionTester(PagePermissionTester):
         # Mentors can not copy Professional Careers
         if self.user.is_mentor:
             return False
-        return super().can_delete(*args, **kwargs)
+        return super().can_copy(*args, **kwargs)
 
     def can_unpublish(self, *args, **kwargs):
         
@@ -56,4 +56,4 @@ class ProCareerPermissionTester(PagePermissionTester):
         # Mentors can not copy Professional Careers
         if self.user.is_mentor:
             return False
-        return super().can_unpublish(*args, **kwargs)
+        return super().can_publish(*args, **kwargs)
