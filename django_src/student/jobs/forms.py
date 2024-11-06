@@ -5,6 +5,8 @@ from django_src.student.models import StudentJobOffer
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+class ApplyUnApplyRendererForm(forms.Form):
+    to_render = forms.CharField()
 
 class ApplyForm(forms.Form):
     job = forms.ModelChoiceField(queryset=JobOffer.objects.all())
@@ -22,7 +24,7 @@ class UnApplyForm(forms.Form):
         try:
             self.job_application = StudentJobOffer.objects.get(student=self.student, job=job_offer)
         except StudentJobOffer.DoesNotExist:
-            raise ValidationError(_("No haz mostrado interes por esta oferta de trabajo"))
+            raise ValidationError(_("No puedes des-aplicar, no haz mostrado interés por esta oferta de trabajo"))
         return job_offer
 
 class JobSearchForm(forms.ModelForm):

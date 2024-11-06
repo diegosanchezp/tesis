@@ -3,7 +3,9 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.template.defaultfilters import truncatechars
 from django.conf import settings
+from django.http.response import HttpResponse, HttpResponseBadRequest
 
+from render_block import render_block_to_string
 from wagtail.models import Page, Orderable
 from modelcluster.fields import ParentalKey
 from wagtail.fields import StreamField
@@ -13,9 +15,9 @@ from wagtail.admin.panels import (
     TitleFieldPanel,
     InlinePanel,
 )
+from django_src.student.models import StudentJobOffer
 from django_src.utils import remove_index_publish_permission
 from django_src.customwagtail.permission_tester import MyPagePermissionTester
-
 # ./manage.py dumpdata --natural-primary --indent 4 --verbosity 2 --output /app/fixtures/tmp/jobs.json business.JobOfferIndex business.JobOffer business.JobOfferInterest wagtailcore.Page business.Business
 
 
@@ -147,8 +149,42 @@ class JobOffer(Page):
         verbose_name = _("Oferta de trabajo")
         verbose_name_plural = _("Ofertas de trabajo")
 
+    def serve(self, request):
+        # To avoid circular import we import here
+        from django_src.student.jobs.jobs_view import apply_to_job, unapply_to_job, UNAPPLY_TO_JOB, APPLY_TO_JOB
+
+        # HtmxHttpRequest is imported here to avoid this error
+        # ImportError: cannot import name 'User' from partially initialized module 'django_src.apps.auth.models' (most likely due to a circular import) (/app/django_src/apps/auth/models.py)
+        from django_src.types import HtmxHttpRequest
+
+        response = super().serve(request)
+
+        def render_apply_btn(request: HtmxHttpRequest, job_offer: "JobOffer"):
+            """
+            Render only the apply btn
+            """
+            response_html = render_block_to_string(self.template, context=self.get_context(request), block_name="apply_btn")
+            return HttpResponse(response_html)
+
+        if request.method == "POST":
+            action = request.POST.get("action", None)
+            if request.htmx:
+                if action == APPLY_TO_JOB:
+                    return apply_to_job(request, render_apply_btn)
+                elif action == UNAPPLY_TO_JOB:
+                    return unapply_to_job(request, render_apply_btn)
+                else:
+                    return HttpResponseBadRequest(_("Acción inválida"))
+
+        return response
+
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
+
+        context["applied"] = False
+        if request.user.is_student:
+            context["applied"] = StudentJobOffer.objects.filter(student__user=request.user).exists()
+
         context["breadcrumbs"] = [
             {"name": truncatechars(self.title, settings.MAX_TITLE_LENGHT)},
         ]

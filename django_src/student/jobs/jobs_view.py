@@ -1,4 +1,5 @@
 import functools
+from typing import Callable
 from django.http.response import HttpResponse, HttpResponseForbidden
 from django.template.response import TemplateResponse
 from django.views.decorators.http import require_POST, require_http_methods
@@ -22,6 +23,8 @@ from .forms import ApplyForm, JobSearchForm, UnApplyForm
 
 jobs_list_template = "student/jobs/jobs_list.html"
 
+APPLY_TO_JOB = "apply_to_job"
+UNAPPLY_TO_JOB = "unapply_to_job"
 
 @require_http_methods(["GET", "POST"])
 @loggedin_and_approved
@@ -33,11 +36,12 @@ def jobs_view(request: HtmxHttpRequest):
     # Post request don't need the jobs queryset, that's why is up here
     if request.method == "POST":
         action = request.POST.get("action", None)
+
         if request.htmx:
-            if action == "apply_to_job":
-                return apply_to_job(request)
-            if action == "unapply_to_job":
-                return unapply_to_job(request)
+            if action == APPLY_TO_JOB:
+                return apply_to_job(request, render_job_offer_card)
+            if action == UNAPPLY_TO_JOB:
+                return unapply_to_job(request, render_job_offer_card)
 
 
     if request.method == "GET":
@@ -105,7 +109,11 @@ def validate_istudent(message: str):
 
 @require_POST
 @validate_istudent(_("Solo estudiantes puede des-aplicar a trabajos"))
-def unapply_to_job(request: HtmxHttpRequest):
+def unapply_to_job(request: HtmxHttpRequest, response_render: Callable[[HtmxHttpRequest, JobOffer], HttpResponse]):
+    """
+    response_render:
+    """
+
     student = get_student(request)
 
     # Check that everything is fine
@@ -114,7 +122,7 @@ def unapply_to_job(request: HtmxHttpRequest):
     if not form.is_valid():
         response = HttpResponseForbidden()
         if form.errors:
-            for error in form.errors:
+            for error in form.errors.values():
                 messages.error(request, message=error[0])
 
         renderMessagesAsToasts(request, response)
@@ -127,7 +135,7 @@ def unapply_to_job(request: HtmxHttpRequest):
 
     # Force set applied to false so the card can render correctly
     job_offer.applied = False
-    response = render_job_offer_card(request, job_offer)
+    response = response_render(request, job_offer)
 
     messages.success(request, message=_("Desaplicado de la oferta de trabajo"))
     renderMessagesAsToasts(request, response)
@@ -136,22 +144,23 @@ def unapply_to_job(request: HtmxHttpRequest):
 
 @require_POST
 @validate_istudent(_("Solo estudiantes puede aplicar a trabajos"))
-def apply_to_job(request):
+def apply_to_job(request, response_render: Callable[[HtmxHttpRequest, JobOffer], HttpResponse]):
     student = get_student(request)
 
     form = ApplyForm(request.POST)
 
     if form.is_valid():
-        job: JobOffer = form.cleaned_data["job"]
+        job_offer: JobOffer = form.cleaned_data["job"]
 
-        student_job_offer = StudentJobOffer(student=student, job=job)
-        student_job_offer.save()
+        # We use get or create to avoid creating more thant two job offer applications
+        # Because there are two views to apply to a job
+        student_job_offer, created = StudentJobOffer.objects.get_or_create(student=student, job=job_offer)
 
         messages.success(request, _("Aplicado a la oferta de trabajo"))
 
         # Force set applied to false so the card can render correctly
-        job.applied = True
-        response = render_job_offer_card(request, job)
+        job_offer.applied = True
+        response = response_render(request, job_offer)
 
         renderMessagesAsToasts(request, response)
         return response

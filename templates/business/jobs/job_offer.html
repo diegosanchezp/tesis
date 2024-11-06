@@ -1,10 +1,13 @@
 {% extends "base.html" %}
-{% load wagtailimages_tags wagtailcore_tags %}
+{% load django_vite wagtailimages_tags wagtailcore_tags %}
 
 {% comment %}
   Job offer Detail view
 {% endcomment %}
 
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+{% endblock %}
 
 {% block body %}
 
@@ -18,7 +21,28 @@
     <div id="job-offer-content" class="wagtail-page-max-size mt-8">
 
         <header class="border-b-2 pb-4">
-            <h1 class="text-6xl mb-4">{{ page.title }}</h1>
+            <div class="flex justify-between">
+                <h1 class="text-6xl mb-4">{{ page.title }}</h1>
+                {% if request.user.is_student %}
+                    {% block apply_btn %}
+                        <form hx-post="" hx-target="this" hx-swap="outerHTML">
+                            {% if applied %}
+                                <input type="hidden" name="action" value="unapply_to_job">
+                                <input type="hidden" name="job_offer" value={{ page.pk }}>
+                                {% #button type="submit" variant="red" %}
+                                    Des-Aplicar
+                                {% /button %}
+                            {% else %}
+                                <input type="hidden" name="action" value="apply_to_job">
+                                <input type="hidden" name="job" value={{ page.pk }}>
+                                {% #button type="submit" %}
+                                    Aplicar
+                                {% /button %}
+                            {% endif %}
+                        </form>
+                    {% endblock %}
+                {% endif %}
+            </div>
             {# Business Author #}
             {# TODO: display business Logo #}
             <a
