@@ -88,11 +88,11 @@ def mentorship_detail_view(request, mentorship_pk: int):
     if is_mentor:
         mentor = get_mentor(request.user.username, prefetch_related="mentorships")
         if mentorship_mentor != mentor:
-            return HttpResponseBadRequest("No autorizado para ver la mentoría")
+            return HttpResponseForbidden("No autorizado para ver la mentoría")
     elif is_admin:
         mentor = mentorship_mentor
     else:
-        return HttpResponseBadRequest("No autorizado para ver la mentoría")
+        return HttpResponseForbidden("No autorizado para ver la mentoría")
 
 
     action = request.GET.get("action")
