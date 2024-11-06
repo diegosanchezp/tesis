@@ -119,8 +119,13 @@ urlpatterns += i18n_patterns(
     # Wagtail
     path("cms/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
-    path("color_demo/<str:color>", color_demo_view, name="color_demo"),  # Delete later
     # End wagtail
+
+    # Uncomment this path to see how the student landing page would look like with grey or yellow background
+    # Yellow background was chosen if you visit the student pro_carrer view
+    # See pro_carreer/student_match.html
+    # path("color_demo/<str:color>", color_demo_view, name="color_demo"),  # Delete later
+
     # Landing page Wagtail
     # Placing at the end ensures that it doesn’t override more specific URL patterns.
     path("", include(wagtail_urls)),
