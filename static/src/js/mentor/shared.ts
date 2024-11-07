@@ -1,3 +1,6 @@
+import htmx from 'htmx.org';
+import { Modal, ModalOptions } from "flowbite";
+
 export const boolMap = {
     "true": true,
     "false": false,

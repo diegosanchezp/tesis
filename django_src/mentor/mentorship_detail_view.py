@@ -3,8 +3,8 @@ from django.http.response import HttpResponseForbidden
 from django.urls.base import reverse_lazy
 from django_htmx.http import trigger_client_event
 
-from django_src.utils.webui import renderMessagesAsToasts
-
+from django_src.utils.webui import close_modal, renderMessagesAsToasts
+from django_src.mentor.landing_view import render_mentorship_req_table
 from .models import Mentorship, StudentMentorshipTask, MentorshipRequest, MentorshipHistory
 from .utils import get_mentor, loggedin_and_approved
 from .forms import MentorshipReqFilterForm
@@ -19,6 +19,9 @@ from django.template.response import TemplateResponse
 from django.db import models
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_http_methods
+from django.utils.translation import gettext_lazy as _
+
+mentorship_detail_template = 'mentor/mentorship_detail.html'
 
 def get_detail_view_context(mentor: Mentor, mentorship: Mentorship):
 
@@ -51,11 +54,12 @@ def get_detail_view_context(mentor: Mentor, mentorship: Mentorship):
 
     return context
 
+
 def render_mentorship_info(mentor: Mentor, mentorship: Mentorship):
     """
     Renders the mentorship info
     """
-    template_name = 'mentor/mentorship_detail.html'
+    template_name = mentorship_detail_template
     context = get_detail_view_context(mentor, mentorship)
     return render_block_to_string(template_name, "mentorship_info", context)
 
@@ -70,7 +74,6 @@ def update_student_table(request, context):
     students_table_html = get_student_table_html(context)
     return HttpResponse(students_table_html)
 
-mentorship_detail_template = 'mentor/mentorship_detail.html'
 @require_http_methods(["GET", "POST"])
 @loggedin_and_approved
 def mentorship_detail_view(request, mentorship_pk: int):
@@ -209,5 +212,49 @@ def delete_student_from_mentorship(request, mentorship_pk: int, student_pk: int)
     messages.success(request, "Estudiante eliminado de la mentoría")
     renderMessagesAsToasts(request, response)
     # Update the table of requests
+    return response
+
+@require_http_methods(["POST"])
+@loggedin_and_approved
+def delete_mentorship_request(request, mentorship_req_pk: int):
+    """
+    Deletes a mentorship request
+    """
+
+    is_mentor = request.user.is_mentor
+    if not (is_mentor or request.user.is_superuser):
+        return HttpResponseBadRequest("Only admins or mentors are allowed")
+
+    mentor = request.user.mentor
+
+    # Find the request
+    mentorship_request = get_object_or_404(MentorshipRequest, pk=mentorship_req_pk)
+
+    # Validate that the mentor owns the mentorship of the request
+    mentorship = mentorship_request.mentorship
+    if mentorship.mentor != mentor:
+        response = HttpResponseForbidden()
+        messages.error(request, message=_("No puedes eliminar la solicitud, no creaste esta mentoría"))
+        renderMessagesAsToasts(request,response)
+
+    mentorship_request.delete()
+
+    messages.success(request, _("Solicitud del estudiante eliminada"))
+
+    # Update the table of mentorship request overview
+    context = get_detail_view_context(mentor, mentorship)
+    mentorship_requests = get_filter_mentorship_requests(mentor)
+    filter_form = MentorshipReqFilterForm()
+    context["filter_form"] = filter_form
+    context["mentorship_requests"] = mentorship_requests
+    response = render_mentorship_req_table(
+        template_name=mentorship_detail_template,
+        context=context
+    )
+
+    # Close the modal where the details of the request are rendered
+    close_modal(response, modalTargetId="#student-info-modal-content")
+
+    renderMessagesAsToasts(request, response)
     return response
 

@@ -80,6 +80,18 @@
                         <p>{{ mentorship_request.date|date:"d/m/Y" }}</p>
                     </div>
                 </div>
+
+                <div class="flex justify-center items-center mt-4">
+                    {% include "components/info_text.html" with text='Si quieres que este estudiante pueda solicitar de nuevo la mentoría, borra la solicitud' margin="mx-4 my-2" %}
+                </div>
+
+                <div class="flex justify-center items-center pb-4">
+                    <div class="mt-2" x-data="deleteMentorshipComponent({{mentorship_request.pk}}, '{% url 'mentor:delete_mentorship_request' mentorship_req_pk=mentorship_request.pk %}')"{# hx-post="{% url 'mentor:delete_mentorship_request' mentorship_req_pk=mentorship_request.pk %}" hx-target="#mentorship_req_table" hx-swap="outerHTML" hx-vals='{"":""}' #}>
+                        {% #button type="submit" variant="red" icon_left="bi bi-trash3-fill" @click="sendHtmxReq" %}
+                            Borrar solicitud <span x-show="confirm">?</span>
+                        {% /button %}
+                    </div>
+                </div>
             {% endif %}
 
             {% if mentorship_request.status == "ACCEPTED" %}
