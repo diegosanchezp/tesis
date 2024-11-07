@@ -1,5 +1,6 @@
 import { initFlowbite } from 'flowbite';
 import htmx from 'htmx.org'
+import { closeModalRPC, openModalRPC } from 'js/utils/modal'
 
 export interface SwapEvtDetail {
     target_element_id: string
@@ -81,5 +82,8 @@ export function renderMessagesAsToasts(evt: SwapEvent){
 export function initHTMXutils(){
     document.body.addEventListener("jsSwap", hxSwap)
     document.body.addEventListener("renderMessagesAsToasts", renderMessagesAsToasts)
+
+    document.body.addEventListener("closeModal", closeModalRPC)
+    document.body.addEventListener("openModal", openModalRPC)
 }
 
