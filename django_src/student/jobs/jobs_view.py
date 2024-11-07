@@ -58,7 +58,7 @@ def jobs_view(request: HtmxHttpRequest):
             "jobsearch_form": jobsearch_form,
             "search_applied": False,
         }
-        jobs_queryset = JobOffer.objects.order_by("-last_published_at")
+        jobs_queryset = JobOffer.objects.live().order_by("-last_published_at")
         # Filter
 
         if jobsearch_form.is_valid():
