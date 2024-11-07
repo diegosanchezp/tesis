@@ -147,16 +147,17 @@
                 </thead>
                 <tbody class="overflow-y-scroll max-h-screen min-h-6">
                     {% for user_approval in page_obj %}
-                        <tr>
+                        <tr class="hover:bg-gray-100">
                             <td><input type='checkbox' name='approvals' value='{{user_approval.id }}'></td>
                             {# name and last name #}
                             <td>
                                 <div class="flex gap-x-2 items-baseline">
                                     <i class="bi bi-person text-xl"></i>
                                     {# clicking the paragrah will open a modal that displays the voucher #}
-                                    <p
+                                    <button
                                         onclick="openModal({{ user_approval.pk }})"
-                                    >{{ user_approval.user.first_name }} {{ user_approval.user.last_name }}</p>
+                                        class="hover:underline decoration-black"
+                                    >{{ user_approval.user.first_name }} {{ user_approval.user.last_name }}</button>
                                 </div>
                             </td>
 
