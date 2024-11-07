@@ -23,15 +23,16 @@
 
     {# event metadata details #}
     <div class="flex flex-col gap-y-2">
-        {% with icon_class="text-ucv-blue" info_class="flex gap-x-2" %}
+        {% with icon_class="text-ucv-blue" info_class="" %}
         <div id="event-date-range" class="{{ info_class }}" title="Fecha">
             <i class="{{ icon_class }} bi bi-calendar"></i>
             <span>
                 {{ event.start_date|date:"d F Y" }}
             </span>
             {% if event.end_date %}
+            <span class="mx-1"> - </span>
             <span>
-                - {{ event.end_date|date:"d F Y"}}
+                {{ event.end_date|date:"d F Y"}}
             </span>
             {% endif %}
         </div>
@@ -43,10 +44,12 @@
         </div>
 
 
-        <div id="event-location" class="{{ info_class }}" title="Ubicación">
-            <i class="{{ icon_class }} bi bi-geo-alt-fill"></i>
-            <span>{{ event.place }}</span>
-        </div>
+        {% if event.place %}
+            <div id="event-location" class="{{ info_class }}" title="Ubicación">
+                <i class="{{ icon_class }} bi bi-geo-alt-fill"></i>
+                <span>{{ event.place }}</span>
+            </div>
+        {% endif %}
         {% endwith %}
     </div>
 </div>
