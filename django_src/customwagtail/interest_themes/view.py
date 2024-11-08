@@ -10,9 +10,11 @@ from django.views.decorators.http import require_http_methods, require_POST, req
 from django.template.response import TemplateResponse
 from render_block import render_block_to_string
 
+from django_src.settings.wagtail_pages import pro_carreer_index_path
 from django_src.utils.webui import renderMessagesAsToasts
 from django_src.apps.register.models import InterestTheme
 from django_src.utils import get_page_number, formdata_to_querystring
+from django_src.pro_carreer.models import ProCarreerIndex
 from .forms import EditInterestThemeForm, TableFilterForm
 
 index_template_name = "customwagtail/interest_themes/index.html"
@@ -73,6 +75,7 @@ def crud_interest(request):
                 "create_interest_theme_form": EditInterestThemeForm(
                     form_id=create_form_id_prefix
                 ),
+                "pro_career_index": ProCarreerIndex.objects.get(path=pro_carreer_index_path)
             }
         )
 

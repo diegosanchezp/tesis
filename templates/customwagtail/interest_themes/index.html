@@ -1,6 +1,6 @@
 {% extends "customwagtail/base.html" %}
 
-{% load django_vite slippers %}
+{% load django_vite slippers static wagtailcore_tags %}
 
 {% block extrascripts %}
     {% vite_asset 'js/htmx.ts' %}
@@ -11,7 +11,13 @@
 {% block body %}
     <main class="page-x-spacing my-5">
 
-    <h1 class="text-2xl mb-4">Gestionar temas de interés</h1>
+    <div class="flex gap-x-2">
+        <h1 class="text-2xl mb-4">Gestionar temas de interés</h1>
+        <div class="self-start">
+            {% include "components/info_help.html" with id="help_edit" help_text='Los temas de interés sirven para que un estudiante pueda encontrar con facilidad Carreras Profesionales.' %}
+        </div>
+    </div>
+
     {% block table_and_form %}
     <div id="table_and_form" class="grid grid-cols-2 gap-x-4" hx-swap-oob="true">
         {# TABLE #}
@@ -127,7 +133,18 @@
                 </div>
             </form>
             {% endblock create_theme_form %}
+
+            <div class="mt-3">
+                <p>Para <span class="underline decoration-black">relacionar</span> los <span class="underline decoration-black">temas de interés</span> con carreras profesionales:</p>
+                <ol class="list-decimal list-inside">
+                    <li>Ve al <a href="{% url 'wagtailadmin_explore' parent_page_id=pro_career_index.pk %}" class="text-ucv-blue underline">indice</a></li>
+                    <li>Escoge una carrera</li>
+                    <li>Clic en relacionar tema de interés</li>
+                </ol>
+                <img src="{% static 'how-to-add-theme-to-pro-career.png' %}">
+            </div>
         </div>
+        {# Info #}
     </div>
     {% endblock table_and_form %}
 

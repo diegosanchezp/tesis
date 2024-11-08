@@ -41,8 +41,15 @@
             <section>
                 <h2 class="text-xl">Relacionar tema de interés a la carrera profesional</h2>
 
+                <p class="flex gap-x-2 {{ "my-4" }} text-slate-500">
+                    <i class="bi bi-info-square-fill"></i>
+                    <span>Para añadir nuevos temas de interés visita la página de gestión de <a href="{% url 'cms_interest_themes_crud' %}" class="underline">Temas de interés</a></span>
+                </p>
+
                 <!-- For adding matches between themes and professional carreer -->
                 {% include "pro_carreer/spec_theme_table.html" with form_id="form-career-theme" form=theme_form content_objects=themes_pro_carreers insert_placeholder="themes-matches" %}
+
+                
             </section>
         </main>
     </div>
