@@ -58,6 +58,7 @@ def get_table_context(request):
     context = {"filter_form": filter_form, "filter_queryparams": filter_queryparams}
     context["state"] = "read"
     context["interest_themes"] = paginate_interests_themes(page_number, interests)
+    context["pro_career_index"] = ProCarreerIndex.objects.get(path=pro_carreer_index_path)
     return context
 
 
