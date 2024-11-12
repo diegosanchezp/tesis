@@ -52,7 +52,47 @@ Error checks:
 - [ ] Shows red text if any of the query parameters `carreer` or `profile` are empty.
 - [ ] If user with an email already exists, shows error message in red text.
 
-**Expected behavior**
 # Mentor Add Experience view
+
+**Expected behavior**
 - [ ] All job descriptions are saved to local storage.
 - [ ] Can delete a job description.
+
+# CMS
+## Approvals
+
+- [ ] If a mentor or a business is approved, then the should be added to their respective CMS groups.
+- [ ] When doing any of the approval acctions: approve, reject, or reset a respective email is sent.
+- [ ] When a name on the approvals table is clicked, the it opens a modal
+
+# Student
+- [ ] Can request mentorship guidance.
+- [ ] Can progress, i.e, advance mentorship tasks status.
+- [ ] Can see a list of careers that relates to my especialization.
+- [ ] Can apply to job offer.
+- [ ] Can see experiences of a professional career.
+## Edit profile
+Can change
+- [ ] Password.
+- [ ] Academic career.
+- [ ] Especialization.
+- [ ] Interest (add or delete).
+# Mentor
+
+## Mentor dashboard
+- [ ] Can approve mentorships
+
+## Mentor blogs
+- [ ] Can create blogs on the CMS
+- [ ] Can see a list of the the blogs that it created.
+- [ ] Wen an update is made to a blog it must be send to moderation.
+- [ ] Can unpublish a blog that it owns.
+- [ ] Can delete a blog that it owns.
+
+- Can create mentorships:
+
+Can not edit:
+- [ ] Blog index
+- [ ] Others people blog
+
+# Business
