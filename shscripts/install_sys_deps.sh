@@ -59,13 +59,16 @@ cp "$ROOT_DIR"/envs/production/postgres.template "$ROOT_DIR"/envs/production/pos
 
 # from django.core.management.utils import get_random_secret_key
 # get_random_secret_key()
+
+sudo usermod -aG docker admin
+
 docker compose run --rm django \
   bash -c "echo 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())' | python"
 # Generate http certs
 
-sudo --preserve-env docker pull "$DOCKER_IMAGE"
+docker pull "$DOCKER_IMAGE"
 
-sudo --preserve-env docker run --rm \
+docker run --rm \
 --env-file envs/production/django \
 --mount 'type=bind,source=./nginx,destination=/app/nginx' \
 --mount 'type=bind,source=./shscripts,destination=/app/shscripts,readonly' \
@@ -73,12 +76,12 @@ sudo --preserve-env docker run --rm \
 "$DOCKER_IMAGE" \
 python shscripts/generate_templates.py
 
-sudo --preserve-env docker compose up -d postgres
+docker compose up -d postgres
 
-sudo --preserve-env docker compose run --rm django \
+docker compose run --rm django \
     python manage.py migrate --settings django_src.settings.production
 
-sudo --preserve-env docker compose up -d
+docker compose up -d
 
 # After installing the sshd config restart the daemon
 sudo systemctl restart sshd.service
