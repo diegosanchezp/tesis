@@ -3,6 +3,6 @@ load_env(){
   source ${1:-.env}
 }
 
-REPODIR="$HOME/tesis"
+REPODIR="$HOME/repos/tesis"
 
 [ -d "$REPODIR" ] && load_env "$REPODIR"/envs/production/host
