@@ -70,7 +70,7 @@ Visit the website
 https://localhost
 
 ## Upload Testing data
-Upload the same data that it is used to test while development
+Upload the same data that it is used to test while the web app was developed
 
 Spawn a container
 
@@ -79,6 +79,7 @@ docker run --rm \
 --network production_default \
 --mount 'type=bind,source=./shscripts,destination=/app/shscripts' \
 --mount 'type=bind,source=./media,destination=/app/media' \
+--mount 'type=bind,source=./tests,destination=/app/tests' \
 --env-file ./envs/production/postgres \
 --env-file ./envs/production/django \
 --interactive --tty \
