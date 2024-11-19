@@ -5,12 +5,12 @@ source ~/.zprofile
 
 cd ~/repos/tesis
 
-# Make a backup
+# Make a backup, $REPODIR flag is defined in ~/.zprofile
 docker compose run --rm \
   --user "$(id -u)" \
   --env "ENVIRONMENT=production" \
   --volume "$HOME/fixture_backups:/app/fixture_backups" \
-  --volume "./shscripts/:/app/shscripts/" \
+  --volume "$REPODIR/shscripts:/app/shscripts" \
   django python -m shscripts.backup && \
 
 # Update the git repository
