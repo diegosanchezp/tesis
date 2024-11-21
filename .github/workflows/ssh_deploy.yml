@@ -1,15 +1,26 @@
 name: SSH deployment
 
-# Configures this workflow to run every time a change is pushed to the branch called `main`.
 on:
-  push:
+
+  # Automatically activate this workflows when "Create and publish a Docker image" finishes successfully
+  # And when we are on the branch main
+  # https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#workflow_run
+  workflow_run:
+    workflows: ["Create and publish a Docker image"]
     branches: ['main']
-  # Run manually on default branch
+    types:
+      completed
+
+  # Allow this workflow to be manually Run on the default branch
   workflow_dispatch:
+
 jobs:
   sshdeploy:
     name: SSH VPS deployment
     runs-on: ubuntu-latest
+    # https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#running-a-workflow-based-on-the-conclusion-of-another-workflow
+    # Only run this job when the workflow "Create and publish a Docker image" completes successfully OR this workflow is triggered manually
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
