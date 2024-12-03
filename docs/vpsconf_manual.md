@@ -14,18 +14,11 @@ Este paso es requerido para los certificados https
 
 # Generar certificados https
 
+Cargar variables de entorno necesarias para los comandos de abajo
+
 ```bash
 load_env env/production/host
 ```
-
-```bash
-sudo --preserve-env docker compose --file "$ROOT_DIR"/docker/production/docker-compose.yml run \
-  --rm --interactive -p "80:80" \
-  certbot certonly --standalone \
-  -d tesis.diegojsanchez.com
-```
-
-El comando de arriba sirve también para renovar el certificado. 
 
 Si los contenedores están activos, hay que pararlos y después activarlos, para que ngnix pueda leer el nuevo certificado.
 
@@ -34,8 +27,37 @@ sudo --preserve-env docker compose stop
 ```
 
 ```bash
+sudo --preserve-env docker compose --file "$REPODIR"/docker/production/docker-compose.yml run \
+  --rm --interactive -p "80:80" \
+  certbot certonly --standalone \
+  -d tesis.diegojsanchez.com
+```
+
+El comando de arriba sirve también para renovar el certificado del dominio tesis.diegojsanchez.com. 
+
+Alternativamente, si se quire renovar todos los certificados previamente obtenidos:
+
+```bash
+sudo --preserve-env docker compose --file "$REPODIR"/docker/production/docker-compose.yml run \
+  --rm --interactive -p "80:80" \
+  certbot renew --standalone
+```
+
+Para comprobar que el certificado se haya renovado nuevamente, el output del comando en `Expiry Date`, debería de decir `(VALID: 89 days)`
+
+```
+Found the following certs:
+  Certificate Name:
+    Expiry Date: 2025-03-03 10:49:46+00:00 (VALID: 89 days)
+```
+
+Reiniciar nuevamente los contenedores
+
+```bash
 sudo --preserve-env docker compose start
 ```
+
+
 # Generar usuario superadmin
 ```bash
 sudo --preserve-env docker compose run --rm --interactive --tty django \
