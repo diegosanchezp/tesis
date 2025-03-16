@@ -171,6 +171,8 @@ def create_student(user, student_form: StudentForm) -> Student:
     # Finally save to database
     student.save()
 
+    # Add interest theme to the student
+    student.interests.set(student_form.cleaned_data["interests"])
     return student
 
 def create_mentor(user, mentor_form: MentorForm, experience_form) -> Mentor:
