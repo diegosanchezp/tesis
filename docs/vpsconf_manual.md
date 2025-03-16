@@ -51,7 +51,7 @@ Found the following certs:
     Expiry Date: 2025-03-03 10:49:46+00:00 (VALID: 89 days)
 ```
 
-Reiniciar nuevamente los contenedores
+**Reiniciar nuevamente** los contenedores o el contenedor de nginx
 
 ```bash
 sudo --preserve-env docker compose start
