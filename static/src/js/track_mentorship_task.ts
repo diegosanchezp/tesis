@@ -89,15 +89,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // prevent default action (open as a link for some elements)
             event.preventDefault();
 
+            // Update the task status on DB
+            const csrftoken = getCSRFToken()
 
-
-                // Update the task status on DB
-                const csrftoken = getCSRFToken()
-
-                if(!csrftoken){
-                    console.error("CSRF token not found")
-                    return
-                }
+            if(!csrftoken){
+                console.error("CSRF token not found")
+                return
+            }
 
             // We check if the target element is a dropzone, otherwise
             // tasks can be dropped inside other tasks elements
@@ -120,19 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const targetDropzoneAction = targetDropzone.dataset.dropzoneAction
                 const taskPk = draggableTask.dataset.taskPk
 
-
-                // const ret = await htmx.ajax("POST", `/student/change_task_state/${taskPk}/`, {
-                //     values: {
-                //         event: targetDropzoneAction
-                //     },
-                //     handler: (response) => {
-                //         if(response['htmx-internal-data'].xhr.status != 200){
-                //             targetDropzone.classList.remove(DRAGENTER_BORDER_STYLE)
-                //             return "bac"
-                //         }
-                //     }
-                // })
-
                 const formData = new FormData();
                 formData.append("event", targetDropzoneAction)
                 // Important add / to the end of url
@@ -148,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(response.status !== 200){
                     // Restore border styles to default
                     targetDropzone.classList.remove(DRAGENTER_BORDER_STYLE)
-                
+
                     // Render django error messages as toasts
                     const rawTriggerData = response.headers.get("HX-Trigger")
                     if(!rawTriggerData){
