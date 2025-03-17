@@ -33,7 +33,7 @@ def get_wagtailpage_paginated(PageModel: Page, per_page: int = 6):
         """
 
         if queryset is None:
-            queryset = PageModel.objects.all().order_by("-last_published_at")
+            queryset = PageModel.objects.live().order_by("-last_published_at")
 
         paginator = Paginator(
             object_list=queryset, per_page=per_page

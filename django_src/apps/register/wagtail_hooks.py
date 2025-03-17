@@ -26,8 +26,8 @@ def hide_approvals_for_mentors(request, menu_items):
     """
     Approvals menu should not be shown to mentors or businesses
     """
-    # Delete the Approvals MenuItem from the menu_items list, if the user is a mentor or business
-    if request.user.is_mentor or request.user.is_business:
+    # Delete the Approvals MenuItem from the menu_items list, if the user is a mentor or business or teacher
+    if request.user.is_mentor or request.user.is_business or request.user.is_professor:
         menu_items[:] = [
             item for item in menu_items if item.label != menu_aprobaciones.label
         ]
