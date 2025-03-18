@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static django_vite slippers wagtailcore_tags %}
+
+{% block extrascripts %}
+    {% vite_asset 'js/htmx.ts' %}
+{% endblock %}
+
+{% block title %}
+    Actualizar datos de Egresado
+{% endblock title %}
+
+{% block body %}
+<header class="flex flex-col justify-center items-center gap-x-4 pt-10 pb-10  bg-gradient-to-t from-white to-ucv-yellow w-full">
+    {# logo #}
+    <a href="/">
+        <img src="{% static 'logo_egresados_ucv.jpg' %}" alt="Logo de la Asociación" class="w-40 h-40 mx-auto mt-2" />
+    </a>
+    <h2 class="text-xl my-2">¡Bienvenido Egresado!</h2>
+</header>
+
+<main class="page-x-spacing">
+    {# default #}
+    {% if view_state == "default" %}
+        {% block default_state %}
+        <section id="default-form">
+            <form
+                id="cedula-form"
+                hx-get=""
+                hx-swap="outerHTML"
+                hx-target="#default-form"
+                class="flex flex-col justify-center items-center gap-y-4">
+
+                <p class="mb-2">Ingresa número de cédula para obtener los datos</p>
+                <input type="hidden" name="action" value="{{ GETActionTypes.CONSULTAR }}">
+
+                <div class="flex gap-x-4 justify-center items-center ">
+                    <div>
+                        {% include "forms/render_field.html" with field=cedula_form.prefijo_cedula %}
+                    </div>
+                    <div>
+                        {% include "forms/render_field.html" with field=cedula_form.cedula %}
+                    </div>
+                </div>
+
+                {% #button type="submit" %}
+                    Consultar
+                {% /button %}
+            </form>
+
+            {% if cedula_form.non_field_errors %}
+                <ul class="">
+                    {% for error in cedula_form.non_field_errors %}
+                        <li class="text-sm text-red-600 text-center">{{ error|escape }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </section>
+        {% endblock default_state %}
+    {% endif %}
+
+
+    {% if view_state == "updating_data" %}
+        {% block updating_data %}
+        <section id="egresados_update">
+            <h2 class="text-xl">Ahora, actualiza los datos</h2>
+
+            {% if ci_form %}
+                {% for error in ci_form.non_field_errors %}
+                    <li class="text-sm text-red-600 text-center">{{ error|escape }}</li>
+                {% endfor %}
+            {% endif %}
+            <div class="mt-2 mb-4">
+                {% if view_state == "edit_success" %}
+                   <p>Datos del egresado actualizados</p>
+                {% endif %}
+                {% if view_state == "updating_data" %}
+                    <p>Editando los datos del Egresado con <span class="font-bold">Cédula:</span> <span class="underline decoration-2 underline-offset-2 decoration-ucv-yellow-dark">{{ egresados_form.instance.prefijo_cedula }} {{ egresados_form.instance.cedula }}</span></p>
+                {% endif %}
+            </div>
+            <form
+                id="egresados_update_form"
+                method="post"
+                hx-post=""
+                hx-swap="outerHTML"
+                hx-target="#egresados_update"
+            >
+                <input type="hidden" name="pk" value="{{egresados_form.instance.pk}}">
+                <input type="hidden" name="cedula"value="{{ egresados_form.instance.cedula }}">
+                <input type="hidden" name="prefijo_cedula" value="{{ egresados_form.instance.prefijo_cedula }}">
+                <div class="flex flex-col gap-y-4 gap-x-6">
+                {% include "forms/form.html" with form=egresados_form %}
+                </div>
+                <div class="border-t border-gray-300 my-6"></div>
+                <div class="flex justify-center mb-6">
+                    {% #button type="submit" %}
+                        Actualizar
+                    {% /button %}
+                </div>
+            </form>
+        </section>
+        {% endblock updating_data %}
+    {% endif %}
+</main>
+{% endblock body %}

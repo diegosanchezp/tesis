@@ -29,7 +29,6 @@ djangorestframework-stubs = "*"
 inotify = "*"
 ipython = "*"
 pip = "*"
-install = "*"
 django-stubs = {version = "*", extras = ["compatible-mypy"]}
 black = ">=24.4.2"
 
