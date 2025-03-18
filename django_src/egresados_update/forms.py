@@ -63,9 +63,11 @@ class EgresadoUpdateValidate(forms.Form):
 
 class CedulaForm(forms.Form):
     prefijo_cedula = forms.ChoiceField(
+        label=_("Prefijo cédula"),
         choices=EgresadosData.PrefijoCedula.choices,
     )
     cedula = forms.IntegerField(
+        label=_("Cédula"),
         min_value=0,
     )
     # class Meta:
