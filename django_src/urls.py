@@ -37,6 +37,7 @@ urlpatterns = i18n_patterns(
     path("student/", include("django_src.student.urls", namespace="student")),
     path("business/", include("django_src.business.urls", namespace="business")),
     path("interests/", include("django_src.interests.urls", namespace="interests")),
+    path("egresado_actualizar_datos", include("django_src.egresados_update.urls", namespace="egresados_update")),
     path("login/", customauth_views.LoginView.as_view(), name="login"),
     path("login-proxy/", customauth_views.LoginProxyView.as_view(), name="login_proxy"),
     path(
