@@ -108,9 +108,9 @@ def root_view(request):
                         None,
                         error=ValidationError(
                             _(
-                                "No encontramos datos registrados con la cédula, %(cedula)s intenta de nuevo."
+                                "No encontramos datos registrados con la cédula: %(prefijo_cedula)s %(cedula)s, intenta de nuevo."
                             ),
-                            params={"cedula": cedula},
+                            params={"cedula": cedula, "prefijo_cedula": prefijo_cedula},
                             code="invalid",
                         ),
                     )

@@ -48,7 +48,7 @@
             </form>
 
             {% if cedula_form.non_field_errors %}
-                <ul class="">
+                <ul class="my-4">
                     {% for error in cedula_form.non_field_errors %}
                         <li class="text-sm text-red-600 text-center">{{ error|escape }}</li>
                     {% endfor %}
